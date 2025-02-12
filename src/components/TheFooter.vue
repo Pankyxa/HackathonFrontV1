@@ -1,0 +1,90 @@
+<template>
+  <!--footer-------------------------------------------------------------------------------------------------------------------->
+  <el-footer class="main-header">
+    <el-row type="flex" justify="center" :gutter="20">
+      <div>
+        <a href="https://www.tyuiu.ru/">
+          <img src="../assets/img/logo_bot.png" alt="">
+        </a>
+      </div>
+      <div class="contacts">
+        <h2>Контакты</h2>
+        <h3 class="number">8 (***) ***-**-**</h3>
+        <p class="mail">Help@mail.ru</p>
+      </div>
+    </el-row>
+  </el-footer>
+  <!--end-footer-------------------------------------------------------------------------------------------------------------------->
+</template>
+
+<script lang="ts" setup>
+</script>
+
+<style scoped>
+.main-header {
+  height: auto;
+  margin: 5px;
+  background: linear-gradient(to right, #0fa4e9, #4338ca);
+  border-radius: 20px;
+  color: white;
+}
+
+div {
+  padding: 20px;
+}
+
+.contacts h2 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.number {
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: normal;
+  margin: 5px 15px;
+  color: white;
+}
+
+.mail {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  margin: 5px 15px;
+  color: white;
+}
+
+.el-row {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.img-col {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.LK {
+  padding: 10px;
+}
+
+.logo {
+  margin: 0px 15px;
+}
+
+img {
+  width: 150px;
+}
+
+@media (max-width: 768px) {
+  .el-row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .contacts {
+    text-align: center;
+  }
+}
+</style>

@@ -1,0 +1,54 @@
+import axios from 'axios';
+
+// Создаем инстанс axios с базовым URL из переменных окружения
+const api = axios.create({
+    baseURL: import.meta.env.VITE_API_URL, // Теперь URL берется из .env файла
+});
+
+// Перехватчик для добавления токена к запросам
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+export const authApi = {
+    async register(data) {
+        try {
+            const response = await api.post('/auth/register', data);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async login(email, password) {
+        try {
+            const response = await api.post('/auth/login', {
+                email,
+                password
+            });
+            const {access_token} = response.data;
+            localStorage.setItem('token', access_token);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async getCurrentUser() {
+        try {
+            const response = await api.get('/auth/me');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Функция выхода
+    logout() {
+        localStorage.removeItem('token');
+    }
+};
