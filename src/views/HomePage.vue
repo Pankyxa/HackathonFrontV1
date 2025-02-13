@@ -1,16 +1,15 @@
 <template>
   <TheHeader></TheHeader>
   <div class="home-page">
-    <!-- Hero section with background image -->
     <div class="hero-section">
       <div class="hero-content">
         <h1>Хакатон</h1>
         <p>Цифровые двойники в энергетике</p>
-        <el-button type="primary" class="custom-button">Подать заявку</el-button>
+        <el-button type="primary" class="custom-button" @click="handleApplicationClick">Подать заявку</el-button>
       </div>
     </div>
 
-    <!-- Task description section -->
+    <AuthRequiredModal v-model="showAuthModal" />
     <div class="task-section">
       <h2>Задача Хакатона</h2>
       <p>Командам необходимо создать цифровую модель энергетической системы месторождения и предложить оптимальные
@@ -79,12 +78,46 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import {UserFilled, Document, Monitor, Check, Trophy, Star, Medal} from '@element-plus/icons-vue'
 import TheHeader from "@/components/TheHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
+import AuthRequiredModal from "@/components/AuthRequiredModal.vue";
+
+const router = useRouter();
+const showAuthModal = ref(false);
+
+const handleApplicationClick = () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    showAuthModal.value = true;
+  } else {
+    router.push('/team/apply');
+  }
+};
+
+const navigateToLogin = () => {
+  showAuthModal.value = false;
+  router.push('/login');
+};
 </script>
 
 <style scoped>
+.dialog-footer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+:deep(.el-dialog) {
+  border-radius: 16px;
+}
+
+:deep(.el-dialog__header) {
+  text-align: center;
+}
+
 .home-page {
   min-height: 100vh;
   margin-top: 100px;
@@ -100,7 +133,7 @@ import TheFooter from "@/components/TheFooter.vue";
 }
 
 .custom-button:hover {
-  opacity: 0.8; /* Делаем кнопку бледнее при наведении */
+  opacity: 0.8;
 }
 
 .hero-section {

@@ -102,7 +102,6 @@ const rules = ref({});
 const fieldErrors = ref({});
 const formRef = ref();
 
-// Инициализация модели формы и правил при изменении полей
 watch(() => props.fields, (newFields) => {
   const newModel = {};
   const newRules = {};
@@ -190,7 +189,6 @@ const handleSecondaryAction = () => {
   margin-left: 110px;
 }
 
-/* Стили для скроллбара */
 .form-fields-container::-webkit-scrollbar {
   width: 8px;
 }

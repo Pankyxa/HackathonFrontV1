@@ -27,3 +27,8 @@ npm run dev
 ```sh
 npm run build
 ```
+
+### .env file
+```.env
+VITE_API_URL=http://localhost:3000
+```

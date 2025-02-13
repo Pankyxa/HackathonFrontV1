@@ -34,7 +34,7 @@ import TheFooter from './TheFooter.vue'
   max-width: 1280px;
   margin: 0 auto;
   padding: 1rem;
-  padding-top: calc(80px + 1rem); /* Добавляем отступ сверху равный высоте хедера + стандартный padding */
+  padding-top: calc(80px + 1rem);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -43,7 +43,7 @@ import TheFooter from './TheFooter.vue'
 @media (max-width: 768px) {
   .main-content {
     padding: 0.5rem;
-    padding-top: calc(80px + 0.5rem); /* Корректируем отступ для мобильных устройств */
+    padding-top: calc(80px + 0.5rem);
   }
 }
 </style>

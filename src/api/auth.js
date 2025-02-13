@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Создаем инстанс axios с базовым URL из переменных окружения
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL, // Теперь URL берется из .env файла
+    baseURL: import.meta.env.VITE_API_URL,
 });
 
 // Перехватчик для добавления токена к запросам

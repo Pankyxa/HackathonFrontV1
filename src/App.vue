@@ -1,13 +1,22 @@
 <template>
   <el-container class="layout-container">
     <el-main>
+      <GlobalLoader />
       <RouterView />
     </el-main>
   </el-container>
 </template>
 
 <script setup>
-import { RouterView } from 'vue-router'
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import GlobalLoader from '@/components/GlobalLoader.vue'
+
+const authStore = useAuthStore()
+
+onMounted(() => {
+  authStore.initializeAuth()
+})
 </script>
 
 <style>
@@ -28,12 +37,10 @@ a {
   color: inherit;
 }
 
-/* Глобальные стили для Element Plus */
 :root {
   --el-color-primary: #409EFF;
 }
 
-/* Обеспечиваем, чтобы footer всегда был внизу */
 .layout-container {
   min-height: 100vh;
 }

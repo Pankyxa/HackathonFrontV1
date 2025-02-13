@@ -195,16 +195,14 @@ const registrationFields = [
           }
           const file = formModel.value.personal_data_agreement;
           if (file) {
-            // Проверяем размер файла (максимум 5MB)
             const maxSize = 5 * 1024 * 1024;
             if (file.size > maxSize) {
               callback(new Error('Размер файла не должен превышать 5MB'));
               return;
             }
-            // Проверяем тип файла
-            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+            const allowedTypes = ['*'];
             if (!allowedTypes.includes(file.type)) {
-              callback(new Error('Допустимые форматы: PDF, JPEG, PNG'));
+              callback(new Error('Допустимые форматы: '));//todo: дописать допустимые форматы
               return;
             }
           }
@@ -220,7 +218,7 @@ const submitRegistration = async (formData) => {
   try {
     loading.value = true;
     const dataToSend = { ...formData };
-    delete dataToSend.confirmPassword; // Удаляем поле подтверждения пароля перед отправкой
+    delete dataToSend.confirmPassword;
     await authApi.register(dataToSend);
     ElMessage.success('Регистрация успешна!');
   router.push('/login');
@@ -264,20 +262,16 @@ const moveToLogin = () => {
   padding-bottom: 20px;
   font-size: 24px;
   color: #409EFF;
-  /* Фиксируем заголовок */
   flex-shrink: 0;
   font-weight: bold;
 }
 
 .registration-form {
   text-align: left;
-  /* Добавляем стили для прокрутки */
   overflow-y: auto;
-  /* Добавляем отступ для скроллбара */
   padding-right: 10px;
 }
 
-/* Стилизуем скроллбар */
 .registration-form::-webkit-scrollbar {
   width: 8px;
 }
@@ -296,7 +290,6 @@ const moveToLogin = () => {
   background: #555;
 }
 
-/* Модифицируем стили для кнопок, чтобы они оставались внизу формы */
 .registration-form :deep(.button-container) {
   position: sticky;
   bottom: 0;
@@ -323,7 +316,6 @@ const moveToLogin = () => {
   width: 100%;
 }
 
-/* Для кнопок внизу формы - занимают всю ширину */
 .registration-form :deep(.el-form-item__button-container) {
   grid-column: 1 / -1;
   margin-top: 20px;
@@ -357,7 +349,7 @@ const moveToLogin = () => {
 
   .registration-form :deep(.el-form) {
     grid-template-columns: 1fr;
-    gap: 20px !important; /* Уменьшаем отступ для мобильной версии */
+    gap: 20px !important;
   }
 
   .registration-form :deep(.el-form-item__label) {
