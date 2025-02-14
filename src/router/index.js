@@ -3,6 +3,9 @@ import HomePage from '../views/HomePage.vue'
 import LoginPage from '../views/LoginPage.vue'
 import RegistrationPage from "@/views/RegistrationPage.vue";
 import {useAuthStore} from "@/stores/auth.js";
+import {useLoadingStore} from "@/stores/loading.js";
+import TeamApplication from "@/views/TeamApplication.vue";
+import MyTeamPage from "@/views/MyTeamPage.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,17 +28,38 @@ const router = createRouter({
     {
       path: '/team/apply',
       name: 'TeamApplication',
-      component: () => import('@/views/TeamApplication.vue'),
+      component: TeamApplication,
       meta: {
         requiresAuth: true,
         title: 'Создание команды'
       }
-
+    },
+    {
+      path: '/team',
+      name: 'my-team',
+      component: MyTeamPage,
+      meta: {
+        requiresAuth: true,
+        title: 'Moя команда'
+      }
     }
   ]
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
+  const loadingStore = useLoadingStore();
+
+  if (loadingStore.isLoading) {
+    await new Promise(resolve => {
+      const unwatch = loadingStore.$subscribe((mutation, state) => {
+        if (!state.isLoading) {
+          unwatch();
+          resolve();
+        }
+      });
+    });
+  }
+
   if (to.meta.requiresAuth) {
     const isAuthenticated = useAuthStore().isAuthenticated;
 

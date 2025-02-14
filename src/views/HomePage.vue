@@ -129,7 +129,7 @@ const navigateToLogin = () => {
   border-radius: 8px;
   background: linear-gradient(90deg, #00A3FF 0%, #5B51D8 100%);
   border: none;
-  transition: opacity 0.3s ease; /* Добавляем плавный переход */
+  transition: opacity 0.3s ease;
 }
 
 .custom-button:hover {

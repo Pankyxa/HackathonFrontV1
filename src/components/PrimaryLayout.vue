@@ -14,7 +14,6 @@ import TheFooter from './TheFooter.vue'
 </script>
 
 <style>
-/* Переопределяем стили Element Plus */
 .el-main {
   padding: 0 !important;
 }

@@ -16,12 +16,24 @@ api.interceptors.request.use((config) => {
 export const teamsApi = {
     async createTeam(teamData) {
         try {
-            const data = {
-                team_name: teamData.name,
-                team_motto: teamData.motto
-            };
+            const formData = new FormData();
 
-            const response = await api.post('/teams/create', data);
+            formData.append('team_name', teamData.team_name);
+            formData.append('team_motto', teamData.team_motto);
+            formData.append('logo', teamData.logo);
+
+            // Add any additional fields from teamData
+            Object.keys(teamData).forEach(key => {
+                if (!['team_name', 'team_motto', 'logo'].includes(key)) {
+                    formData.append(key, teamData[key]);
+                }
+            });
+
+            const response = await api.post('/teams/create', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

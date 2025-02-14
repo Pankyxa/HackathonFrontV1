@@ -124,9 +124,9 @@ const registrationFields = [
   {
     name: 'course',
     label: 'Курс',
-    type: 'select', // Меняем тип на select
+    type: 'select',
     placeholder: 'Выберите курс',
-    options: [ // Добавляем опции для выбора
+    options: [
       { value: '1', label: '1 курс' },
       { value: '2', label: '2 курс' },
       { value: '3', label: '3 курс' },
@@ -139,7 +139,7 @@ const registrationFields = [
     ]
   },
   {
-    name: 'study_certificate',
+    name: 'education_certificate_file',
     label: 'Справка с места учёбы',
     type: 'file',
     placeholder: 'Прикрепите справку с места учебы',
@@ -155,18 +155,16 @@ const registrationFields = [
             callback(new Error('Пожалуйста, прикрепите файл'));
             return;
           }
-          const file = formModel.value.study_certificate;
+          const file = formModel.value.education_certificate_file;
           if (file) {
-            // Проверяем размер файла (например, максимум 5MB)
-            const maxSize = 5 * 1024 * 1024; // 5MB в байтах
+            const maxSize = 5 * 1024 * 1024;
             if (file.size > maxSize) {
               callback(new Error('Размер файла не должен превышать 5MB'));
               return;
             }
-            // Проверяем тип файла
-            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+            const allowedTypes = ['application/pdf'];
             if (!allowedTypes.includes(file.type)) {
-              callback(new Error('Допустимые форматы: PDF, JPEG, PNG'));
+              callback(new Error('Допустимые форматы: PDF'));
               return;
             }
           }
@@ -177,7 +175,7 @@ const registrationFields = [
     ]
   },
   {
-    name: 'personal_data_agreement',
+    name: 'consent_file',
     label: 'Согласие',
     type: 'file',
     placeholder: 'Прикрепите согласие на обработку ПД',
@@ -193,16 +191,16 @@ const registrationFields = [
             callback(new Error('Пожалуйста, прикрепите файл'));
             return;
           }
-          const file = formModel.value.personal_data_agreement;
+          const file = formModel.value.consent_file;
           if (file) {
             const maxSize = 5 * 1024 * 1024;
             if (file.size > maxSize) {
               callback(new Error('Размер файла не должен превышать 5MB'));
               return;
             }
-            const allowedTypes = ['*'];
+            const allowedTypes = ['application/pdf'];
             if (!allowedTypes.includes(file.type)) {
-              callback(new Error('Допустимые форматы: '));//todo: дописать допустимые форматы
+              callback(new Error('Допустимые форматы: PDF'));
               return;
             }
           }

@@ -17,7 +17,16 @@ api.interceptors.request.use((config) => {
 export const authApi = {
     async register(data) {
         try {
-            const response = await api.post('/auth/register', data);
+            const formData = new FormData();
+
+            Object.keys(data).forEach(key => {
+                formData.append(key, data[key]);
+            });
+            const response = await api.post('/auth/register', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

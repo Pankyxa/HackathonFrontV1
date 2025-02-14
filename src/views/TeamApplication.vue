@@ -94,7 +94,7 @@ const currentStep = ref(0);
 const teamForm = ref({
   name: '',
   motto: '',
-  photo: null,
+  logo: null,
   members: [{ name: '' }]
 });
 const store = useAuthStore()
@@ -130,7 +130,13 @@ const removeMember = (index) => {
 
 const createTeam = async () => {
   try {
-    await teamsApi.createTeam(teamForm.value);
+    const formattedData = {
+      team_name: teamForm.value.name,
+      team_motto: teamForm.value.motto,
+      logo: teamForm.value.photo, // предполагая, что TeamPhotoEditor возвращает File объект
+      members: teamForm.value.members
+    };
+    await teamsApi.createTeam(formattedData);
     currentStep.value = 2;
   } catch (error) {
     console.error('Ошибка при создании команды:', error);
@@ -153,7 +159,7 @@ const prevStep = () => {
 };
 
 const handleFinish = () => {
-  router.push('/dashboard');
+  router.push('/');
 };
 </script>
 
