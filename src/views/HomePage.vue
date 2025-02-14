@@ -120,7 +120,7 @@ const navigateToLogin = () => {
 
 .home-page {
   min-height: 100vh;
-  margin-top: 100px;
+  margin-top: 105px;
 }
 
 .custom-button {
