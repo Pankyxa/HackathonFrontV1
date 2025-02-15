@@ -17,15 +17,42 @@
           :error="fieldErrors[field.name]"
       >
         <template v-if="field.type === 'file'">
-          <el-upload
-              class="upload-field"
-              action="#"
-              :auto-upload="false"
-              :on-change="(file) => handleFileChange(file, field.name)"
-              :on-remove="() => handleFileRemove(field.name)"
-          >
-            <el-button type="primary">Выбрать файл</el-button>
-          </el-upload>
+          <div class="file-upload-container">
+            <div class="file-upload-header">
+              <el-tooltip
+                  v-if="field.tooltip"
+                  :content="field.tooltip"
+                  placement="top"
+                  effect="light"
+                  popper-class="custom-tooltip-popper"
+              >
+                <el-icon class="tooltip-icon">
+                  <InfoFilled/>
+                </el-icon>
+              </el-tooltip>
+              <el-button
+                  v-if="field.downloadTemplate"
+                  type="primary"
+                  link
+                  @click="$emit('download-consent')"
+                  class="download-template-btn"
+              >
+                <el-icon>
+                  <Download/>
+                </el-icon>
+                Скачать шаблон
+              </el-button>
+            </div>
+            <el-upload
+                class="upload-field"
+                action="#"
+                :auto-upload="false"
+                :on-change="(file) => handleFileChange(file, field.name)"
+                :on-remove="() => handleFileRemove(field.name)"
+            >
+              <el-button type="primary">Выбрать файл</el-button>
+            </el-upload>
+          </div>
         </template>
         <template v-else-if="field.type === 'checkbox'">
           <el-checkbox
@@ -34,7 +61,8 @@
           >
             <!-- Заменяем v-html на компонент с обработчиком клика -->
             <span v-if="field.name === 'terms_accepted'">
-              Я ознакомился и согласен с <a href="#" @click.prevent="$emit('download-terms')" style="color: #409EFF; text-decoration: underline;">условиями проведения хакатона</a>
+              Я ознакомился и согласен с <a href="#" @click.prevent="$emit('download-terms')"
+                                            style="color: #409EFF; text-decoration: underline;">условиями проведения хакатона</a>
             </span>
             <span v-else v-html="field.customContent"></span>
           </el-checkbox>
@@ -84,6 +112,7 @@
 
 <script setup>
 import {ref, watch} from 'vue';
+import {InfoFilled, Download} from '@element-plus/icons-vue';
 
 const props = defineProps({
   loading: {
@@ -108,7 +137,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['submit', 'secondaryAction', 'update:model-value', 'download-terms']);
+const emit = defineEmits(['submit', 'secondaryAction', 'update:model-value', 'download-terms', 'download-consent']);
 const formModel = ref({});
 const rules = ref({});
 const fieldErrors = ref({});
@@ -173,6 +202,12 @@ const handleSecondaryAction = () => {
   emit('secondaryAction');
 };
 </script>
+
+<style>
+.el-popper.custom-tooltip-popper {
+  color: #333333 !important;
+}
+</style>
 
 <style scoped>
 .auth-form {
@@ -275,5 +310,35 @@ const handleSecondaryAction = () => {
 
 .form-fields-container :deep(.el-checkbox__label a:hover) {
   color: #66b1ff;
+}
+
+.file-upload-container {
+  width: 100%;
+}
+
+.file-upload-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+
+.tooltip-icon {
+  color: #909399;
+  font-size: 16px;
+  cursor: help;
+}
+
+.download-template-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  height: auto;
+  font-size: 14px;
+}
+
+.download-template-btn :deep(.el-icon) {
+  margin-right: 4px;
 }
 </style>

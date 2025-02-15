@@ -13,6 +13,7 @@
             @secondary-action="moveToLogin"
             @update:model-value="updateFormModel"
             @download-terms="downloadTerms"
+            @download-consent="downloadConsent"
             class="registration-form"
         />
       </div>
@@ -39,6 +40,13 @@ const downloadTerms = () => {
   const link = document.createElement('a');
   link.href = '/files/Положение о хакатоне Цифровые двойники в энергетике.pdf';
   link.target = '_blank';
+  link.click();
+};
+
+const downloadConsent = () => {
+  const link = document.createElement('a');
+  link.href = '/files/Согласия хакатон Цифровые двойники в энергетике.pdf'; // Путь к шаблону согласия
+  link.download = 'Шаблон согласия.pdf';
   link.click();
 };
 
@@ -184,9 +192,11 @@ const registrationFields = [
   },
   {
     name: 'consent_file',
-    label: 'Согласие',
+    label: 'Согласия',
     type: 'file',
     placeholder: 'Прикрепите согласие на обработку ПД',
+    tooltip: 'Распечатайте согласия, заполните их, отсканируйте и прикрепите в одном файле в формате pdf',
+    downloadTemplate: true,
     rules: [
       {
         required: true,
