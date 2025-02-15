@@ -26,13 +26,25 @@
           >
             <el-button type="primary">Выбрать файл</el-button>
           </el-upload>
-</template>
+        </template>
+        <template v-else-if="field.type === 'checkbox'">
+          <el-checkbox
+              v-model="formModel[field.name]"
+              @change="handleInput"
+          >
+            <!-- Заменяем v-html на компонент с обработчиком клика -->
+            <span v-if="field.name === 'terms_accepted'">
+              Я ознакомился и согласен с <a href="#" @click.prevent="$emit('download-terms')" style="color: #409EFF; text-decoration: underline;">условиями проведения хакатона</a>
+            </span>
+            <span v-else v-html="field.customContent"></span>
+          </el-checkbox>
+        </template>
         <el-select
             v-else-if="field.type === 'select'"
             v-model="formModel[field.name]"
             :placeholder="field.placeholder"
             class="full-width"
-      >
+        >
           <el-option
               v-for="option in field.options"
               :key="option.value"
@@ -71,7 +83,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import {ref, watch} from 'vue';
 
 const props = defineProps({
   loading: {
@@ -96,7 +108,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['submit', 'secondaryAction', 'update:model-value']);
+const emit = defineEmits(['submit', 'secondaryAction', 'update:model-value', 'download-terms']);
 const formModel = ref({});
 const rules = ref({});
 const fieldErrors = ref({});
@@ -118,11 +130,11 @@ watch(() => props.fields, (newFields) => {
   formModel.value = newModel;
   rules.value = newRules;
   fieldErrors.value = newErrors;
-}, { immediate: true });
+}, {immediate: true});
 
 watch(formModel, (newValue) => {
   emit('update:model-value', newValue);
-}, { deep: true });
+}, {deep: true});
 const handleInput = () => {
   emit('update:model-value', formModel.value);
 };
@@ -237,5 +249,31 @@ const handleSecondaryAction = () => {
 
 .full-width {
   width: 100%;
+}
+
+/* Добавляем стили для чекбокса */
+.form-fields-container :deep(.el-checkbox) {
+  height: auto;
+  margin-right: 0;
+}
+
+.form-fields-container :deep(.el-checkbox__label) {
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.form-fields-container :deep(.el-checkbox__input) {
+  margin-top: 2px;
+}
+
+/* Стили для ссылки внутри чекбокса */
+.form-fields-container :deep(.el-checkbox__label a) {
+  color: #409EFF;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.form-fields-container :deep(.el-checkbox__label a:hover) {
+  color: #66b1ff;
 }
 </style>

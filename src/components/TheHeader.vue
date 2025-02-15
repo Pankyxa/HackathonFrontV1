@@ -1,5 +1,5 @@
 <template>
-  <el-header class="header">
+  <el-header class="header" :class="{ 'header-hidden': isHeaderHidden, 'menu-open': isMenuOpen }">
     <div class="header-content">
       <div class="logo">
         <router-link to="/">
@@ -62,6 +62,13 @@ import MenuItems from './MenuItems.vue'
 import {useAuthStore} from '@/stores/auth'
 import {useLoadingStore} from "@/stores/loading.js";
 import {storeToRefs} from "pinia";
+
+const props = defineProps({
+  isHeaderHidden: {
+    type: Boolean,
+    default: false
+  }
+});
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -132,9 +139,19 @@ onBeforeUnmount(() => {
   z-index: 1000;
   width: calc(100% - 10px);
   box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
-.header-content {
+.header-hidden {
+  transform: translateY(-100%);
+}
+
+.header.menu-open {
+  height: auto !important;
+}
+
+  .header-content {
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
@@ -142,17 +159,17 @@ onBeforeUnmount(() => {
   align-items: center;
   height: 100%;
   padding: 0 20px;
-}
+  }
 
 .logo img {
   height: 40px;
   object-fit: contain;
-}
+  }
 
 .desktop-menu {
   display: flex;
   align-items: center;
-}
+  }
 
 .nav-menu {
   border: none;
@@ -255,15 +272,15 @@ onBeforeUnmount(() => {
   }
 
   .mobile-menu-dropdown {
-    position: fixed;
-    top: 80px;
-    left: 5px;
-    right: 5px;
-    width: calc(100% - 10px);
-    margin: 0;
-    border-radius: 16px;
+    position: static;
+    width: 100%;
+    margin-top: 10px;
+    padding-bottom: 10px;
   }
 
+  .mobile-nav-menu {
+    width: 100%;
+  }
   .hamburger-btn {
     background: transparent;
     border: 2px solid white;
@@ -282,12 +299,29 @@ onBeforeUnmount(() => {
   }
 
   :deep(.mobile-nav-menu .el-menu-item) {
-    margin: 8px 16px;
-    transition: transform 0.2s ease;
+    margin: 8px 15px;
+    width: calc(100% - 30px);
   }
 
-  :deep(.mobile-nav-menu .el-menu-item:active) {
-    transform: scale(0.98);
+  .slide-fade-enter-active,
+  .slide-fade-leave-active {
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .slide-fade-enter-from,
+  .slide-fade-leave-to {
+    transform: translateY(-20px);
+    opacity: 0;
+}
+
+  .header {
+    transition: all 0.3s ease;
+  }
+
+  .header.menu-open {
+    height: auto !important;
+    padding-bottom: 10px;
   }
 }
 </style>

@@ -12,6 +12,7 @@
             @submit="submitRegistration"
             @secondary-action="moveToLogin"
             @update:model-value="updateFormModel"
+            @download-terms="downloadTerms"
             class="registration-form"
         />
       </div>
@@ -32,6 +33,13 @@ const loading = ref(false);
 const formModel = ref({});
 const updateFormModel = (newValue) => {
   formModel.value = newValue;
+};
+
+const downloadTerms = () => {
+  const link = document.createElement('a');
+  link.href = '/files/Положение о хакатоне Цифровые двойники в энергетике.pdf';
+  link.target = '_blank';
+  link.click();
 };
 
 const registrationFields = [
@@ -209,7 +217,25 @@ const registrationFields = [
         trigger: 'change'
       }
     ]
-  }
+  },
+  {
+    name: 'terms_accepted',
+    type: 'checkbox',
+    label: ' ',
+    customContent: '',
+    rules: [
+      {
+        validator: (rule, value, callback) => {
+          if (!value) {
+            callback(new Error('Необходимо принять условия проведения хакатона'));
+          } else {
+            callback();
+          }
+        },
+        trigger: 'change'
+      }
+    ]
+  },
 ];
 
 const submitRegistration = async (formData) => {
@@ -217,6 +243,7 @@ const submitRegistration = async (formData) => {
     loading.value = true;
     const dataToSend = { ...formData };
     delete dataToSend.confirmPassword;
+    delete dataToSend.terms_accepted;
     await authApi.register(dataToSend);
     ElMessage.success('Регистрация успешна!');
   router.push('/login');
@@ -333,6 +360,20 @@ const moveToLogin = () => {
   font-size: 12px;
   line-height: 1;
   padding-top: 4px;
+}
+
+.registration-form :deep(.el-checkbox__label) {
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.registration-form :deep(.el-checkbox) {
+  margin-right: 0;
+  align-items: flex-start;
+}
+
+.registration-form :deep(.el-checkbox__inner) {
+  margin-top: 3px;
 }
 
 @media (max-width: 768px) {
