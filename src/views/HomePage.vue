@@ -125,13 +125,13 @@ onUnmounted(() => {
 });
 
 const stages = [
-  {icon: 'UserFilled', text: 'Регистрация участников'},
-  {icon: 'Document', text: 'Рассылка данных для выполнения задания'},
-  {icon: 'Monitor', text: 'Прием решений'},
-  {icon: 'Check', text: 'Проверка решений'},
-  {icon: 'Trophy', text: 'Онлайн защита'},
-  {icon: 'Star', text: 'Публикация результатов'},
-  {icon: 'Medal', text: 'Награждение'}
+  {icon: UserFilled, text: 'Регистрация участников'},
+  {icon: Document, text: 'Рассылка данных для выполнения задания'},
+  {icon: Monitor, text: 'Прием решений'},
+  {icon: Check, text: 'Проверка решений'},
+  {icon: Trophy, text: 'Онлайн защита'},
+  {icon: Star, text: 'Публикация результатов'},
+  {icon: Medal, text: 'Награждение'}
 ];
 
 const handleApplicationClick = () => {
