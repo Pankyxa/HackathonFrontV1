@@ -22,12 +22,11 @@ export const teamsApi = {
             formData.append('team_motto', teamData.team_motto);
             formData.append('logo', teamData.logo);
 
-            // Add any additional fields from teamData
-            Object.keys(teamData).forEach(key => {
-                if (!['team_name', 'team_motto', 'logo'].includes(key)) {
-                    formData.append(key, teamData[key]);
-                }
-            });
+            if (teamData.member_ids) {
+                formData.append('member_ids', teamData.member_ids);
+            } else {
+                formData.append('member_ids', JSON.stringify([]));
+            }
 
             const response = await api.post('/teams/create', formData, {
                 headers: {
@@ -39,6 +38,7 @@ export const teamsApi = {
             throw error.response?.data || error.message;
         }
     },
+
     async getAllTeams() {
         try {
             const response = await api.get('/teams');

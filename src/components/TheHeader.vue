@@ -57,7 +57,7 @@
 import {ref, onMounted, onBeforeUnmount} from 'vue'
 import {useRouter} from 'vue-router'
 import {Menu} from '@element-plus/icons-vue'
-import AuthRequiredModal from "@/components/AuthRequiredModal.vue"
+import AuthRequiredModal from "@/components/auth/AuthRequiredModal.vue"
 import MenuItems from './MenuItems.vue'
 import {useAuthStore} from '@/stores/auth'
 import {useLoadingStore} from "@/stores/loading.js";

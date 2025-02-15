@@ -83,7 +83,7 @@ import { useRouter } from 'vue-router';
 import {UserFilled, Document, Monitor, Check, Trophy, Star, Medal} from '@element-plus/icons-vue'
 import TheHeader from "@/components/TheHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
-import AuthRequiredModal from "@/components/AuthRequiredModal.vue";
+import AuthRequiredModal from "@/components/auth/AuthRequiredModal.vue";
 
 const router = useRouter();
 const showAuthModal = ref(false);

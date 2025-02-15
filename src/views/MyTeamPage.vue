@@ -68,7 +68,7 @@ const currentComponent = computed(() => {
 .team-sidebar {
   width: 250px;
   background: linear-gradient(90deg, #00A3FF 0%, #5B51D8 100%);
-  min-height: 100%; /* Занимает всю высоту родителя */
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   }

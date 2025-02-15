@@ -23,7 +23,7 @@
 import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import PrimaryLayout from '../components/PrimaryLayout.vue';
-import AuthForm from '../components/AuthForm.vue';
+import AuthForm from '../components/auth/AuthForm.vue';
 import { useRouter } from 'vue-router';
 import { authApi } from '../api/auth';
 
