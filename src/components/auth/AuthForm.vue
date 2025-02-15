@@ -59,7 +59,6 @@
               v-model="formModel[field.name]"
               @change="handleInput"
           >
-            <!-- Заменяем v-html на компонент с обработчиком клика -->
             <span v-if="field.name === 'terms_accepted'">
               Я ознакомился и согласен с <a href="#" @click.prevent="$emit('download-terms')"
                                             style="color: #409EFF; text-decoration: underline;">условиями проведения хакатона</a>
@@ -80,6 +79,24 @@
               :value="option.value"
           />
         </el-select>
+        <el-input
+            v-else-if="field.name === 'number'"
+            v-model="formModel[field.name]"
+            v-mask="'+7 (###) ###-##-##'"
+            :mask-placeholder="{ '#': '_' }"
+            placeholder="+7 (___) ___-__-__"
+            :class="`input-${field.name}`"
+            @input="handleInput"
+        ></el-input>
+        <el-input
+            v-else-if="field.name === 'code_speciality'"
+            v-model="formModel[field.name]"
+            v-mask="'##.##.##'"
+            :mask-placeholder="{ '#': '_' }"
+            placeholder="__.__.__ "
+            :class="`input-${field.name}`"
+            @input="handleInput"
+        ></el-input>
         <el-input
             v-else
             v-model="formModel[field.name]"
@@ -137,6 +154,17 @@ const props = defineProps({
   }
 });
 
+const validateSpecialityCode = (rule, value, callback) => {
+  const regex = /^\d{2}\.\d{2}\.\d{2}$/;
+  if (!value) {
+    callback(new Error('Пожалуйста, введите код специальности'));
+  } else if (!regex.test(value)) {
+    callback(new Error('Формат: XX.XX.XX, где X - цифры'));
+  } else {
+    callback();
+  }
+};
+
 const emit = defineEmits(['submit', 'secondaryAction', 'update:model-value', 'download-terms', 'download-consent']);
 const formModel = ref({});
 const rules = ref({});
@@ -187,7 +215,6 @@ const handleSubmit = async () => {
         emit('submit', formModel.value);
       } else {
         console.error('Ошибка валидации:', fields);
-        // Обновляем ошибки для каждого поля
         Object.keys(fields).forEach(key => {
           fieldErrors.value[key] = fields[key][0].message;
         });
@@ -286,7 +313,6 @@ const handleSecondaryAction = () => {
   width: 100%;
 }
 
-/* Добавляем стили для чекбокса */
 .form-fields-container :deep(.el-checkbox) {
   height: auto;
   margin-right: 0;
@@ -301,7 +327,6 @@ const handleSecondaryAction = () => {
   margin-top: 2px;
 }
 
-/* Стили для ссылки внутри чекбокса */
 .form-fields-container :deep(.el-checkbox__label a) {
   color: #409EFF;
   text-decoration: underline;

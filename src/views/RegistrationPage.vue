@@ -45,7 +45,7 @@ const downloadTerms = () => {
 
 const downloadConsent = () => {
   const link = document.createElement('a');
-  link.href = '/files/Согласия хакатон Цифровые двойники в энергетике.pdf'; // Путь к шаблону согласия
+  link.href = '/files/Согласия хакатон Цифровые двойники в энергетике.pdf';
   link.download = 'Шаблон согласия.pdf';
   link.click();
 };
@@ -105,9 +105,14 @@ const registrationFields = [
     name: 'number',
     label: 'Телефон',
     type: 'text',
-    placeholder: 'Введите номер телефона',
+    placeholder: '+7 (___) ___-__-__',
     rules: [
-      { required: true, message: 'Пожалуйста, введите номер телефона', trigger: 'blur' }
+      { required: true, message: 'Пожалуйста, введите номер телефона', trigger: 'blur' },
+      {
+        pattern: /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/,
+        message: 'Введите корректный номер телефона',
+        trigger: 'blur'
+      }
     ]
   },
   {
@@ -132,9 +137,14 @@ const registrationFields = [
     name: 'code_speciality',
     label: 'Код спец.',
     type: 'text',
-    placeholder: 'Введите код специальности',
+    placeholder: '__.__.__ ',
     rules: [
-      { required: true, message: 'Пожалуйста, введите код специальности', trigger: 'blur' }
+      { required: true, message: 'Пожалуйста, введите код специальности', trigger: 'blur' },
+      {
+        pattern: /^\d{2}\.\d{2}\.\d{2}$/,
+        message: 'Формат: XX.XX.XX, где X - цифры',
+        trigger: 'blur'
+      }
     ]
   },
   {
