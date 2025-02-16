@@ -4,18 +4,37 @@
     <div class="team-page">
       <div class="team-sidebar">
         <div class="sidebar-menu">
-          <div class="menu-item"
-               v-for="item in menuItems"
-               :key="item.id"
-               :class="{ active: activeTab === item.id }"
-               @click="activeTab = item.id">
+          <div
+            class="menu-item team-header-item"
+            :class="{ active: activeTab === 'info' }"
+            @click="activeTab = 'info'"
+          >
+            <img
+              v-if="teamLogo"
+              :src="teamLogo"
+              alt="Team Logo"
+              class="menu-logo"
+            />
+            <div v-else class="menu-logo-placeholder"></div>
+            <span class="team-name">{{ teamName || 'Моя команда' }}</span>
+          </div>
+          <div
+            v-for="item in menuItems"
+            :key="item.id"
+            class="menu-item"
+            :class="{ active: activeTab === item.id }"
+            @click="activeTab = item.id"
+          >
             {{ item.title }}
           </div>
         </div>
       </div>
       <div class="content-area">
         <div class="content-wrapper">
-          <component :is="currentComponent"></component>
+          <component
+            :is="currentComponent"
+            @update:teamInfo="handleTeamInfoUpdate"
+          ></component>
         </div>
       </div>
     </div>
@@ -24,16 +43,20 @@
 </template>
 
 <script setup>
-import {ref, computed} from 'vue'
-import TheHeader from "@/components/TheHeader.vue";
-import TheFooter from "@/components/TheFooter.vue";
+import { ref, computed, onMounted } from 'vue'
+import TheHeader from "@/components/TheHeader.vue"
+import TheFooter from "@/components/TheFooter.vue"
 import TeamInfo from '@/components/team/TeamInfo.vue'
+import TeamMembers from '@/components/team/TeamMembers.vue'
+import { teamsApi } from '@/api/teams'
 
 const activeTab = ref('info')
+const teamName = ref('')
+const teamLogo = ref(null)
+const teamId = ref(null)
 
 const menuItems = [
-  {id: 'info', title: 'Название'},
-  {id: 'team', title: 'Состав'},
+  {id: 'members', title: 'Участники'},
   {id: 'task', title: 'Задача'},
   {id: 'examples', title: 'Примеры сайтов'}
 ]
@@ -42,8 +65,29 @@ const currentComponent = computed(() => {
   switch (activeTab.value) {
     case 'info':
       return TeamInfo
+    case 'members':
+      return TeamMembers
     default:
       return null
+  }
+})
+
+const handleTeamInfoUpdate = (info) => {
+  teamName.value = info.team_name
+  teamId.value = info.id
+  if (info.logo_file_id) {
+    teamLogo.value = `${import.meta.env.VITE_API_URL}/teams/${info.id}/logo`
+  }
+}
+
+onMounted(async () => {
+  try {
+    const teamInfo = await teamsApi.getCurrentTeam()
+    if (teamInfo) {
+      handleTeamInfoUpdate(teamInfo)
+    }
+  } catch (error) {
+    console.error('Error loading team info:', error)
   }
 })
 </script>
@@ -117,12 +161,37 @@ const currentComponent = computed(() => {
   flex: 1;
 }
 
-@media (max-width: 768px) {
-  .my-team-container {
-    min-height: 80%;
-    margin: 90px 10px 10px 10px;
+.team-header-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
   }
 
+.menu-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: white;
+  }
+
+.menu-logo-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  }
+
+.team-name {
+  font-weight: 500;
+    flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  }
+
+@media (max-width: 768px) {
   .team-page {
     flex-direction: column;
     min-height: 500px;
@@ -131,7 +200,7 @@ const currentComponent = computed(() => {
   .team-sidebar {
     width: 100%;
     min-height: auto;
-  }
+}
 
   .sidebar-menu {
     flex-direction: row;

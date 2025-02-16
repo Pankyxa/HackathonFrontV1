@@ -46,5 +46,54 @@ export const teamsApi = {
         } catch (error) {
             throw error.response?.data || error.message;
         }
-    }
+    },
+
+    async getTeamInfo() {
+        try {
+            const response = await api.get('/teams/my');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async updateTeamInfo(teamData) {
+        try {
+            const response = await api.put('/teams/my', teamData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async updateTeamLogo(formData) {
+        try {
+            const response = await api.put('/teams/my/logo', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async getTeamMembers() {
+        try {
+            const response = await api.get('/teams/my/members');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async getCurrentTeam() {
+        try {
+            const response = await api.get('/teams');
+            return response.data[0];
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 };

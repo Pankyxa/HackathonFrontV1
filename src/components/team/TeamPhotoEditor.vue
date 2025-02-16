@@ -70,6 +70,10 @@ const props = defineProps({
   modelValue: {
     type: [String, File, null],
     default: null
+  },
+  initialImage: {
+    type: String,
+    default: null
   }
 });
 
@@ -82,6 +86,11 @@ const showEditor = ref(false);
 const coordinates = ref(null);
 
 const isMobile = computed(() => window.innerWidth <= 768);
+
+if (props.initialImage) {
+  imageUrl.value = props.initialImage
+  showEditor.value = true
+}
 
 const triggerFileInput = () => {
   fileInput.value.click();
@@ -97,7 +106,6 @@ const handleFileInputChange = (event) => {
     };
     reader.readAsDataURL(file);
   }
-  // Сброс значения input для возможности повторной загрузки того же файла
   event.target.value = '';
 };
 
@@ -109,7 +117,7 @@ const cropImage = async () => {
   const {coordinates: coords, canvas} = coordinates.value;
 
   const outputCanvas = document.createElement('canvas');
-  const size = 300; // Фиксированный размер для выходного изображения
+  const size = 300;
   outputCanvas.width = size;
   outputCanvas.height = size;
   const ctx = outputCanvas.getContext('2d');
