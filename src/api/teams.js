@@ -66,9 +66,12 @@ export const teamsApi = {
         }
     },
 
-    async updateTeamLogo(formData) {
+    async updateTeamLogo(teamId, file) {
         try {
-            const response = await api.put('/teams/my/logo', formData, {
+            const formData = new FormData();
+            formData.append('logo', file, file.name);
+
+            const response = await api.put(`/teams/${teamId}/logo`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 }

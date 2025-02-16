@@ -4,10 +4,10 @@
       <div class="logo-container">
         <div class="logo-wrapper">
           <img
-            v-if="teamLogo"
-            :src="teamLogo"
-            alt="Team Logo"
-            class="team-logo"
+              v-if="teamLogo"
+              :src="teamLogo"
+              alt="Team Logo"
+              class="team-logo"
           />
           <div v-else class="logo-placeholder">
             <span>Нет логотипа</span>
@@ -15,25 +15,25 @@
         </div>
         <div class="logo-actions">
           <input
-            type="file"
-            ref="fileInput"
-            @change="handleFileSelect"
-            accept="image/*"
-            style="display: none"
+              type="file"
+              ref="fileInput"
+              @change="handleFileSelect"
+              accept="image/*"
+              style="display: none"
           >
           <button class="change-logo-btn" @click="$refs.fileInput.click()">
-          Изменить логотип
-      </button>
+            Изменить логотип
+          </button>
         </div>
-  </div>
+      </div>
       <div class="team-details">
         <div class="form-group">
           <label>Название команды</label>
-          <input type="text" v-model="teamData.team_name" class="form-input" />
+          <input type="text" v-model="teamData.team_name" class="form-input"/>
         </div>
         <div class="form-group">
           <label>Девиз команды</label>
-          <input type="text" v-model="teamData.team_motto" class="form-input" />
+          <input type="text" v-model="teamData.team_motto" class="form-input"/>
         </div>
       </div>
     </div>
@@ -41,9 +41,9 @@
       <div class="form-group">
         <label>Описание команды</label>
         <textarea
-          v-model="teamData.description"
-          class="form-input"
-          rows="4"
+            v-model="teamData.description"
+            class="form-input"
+            rows="4"
         ></textarea>
       </div>
     </div>
@@ -54,27 +54,28 @@
     </div>
 
     <el-dialog
-      v-model="showPhotoEditor"
-      title="Редактирование фото"
-      :width="isMobile ? '95%' : '700px'"
-      class="editor-dialog"
-      :close-on-click-modal="false"
+        v-model="showPhotoEditor"
+        title="Редактирование фото"
+        :width="isMobile ? '95%' : '700px'"
+        class="editor-dialog"
+        :close-on-click-modal="false"
     >
       <TeamPhotoEditor
-        v-if="showPhotoEditor"
-        v-model="logoFile"
-        :initial-image="selectedImage"
-        @update:modelValue="handleLogoChange"
-        @cancel="showPhotoEditor = false"
+          v-if="showPhotoEditor"
+          v-model="logoFile"
+          :initial-image="selectedImage"
+          @update:modelValue="handleLogoChange"
+          @cancel="showPhotoEditor = false"
       />
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { teamsApi } from '@/api/teams'
+import {ref, computed, onMounted} from 'vue'
+import {teamsApi} from '@/api/teams'
 import TeamPhotoEditor from './TeamPhotoEditor.vue'
+import {ElMessage} from 'element-plus'
 
 const emit = defineEmits(['update:teamInfo'])
 const fileInput = ref(null)
@@ -91,6 +92,28 @@ const teamData = ref({
 
 const isMobile = computed(() => window.innerWidth <= 768)
 
+const validateFile = (file) => {
+  const maxSize = 5 * 1024 * 1024;
+  if (file.size > maxSize) {
+      ElMessage({
+      message: 'Размер файла не должен превышать 5MB',
+      type: 'error'
+      });
+    return false;
+  }
+
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  if (!allowedTypes.includes(file.type)) {
+      ElMessage({
+      message: 'Поддерживаются только изображения в форматах JPEG, PNG и GIF',
+        type: 'error'
+      });
+    return false;
+    }
+
+  return true;
+};
+
 const handleFileSelect = (event) => {
   const file = event.target.files[0]
   if (file) {
@@ -101,24 +124,51 @@ const handleFileSelect = (event) => {
   }
     reader.readAsDataURL(file)
     event.target.value = ''
-  }
 }
+}
+
 const handleLogoChange = async (file) => {
-  if (file) {
+  if (file && validateFile(file)) {
   try {
-      loading.value = true
-      const formData = new FormData()
-      formData.append('logo', file)
-      // await teamsApi.updateTeamLogo(formData)
-      teamLogo.value = URL.createObjectURL(file)
-      showPhotoEditor.value = false
-  } catch (error) {
-      console.error('Error uploading logo:', error)
-  } finally {
-      loading.value = false
+      loading.value = true;
+
+      let fileToUpload = file;
+      if (file instanceof Blob && !(file instanceof File)) {
+        fileToUpload = new File([file], 'team-photo.png', { type: 'image/png' });
   }
-  }
+
+      const teamId = teamData.value.id;
+      if (!teamId) {
+        throw new Error('Team ID not found');
 }
+
+      await teamsApi.updateTeamLogo(teamId, fileToUpload);
+
+      teamLogo.value = `${import.meta.env.VITE_API_URL}/teams/${teamId}/logo?t=${Date.now()}`;
+
+      emit('update:teamInfo', {
+        ...teamData.value,
+        logo_updated_at: Date.now()
+      });
+
+      showPhotoEditor.value = false;
+
+      ElMessage({
+        message: 'Логотип команды успешно обновлен',
+        type: 'success'
+      });
+  } catch (error) {
+      console.error('Error uploading logo:', error);
+      ElMessage({
+        message: 'Ошибка при обновлении логотипа команды',
+        type: 'error'
+      });
+  } finally {
+      loading.value = false;
+  }
+  }
+};
+
 const saveTeamInfo = async () => {
   loading.value = true
   try {
@@ -163,9 +213,9 @@ onMounted(async () => {
 .logo-container {
   width: 200px;
   display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+  flex-direction: column;
+  align-items: center;
+}
 
 .logo-wrapper {
   width: 200px;
@@ -173,7 +223,7 @@ onMounted(async () => {
   border-radius: 50%;
   overflow: hidden;
   position: relative;
-  }
+}
 
 .team-logo {
   width: 100%;

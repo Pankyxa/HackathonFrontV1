@@ -11,7 +11,7 @@
           >
             <img
               v-if="teamLogo"
-              :src="teamLogo"
+              :src="teamLogoUrl"
               alt="Team Logo"
               class="menu-logo"
             />
@@ -54,12 +54,18 @@ const activeTab = ref('info')
 const teamName = ref('')
 const teamLogo = ref(null)
 const teamId = ref(null)
+const teamLogoTimestamp = ref(Date.now())
 
 const menuItems = [
   {id: 'members', title: 'Участники'},
   {id: 'task', title: 'Задача'},
   {id: 'examples', title: 'Примеры сайтов'}
 ]
+
+const teamLogoUrl = computed(() => {
+  if (!teamLogo.value) return null;
+  return `${teamLogo.value}?t=${teamLogoTimestamp.value}`;
+})
 
 const currentComponent = computed(() => {
   switch (activeTab.value) {
@@ -77,6 +83,10 @@ const handleTeamInfoUpdate = (info) => {
   teamId.value = info.id
   if (info.logo_file_id) {
     teamLogo.value = `${import.meta.env.VITE_API_URL}/teams/${info.id}/logo`
+    // Обновляем timestamp при обновлении логотипа
+    if (info.logo_updated_at) {
+      teamLogoTimestamp.value = info.logo_updated_at
+    }
   }
 }
 
