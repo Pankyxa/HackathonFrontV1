@@ -45,8 +45,8 @@ const downloadTerms = () => {
 
 const downloadConsent = () => {
   const link = document.createElement('a');
-  link.href = '/files/Согласия хакатон Цифровые двойники в энергетике.pdf';
-  link.download = 'Шаблон согласия.pdf';
+  link.href = '/files/Шаблон согласия.pdf';
+  link.target = 'Шаблон согласия.pdf';
   link.click();
 };
 
