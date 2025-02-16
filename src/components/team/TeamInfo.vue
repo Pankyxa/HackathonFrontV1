@@ -21,7 +21,7 @@
               accept="image/*"
               style="display: none"
           >
-          <button class="change-logo-btn" @click="$refs.fileInput.click()">
+          <button class="change-logo-btn" v-if="isTeamLeader" @click="$refs.fileInput.click()">
             Изменить логотип
           </button>
         </div>
@@ -35,14 +35,27 @@
           <label>Девиз команды</label>
           <div class="info-value">{{ teamData.team_motto }}</div>
         </div>
-        <button class="edit-btn" @click="openEditModal">
+        <button class="edit-btn" v-if="isTeamLeader" @click="openEditModal">
           Редактировать информацию
         </button>
       </div>
     </div>
 
     <div class="team-members-section">
-      <h2 class="section-title">Участники команды</h2>
+      <div class="section-header">
+        <h2 class="section-title">Участники команды</h2>
+        <div class="header-right">
+          <span class="member-count">{{ teamMembers.length }}/4 участников</span>
+          <button
+              v-if="isTeamLeader"
+              class="add-member-btn"
+              @click="showUserSearch"
+              :disabled="teamMembers.length >= 5"
+          >
+            Добавить участника
+          </button>
+        </div>
+      </div>
       <div class="members-list">
         <div v-for="member in teamMembers" :key="member.id" class="member-card">
           <div class="member-info">
@@ -124,15 +137,22 @@
         </div>
       </template>
     </el-dialog>
+
+    <UserSearchModal
+        v-model="showAddMemberModal"
+        :existing-members="teamMembers.map(member => member.user)"
+        @select="handleMemberSelect"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { teamsApi } from '@/api/teams'
-import { useAuthStore } from '@/stores/auth'
-import { ElMessage } from 'element-plus'
+import {ref, computed, onMounted} from 'vue'
+import {teamsApi} from '@/api/teams'
+import {useAuthStore} from '@/stores/auth'
+import {ElMessage} from 'element-plus'
 import TeamPhotoEditor from './TeamPhotoEditor.vue'
+import UserSearchModal from './UserSearchModal.vue'
 
 const emit = defineEmits(['update:teamInfo'])
 const authStore = useAuthStore()
@@ -158,6 +178,8 @@ const editFormData = ref({
 
 const isTeamLeader = computed(() => teamData.value?.team_leader_id === currentUserId.value)
 const isMobile = computed(() => window.innerWidth <= 768)
+
+const showAddMemberModal = ref(false)
 
 const validateFile = (file) => {
   const maxSize = 5 * 1024 * 1024;
@@ -201,7 +223,7 @@ const handleLogoChange = async (file) => {
 
       let fileToUpload = file;
       if (file instanceof Blob && !(file instanceof File)) {
-        fileToUpload = new File([file], 'team-photo.png', { type: 'image/png' });
+        fileToUpload = new File([file], 'team-photo.png', {type: 'image/png'});
       }
 
       const teamId = teamData.value.id;
@@ -355,6 +377,46 @@ const removeMember = async () => {
 onMounted(() => {
   loadTeamData()
 })
+
+const handleMemberSelect = async (user) => {
+  try {
+    loading.value = true;
+    await teamsApi.addTeamMember(teamData.value.id, {
+      user_id: user.id,
+      role: 'member'
+    });
+
+    // Обновляем список участников
+    const membersData = await teamsApi.getTeamMembers(teamData.value.id);
+    teamMembers.value = membersData.members;
+
+    showAddMemberModal.value = false;
+
+    ElMessage({
+      message: 'Приглашение в команду успешно отправлено',
+      type: 'success'
+    });
+  } catch (error) {
+    console.error('Error adding team member:', error);
+    ElMessage({
+      message: error.message || 'Ошибка при добавлении участника',
+      type: 'error'
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const showUserSearch = () => {
+  if (teamMembers.value.length >= 4) {
+    ElMessage({
+      message: 'Достигнуто максимальное количество участников (4)',
+      type: 'warning'
+    });
+    return;
+  }
+  showAddMemberModal.value = true;
+};
 </script>
 
 <style scoped>
@@ -477,6 +539,36 @@ onMounted(() => {
   margin-top: 2rem;
   padding-top: 2rem;
   border-top: 1px solid #dcdfe6;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.add-member-btn {
+  padding: 8px 20px;
+  background: white;
+  color: #5B51D8;
+  border: 2px solid #5B51D8;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.add-member-btn:hover {
+  background: rgba(91, 81, 216, 0.1);
+}
+
+.add-member-btn:active {
+  transform: translateY(1px);
+}
+
+.add-member-form {
+  padding: 1rem;
 }
 
 .section-title {

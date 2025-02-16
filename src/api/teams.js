@@ -117,4 +117,13 @@ export const teamsApi = {
             throw error.response?.data || error.message;
         }
     },
+
+    async addTeamMember(teamId, userData) {
+        try {
+            const response = await api.post(`/teams/${teamId}/members`, userData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
 };
