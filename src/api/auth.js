@@ -20,6 +20,7 @@ export const authApi = {
             const formData = new FormData();
 
             Object.keys(data).forEach(key => {
+                console.log(data[key]);
                 formData.append(key, data[key]);
             });
             const response = await api.post('/auth/register', formData, {

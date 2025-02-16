@@ -1,60 +1,123 @@
 <template>
   <div class="team-members">
-    <h2>Участники команды</h2>
+    <h2 class="section-title">Участники команды</h2>
     <div class="members-list">
-      <div v-if="loading" class="loading">Загрузка участников...</div>
-      <div v-else-if="error" class="error">{{ error }}</div>
-      <template v-else>
-        <div v-for="member in members" :key="member.id" class="member-card">
-          <div class="member-info">
-            <div class="member-name">{{ member.user?.name || 'Участник' }}</div>
-            <div class="member-role">{{ formatRole(member.role) }}</div>
-          </div>
-          <div class="member-status" :class="member.status.toLowerCase()">
-            {{ formatStatus(member.status) }}
-          </div>
+      <div v-for="member in members" :key="member.id" class="member-card">
+        <div class="member-info">
+          <div class="member-name">{{ member.user.full_name }}</div>
+          <div class="member-role">{{ getRoleName(member.role) }}</div>
+        </div>
+        <div class="member-actions" v-if="isTeamLeader && member.user.id !== currentUserId">
+          <button class="remove-btn" @click="confirmRemoveMember(member)">
+            Удалить
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <el-dialog
+        v-model="showConfirmDialog"
+        title="Подтверждение удаления"
+        width="400px"
+    >
+      <div class="confirm-content">
+        <p>Вы действительно хотите удалить участника {{ selectedMember?.user.full_name }} из команды?</p>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <button class="cancel-btn" @click="showConfirmDialog = false">Отмена</button>
+          <button
+              class="confirm-btn"
+              @click="removeMember"
+              :disabled="removing"
+          >
+            {{ removing ? 'Удаление...' : 'Удалить' }}
+          </button>
         </div>
       </template>
-    </div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { teamsApi } from '@/api/teams';
+import {ref, onMounted} from 'vue'
+import {teamsApi} from '@/api/teams'
+import {useAuthStore} from '@/stores/auth'
+import {ElMessage} from 'element-plus'
 
-const members = ref([]);
-const loading = ref(false);
-const error = ref(null);
+const authStore = useAuthStore()
+const currentUserId = authStore.user?.id
+const members = ref([])
+const isTeamLeader = ref(false)
+const showConfirmDialog = ref(false)
+const selectedMember = ref(null)
+const removing = ref(false)
 
-const formatRole = (role) => {
+const getRoleName = (role) => {
   const roles = {
-    'TEAMLEAD': 'Тимлид',
+    'TEAMLEAD': 'Лидер команды',
     'MEMBER': 'Участник'
-  };
-  return roles[role] || role;
-};
+  }
+  return roles[role] || role
+}
 
-const formatStatus = (status) => {
-  const statuses = {
-    'PENDING': 'Ожидает подтверждения',
-    'ACCEPTED': 'Принят',
-    'REJECTED': 'Отклонен'
-  };
-  return statuses[status] || status;
-};
+const confirmRemoveMember = (member) => {
+  selectedMember.value = member
+  showConfirmDialog.value = true
+}
 
-// TODO: Добавить метод загрузки участников после реализации API
+const removeMember = async () => {
+  if (!selectedMember.value) return
+
+  removing.value = true
+  try {
+    await teamsApi.removeTeamMember(selectedMember.value.team_id, selectedMember.value.id)
+    members.value = members.value.filter(m => m.id !== selectedMember.value.id)
+    showConfirmDialog.value = false
+    ElMessage({
+      message: 'Участник успешно удален из команды',
+      type: 'success'
+    })
+  } catch (error) {
+    console.error('Error removing team member:', error)
+    ElMessage({
+      message: 'Ошибка при удалении участника',
+      type: 'error'
+    })
+  } finally {
+    removing.value = false
+  }
+}
+
+onMounted(async () => {
+  try {
+    const teamData = await teamsApi.getMyTeam()
+    if (teamData) {
+      const teamMembers = await teamsApi.getMyTeamMembers(teamData.id)
+      members.value = teamMembers.members
+      isTeamLeader.value = teamData.team_leader_id === currentUserId
+    }
+  } catch (error) {
+    console.error('Error loading team members:', error)
+  }
+})
 </script>
 
 <style scoped>
 .team-members {
-  padding: 1rem;
+  max-width: 800px;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
 }
 
 .members-list {
-  margin-top: 1.5rem;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
 }
 
@@ -63,9 +126,15 @@ const formatStatus = (status) => {
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: var(--color-background-soft);
+  background: white;
+  border: 1px solid #dcdfe6;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.member-card:hover {
+  border-color: #5B51D8;
+  box-shadow: 0 2px 8px rgba(91, 81, 216, 0.1);
 }
 
 .member-info {
@@ -75,42 +144,55 @@ const formatStatus = (status) => {
 }
 
 .member-name {
-  font-weight: 600;
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 500;
 }
 
 .member-role {
   font-size: 0.9rem;
-  color: var(--color-text-light);
+  color: #666;
 }
 
-.member-status {
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.875rem;
+.member-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
-.member-status.accepted {
-  background: #e6f4ea;
-  color: #1e7e34;
+.remove-btn {
+  padding: 6px 16px;
+  background: white;
+  color: #f56c6c;
+  border: 1px solid #f56c6c;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
 }
 
-.member-status.pending {
-  background: #fff3e0;
-  color: #f57c00;
+.remove-btn:hover {
+  background: #fef0f0;
 }
 
-.member-status.rejected {
-  background: #ffebee;
-  color: #d32f2f;
+.confirm-content {
+  padding: 1rem 0;
+  color: #333;
 }
 
-.loading, .error {
-  text-align: center;
-  padding: 2rem;
-  color: var(--color-text-light);
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1rem;
 }
 
-.error {
-  color: #d32f2f;
+.cancel-btn {
+  padding: 8px 20px;
+  background: white;
+  color: #606266;
+  border: 1px solid #dcdfe6;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 </style>

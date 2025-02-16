@@ -27,31 +27,65 @@
         </div>
       </div>
       <div class="team-details">
+        <div class="info-group">
+          <label>Название команды</label>
+          <div class="info-value">{{ teamData.team_name }}</div>
+        </div>
+        <div class="info-group">
+          <label>Девиз команды</label>
+          <div class="info-value">{{ teamData.team_motto }}</div>
+        </div>
+        <button class="edit-btn" @click="openEditModal">
+          Редактировать информацию
+        </button>
+      </div>
+    </div>
+
+    <div class="team-members-section">
+      <h2 class="section-title">Участники команды</h2>
+      <div class="members-list">
+        <div v-for="member in teamMembers" :key="member.id" class="member-card">
+          <div class="member-info">
+            <div class="member-name">{{ member.user.full_name }}</div>
+            <div class="member-role">{{ getRoleName(member.role) }}</div>
+          </div>
+          <div class="member-actions" v-if="isTeamLeader && member.user.id !== currentUserId">
+            <button class="remove-btn" @click="confirmRemoveMember(member)">
+              Удалить
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <el-dialog
+        v-model="showEditModal"
+        title="Редактирование информации"
+        width="400px"
+    >
+      <div class="edit-form">
         <div class="form-group">
           <label>Название команды</label>
-          <input type="text" v-model="teamData.team_name" class="form-input"/>
+          <input type="text" v-model="editFormData.team_name" class="form-input"/>
         </div>
         <div class="form-group">
           <label>Девиз команды</label>
-          <input type="text" v-model="teamData.team_motto" class="form-input"/>
+          <input type="text" v-model="editFormData.team_motto" class="form-input"/>
         </div>
       </div>
-    </div>
-    <div class="team-description">
-      <div class="form-group">
-        <label>Описание команды</label>
-        <textarea
-            v-model="teamData.description"
-            class="form-input"
-            rows="4"
-        ></textarea>
-      </div>
-    </div>
-    <div class="actions">
-      <button class="save-btn" @click="saveTeamInfo" :disabled="loading">
-        {{ loading ? 'Сохранение...' : 'Сохранить изменения' }}
-      </button>
-    </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <button class="cancel-btn" @click="showEditModal = false">Отмена</button>
+          <button
+              class="save-btn"
+              @click="saveTeamInfo"
+              :disabled="loading"
+          >
+            {{ loading ? 'Сохранение...' : 'Сохранить' }}
+          </button>
+        </div>
+      </template>
+    </el-dialog>
 
     <el-dialog
         v-model="showPhotoEditor"
@@ -68,48 +102,81 @@
           @cancel="showPhotoEditor = false"
       />
     </el-dialog>
+
+    <el-dialog
+        v-model="showConfirmDialog"
+        title="Подтверждение удаления"
+        width="400px"
+    >
+      <div class="confirm-content">
+        <p>Вы действительно хотите удалить участника {{ selectedMember?.user.full_name }} из команды?</p>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <button class="cancel-btn" @click="showConfirmDialog = false">Отмена</button>
+          <button
+              class="confirm-btn"
+              @click="removeMember"
+              :disabled="removing"
+          >
+            {{ removing ? 'Удаление...' : 'Удалить' }}
+          </button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import {ref, computed, onMounted} from 'vue'
-import {teamsApi} from '@/api/teams'
+import { ref, computed, onMounted } from 'vue'
+import { teamsApi } from '@/api/teams'
+import { useAuthStore } from '@/stores/auth'
+import { ElMessage } from 'element-plus'
 import TeamPhotoEditor from './TeamPhotoEditor.vue'
-import {ElMessage} from 'element-plus'
 
 const emit = defineEmits(['update:teamInfo'])
+const authStore = useAuthStore()
+const currentUserId = computed(() => authStore.user?.id)
+
 const fileInput = ref(null)
 const showPhotoEditor = ref(false)
 const selectedImage = ref(null)
 const logoFile = ref(null)
 const teamLogo = ref(null)
-const loading = ref(false)
 
-const teamData = ref({
-  team_motto: '',
-  description: ''
+const teamData = ref({})
+const teamMembers = ref([])
+const loading = ref(false)
+const removing = ref(false)
+const showEditModal = ref(false)
+const showConfirmDialog = ref(false)
+const selectedMember = ref(null)
+const editFormData = ref({
+  team_name: '',
+  team_motto: ''
 })
 
+const isTeamLeader = computed(() => teamData.value?.team_leader_id === currentUserId.value)
 const isMobile = computed(() => window.innerWidth <= 768)
 
 const validateFile = (file) => {
   const maxSize = 5 * 1024 * 1024;
   if (file.size > maxSize) {
-      ElMessage({
+    ElMessage({
       message: 'Размер файла не должен превышать 5MB',
       type: 'error'
-      });
+    });
     return false;
   }
 
   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
   if (!allowedTypes.includes(file.type)) {
-      ElMessage({
+    ElMessage({
       message: 'Поддерживаются только изображения в форматах JPEG, PNG и GIF',
-        type: 'error'
-      });
+      type: 'error'
+    });
     return false;
-    }
+  }
 
   return true;
 };
@@ -121,26 +188,26 @@ const handleFileSelect = (event) => {
     reader.onload = (e) => {
       selectedImage.value = e.target.result
       showPhotoEditor.value = true
-  }
+    }
     reader.readAsDataURL(file)
     event.target.value = ''
-}
+  }
 }
 
 const handleLogoChange = async (file) => {
   if (file && validateFile(file)) {
-  try {
+    try {
       loading.value = true;
 
       let fileToUpload = file;
       if (file instanceof Blob && !(file instanceof File)) {
         fileToUpload = new File([file], 'team-photo.png', { type: 'image/png' });
-  }
+      }
 
       const teamId = teamData.value.id;
       if (!teamId) {
         throw new Error('Team ID not found');
-}
+      }
 
       await teamsApi.updateTeamLogo(teamId, fileToUpload);
 
@@ -157,45 +224,136 @@ const handleLogoChange = async (file) => {
         message: 'Логотип команды успешно обновлен',
         type: 'success'
       });
-  } catch (error) {
+    } catch (error) {
       console.error('Error uploading logo:', error);
       ElMessage({
         message: 'Ошибка при обновлении логотипа команды',
         type: 'error'
       });
-  } finally {
+    } finally {
       loading.value = false;
-  }
+    }
   }
 };
 
-const saveTeamInfo = async () => {
-  loading.value = true
+const getRoleName = (role) => {
+  const upperRole = role.toUpperCase()
+  const roles = {
+    'TEAMLEAD': 'Лидер команды',
+    'MEMBER': 'Участник команды'
+  }
+  return roles[upperRole] || role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()
+}
+
+const loadTeamData = async () => {
   try {
-    //todo: Реализовать сохранение данных команды/заменить на поля и сделать модалку?
+    loading.value = true
+    const team = await teamsApi.getMyTeam()
+    if (team) {
+      teamData.value = team
+      if (team.logo_file_id) {
+        teamLogo.value = `${import.meta.env.VITE_API_URL}/teams/${team.id}/logo`
+      }
+      emit('update:teamInfo', team)
+
+      const membersData = await teamsApi.getTeamMembers(team.id)
+      teamMembers.value = membersData.members
+    }
   } catch (error) {
-    console.error('Error saving team info:', error)
+    console.error('Error loading team data:', error)
+    ElMessage({
+      message: 'Ошибка при загрузке данных команды',
+      type: 'error'
+    })
   } finally {
     loading.value = false
   }
 }
 
-onMounted(async () => {
-  try {
-    loading.value = true
-    const teamInfo = await teamsApi.getCurrentTeam()
-    if (teamInfo) {
-      teamData.value = teamInfo
-      if (teamInfo.logo_file_id) {
-        teamLogo.value = `${import.meta.env.VITE_API_URL}/teams/${teamInfo.id}/logo`
-      }
-      emit('update:teamInfo', teamInfo)
-    }
-  } catch (error) {
-    console.error('Error loading team info:', error)
-  } finally {
-    loading.value = false
+const openEditModal = () => {
+  console.log(currentUserId)
+  editFormData.value = {
+    team_name: teamData.value.team_name || '',
+    team_motto: teamData.value.team_motto || ''
   }
+  showEditModal.value = true
+}
+
+const saveTeamInfo = async () => {
+  try {
+    loading.value = true;
+
+    if (!editFormData.value.team_name || !editFormData.value.team_motto) {
+      ElMessage({
+        message: 'Название и девиз команды обязательны для заполнения',
+        type: 'warning'
+      });
+      return;
+    }
+
+    const updateData = {
+      team_name: String(editFormData.value.team_name).trim(),
+      team_motto: String(editFormData.value.team_motto).trim()
+    };
+
+    await teamsApi.updateTeamInfo(teamData.value.id, updateData);
+
+    teamData.value = {
+      ...teamData.value,
+      ...updateData
+    };
+
+    emit('update:teamInfo', {
+      ...teamData.value,
+      updated_at: Date.now()
+    });
+
+    showEditModal.value = false;
+    ElMessage({
+      message: 'Информация о команде успешно обновлена',
+      type: 'success'
+    });
+  } catch (error) {
+    console.error('Error updating team info:', error);
+    ElMessage({
+      message: 'Ошибка при обновлении информации о команде',
+      type: 'error'
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const confirmRemoveMember = (member) => {
+  selectedMember.value = member
+  showConfirmDialog.value = true
+}
+
+const removeMember = async () => {
+  if (!selectedMember.value) return
+
+  removing.value = true
+  try {
+    await teamsApi.removeTeamMember(teamData.value.id, selectedMember.value.id)
+    teamMembers.value = teamMembers.value.filter(m => m.id !== selectedMember.value.id)
+    showConfirmDialog.value = false
+    ElMessage({
+      message: 'Участник успешно удален из команды',
+      type: 'success'
+    })
+  } catch (error) {
+    console.error('Error removing team member:', error)
+    ElMessage({
+      message: 'Ошибка при удалении участника',
+      type: 'error'
+    })
+  } finally {
+    removing.value = false
+  }
+}
+
+onMounted(() => {
+  loadTeamData()
 })
 </script>
 
@@ -277,40 +435,170 @@ onMounted(async () => {
   flex: 1;
 }
 
-.form-group {
+.info-group {
   margin-bottom: 1.5rem;
+}
+
+.info-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.info-value {
+  font-size: 1.1rem;
+  color: #333;
+  padding: 0.5rem 0;
+}
+
+.edit-btn {
+  margin-top: 1rem;
+  padding: 8px 20px;
+  background: white;
+  color: #5B51D8;
+  border: 2px solid #5B51D8;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.edit-btn:hover {
+  background: rgba(91, 81, 216, 0.1);
+}
+
+.edit-btn:active {
+  transform: translateY(1px);
+}
+
+.team-members-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #dcdfe6;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.member-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.member-card:hover {
+  border-color: #5B51D8;
+  box-shadow: 0 2px 8px rgba(91, 81, 216, 0.1);
+}
+
+.member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.member-name {
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.member-role {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.member-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.remove-btn {
+  padding: 6px 16px;
+  background: white;
+  color: #f56c6c;
+  border: 1px solid #f56c6c;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.remove-btn:hover {
+  background: #fef0f0;
+}
+
+.edit-form {
+  padding: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: var(--color-text);
+  color: #333;
   font-weight: 500;
 }
 
 .form-input {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid #dcdfe6;
   border-radius: 6px;
-  background: var(--color-background);
-  color: var(--color-text);
+  color: #333;
 }
 
-textarea.form-input {
-  resize: vertical;
-  min-height: 100px;
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.cancel-btn,
+.save-btn {
+  padding: 8px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn {
+  background: white;
+  color: #606266;
+  border: 1px solid #dcdfe6;
+}
+
+.cancel-btn:hover {
+  color: #409eff;
+  border-color: #c6e2ff;
+  background-color: #ecf5ff;
 }
 
 .save-btn {
-  padding: 0.75rem 1.5rem;
   background: linear-gradient(90deg, #00A3FF 0%, #5B51D8 100%);
   color: white;
   border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s ease;
 }
 
 .save-btn:hover {
@@ -322,10 +610,27 @@ textarea.form-input {
   cursor: not-allowed;
 }
 
-.actions {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: flex-end;
+.confirm-btn {
+  padding: 8px 20px;
+  background: #f56c6c;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.confirm-btn:hover {
+  opacity: 0.9;
+}
+
+.confirm-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.editor-dialog :deep(.el-dialog__body) {
+  padding: 0;
 }
 
 @media (max-width: 768px) {
@@ -337,9 +642,5 @@ textarea.form-input {
   .team-details {
     width: 100%;
   }
-}
-
-.editor-dialog :deep(.el-dialog__body) {
-  padding: 0;
 }
 </style>

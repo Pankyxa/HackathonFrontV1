@@ -7,19 +7,27 @@ import { useLoadingStore } from './loading'
 export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false)
   const isHaveTeam = ref(false)
+  const user = ref(null) // Добавляем user
   const loadingStore = useLoadingStore()
+
+  const setUser = (userData) => {
+    user.value = userData
+  }
 
   const checkAuth = async () => {
     try {
       const token = localStorage.getItem('token')
       if (token) {
-        await authApi.getCurrentUser()
+        const userData = await authApi.getCurrentUser()
+        user.value = userData
         isAuthenticated.value = true
       } else {
         isAuthenticated.value = false
+        user.value = null
       }
     } catch (error) {
       isAuthenticated.value = false
+      user.value = null
       localStorage.removeItem('token')
     }
   }
@@ -33,6 +41,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
     } catch (error) {
       isAuthenticated.value = false
+      user.value = null
       localStorage.removeItem('token')
     }
   }
@@ -55,15 +64,18 @@ export const useAuthStore = defineStore('auth', () => {
     authApi.logout()
     isAuthenticated.value = false
     isHaveTeam.value = false
+    user.value = null
     localStorage.removeItem('token')
   }
 
   return {
     isAuthenticated,
     isHaveTeam,
+    user,
     checkAuth,
     checkTeam,
     initializeAuth,
-    logout
+    logout,
+    setUser
   }
 })

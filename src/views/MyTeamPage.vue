@@ -81,18 +81,22 @@ const currentComponent = computed(() => {
 const handleTeamInfoUpdate = (info) => {
   teamName.value = info.team_name
   teamId.value = info.id
+
   if (info.logo_file_id) {
     teamLogo.value = `${import.meta.env.VITE_API_URL}/teams/${info.id}/logo`
-    // Обновляем timestamp при обновлении логотипа
     if (info.logo_updated_at) {
       teamLogoTimestamp.value = info.logo_updated_at
     }
+  }
+
+  if (info.updated_at) {
+    teamLogoTimestamp.value = info.updated_at
   }
 }
 
 onMounted(async () => {
   try {
-    const teamInfo = await teamsApi.getCurrentTeam()
+    const teamInfo = await teamsApi.getMyTeam()
     if (teamInfo) {
       handleTeamInfoUpdate(teamInfo)
     }

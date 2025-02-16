@@ -48,18 +48,17 @@ export const teamsApi = {
         }
     },
 
-    async getTeamInfo() {
+    async updateTeamInfo(teamId, teamData) {
         try {
-            const response = await api.get('/teams/my');
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    },
+            const formData = new FormData();
+            formData.append('team_name', teamData.team_name);
+            formData.append('team_motto', teamData.team_motto);
 
-    async updateTeamInfo(teamData) {
-        try {
-            const response = await api.put('/teams/my', teamData);
+            const response = await api.put(`/teams/${teamId}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -82,19 +81,38 @@ export const teamsApi = {
         }
     },
 
-    async getTeamMembers() {
+    async getTeamMembers(teamId) {
         try {
-            const response = await api.get('/teams/my/members');
+            const response = await api.get(`/teams/${teamId}/members`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
         }
     },
 
-    async getCurrentTeam() {
+    async getCurrentTeam(teamId) {
         try {
-            const response = await api.get('/teams');
+            const response = await api.get(`/teams/${teamId}/`);
             return response.data[0];
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async getMyTeam() {
+        try {
+            const response = await api.get(`/teams/my/team`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async removeTeamMember(teamId, memberId) {
+        try {
+            console.log(memberId);
+            const response = await api.delete(`/teams/${teamId}/members/${memberId}`);
+            return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
         }
