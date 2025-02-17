@@ -57,9 +57,8 @@ const teamId = ref(null)
 const teamLogoTimestamp = ref(Date.now())
 
 const menuItems = [
-  {id: 'members', title: 'Участники'},
   {id: 'task', title: 'Задача'},
-  {id: 'examples', title: 'Примеры сайтов'}
+  {id: 'atach solution', title: 'Прикрепить решение'}
 ]
 
 const teamLogoUrl = computed(() => {
@@ -71,8 +70,8 @@ const currentComponent = computed(() => {
   switch (activeTab.value) {
     case 'info':
       return TeamInfo
-    case 'members':
-      return TeamMembers
+    case 'task':
+      return null
     default:
       return null
   }

@@ -71,6 +71,33 @@
       </div>
     </div>
 
+    <div v-if="isTeamLeader || isTeamMember" class="danger-zone">
+      <h3 class="danger-zone-title">Опасная зона</h3>
+      <div class="danger-zone-content">
+        <!-- Для лидера команды -->
+        <template v-if="isTeamLeader">
+          <p class="danger-zone-description">
+            Удаление команды приведет к безвозвратному удалению всех данных команды.
+            Это действие нельзя отменить.
+          </p>
+          <button class="delete-team-btn" @click="showDeleteConfirm = true">
+            Удалить команду
+          </button>
+        </template>
+
+        <!-- Для участника команды -->
+        <template v-else>
+          <p class="danger-zone-description">
+            Выход из команды приведет к потере доступа к материалам команды.
+            Для повторного вступления потребуется новое приглашение от лидера команды.
+          </p>
+          <button class="leave-team-btn" @click="showLeaveConfirm = true">
+            Покинуть команду
+          </button>
+        </template>
+      </div>
+    </div>
+
     <el-dialog
         v-model="showEditModal"
         title="Редактирование информации"
@@ -143,16 +170,86 @@
         :existing-members="teamMembers.map(member => member.user)"
         @select="handleMemberSelect"
     />
+
+    <el-dialog
+        v-model="showDeleteConfirm"
+        title="Подтверждение удаления команды"
+        width="400px"
+        class="delete-dialog"
+    >
+      <div class="delete-confirmation">
+        <p class="delete-warning">
+          Вы уверены, что хотите удалить команду "{{ teamData.team_name }}"?
+        </p>
+        <p class="delete-description">
+          Это действие нельзя будет отменить. Все данные команды будут удалены безвозвратно.
+        </p>
+        <div class="confirmation-input">
+          <label>Для подтверждения введите название команды:</label>
+          <input
+              type="text"
+              v-model="deleteConfirmationText"
+              :placeholder="teamData.team_name"
+              class="confirm-input"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <button class="cancel-btn" @click="showDeleteConfirm = false">
+            Отмена
+          </button>
+          <button
+              class="delete-confirm-btn"
+              @click="deleteTeam"
+              :disabled="deleteConfirmationText !== teamData.team_name || deleting"
+          >
+            {{ deleting ? 'Удаление...' : 'Удалить команду' }}
+          </button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <el-dialog
+        v-model="showLeaveConfirm"
+        title="Подтверждение выхода из команды"
+        width="400px"
+        class="leave-dialog"
+    >
+      <div class="leave-confirmation">
+        <p class="leave-warning">
+          Вы уверены, что хотите покинуть команду "{{ teamData.team_name }}"?
+        </p>
+        <p class="leave-description">
+          Для повторного вступления вам потребуется новое приглашение от лидера команды.
+        </p>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <button class="cancel-btn" @click="showLeaveConfirm = false">
+            Отмена
+          </button>
+          <button
+              class="leave-confirm-btn"
+              @click="leaveTeam"
+              :disabled="leaving"
+          >
+            {{ leaving ? 'Выход...' : 'Покинуть команду' }}
+          </button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import {ref, computed, onMounted} from 'vue'
+import {ref, computed, onMounted, watch} from 'vue'
 import {teamsApi} from '@/api/teams'
 import {useAuthStore} from '@/stores/auth'
 import {ElMessage} from 'element-plus'
 import TeamPhotoEditor from './TeamPhotoEditor.vue'
 import UserSearchModal from './UserSearchModal.vue'
+import {useRouter} from "vue-router";
 
 const emit = defineEmits(['update:teamInfo'])
 const authStore = useAuthStore()
@@ -175,7 +272,19 @@ const editFormData = ref({
   team_name: '',
   team_motto: ''
 })
+const showDeleteConfirm = ref(false)
+const deleteConfirmationText = ref('')
+const deleting = ref(false)
+const router = useRouter()
 
+const showLeaveConfirm = ref(false)
+const leaving = ref(false)
+
+const isTeamMember = computed(() => {
+  return teamMembers.value.some(
+      member => member.user.id === currentUserId.value && member.role.toUpperCase() === 'MEMBER'
+  )
+})
 const isTeamLeader = computed(() => teamData.value?.team_leader_id === currentUserId.value)
 const isMobile = computed(() => window.innerWidth <= 768)
 
@@ -373,6 +482,77 @@ const removeMember = async () => {
     removing.value = false
   }
 }
+
+const deleteTeam = async () => {
+  if (deleteConfirmationText.value !== teamData.value.team_name) return;
+
+  try {
+    deleting.value = true;
+    await teamsApi.deleteTeam(teamData.value.id);
+
+    ElMessage({
+      message: 'Команда успешно удалена',
+      type: 'success'
+    });
+
+    // Обновляем состояние авторизации, так как пользователь больше не в команде
+    const authStore = useAuthStore();
+    await authStore.updateUserInfo();
+
+    // Перенаправляем на главную страницу
+    router.push('/');
+  } catch (error) {
+    console.error('Error deleting team:', error);
+    ElMessage({
+      message: 'Ошибка при удалении команды',
+      type: 'error'
+    });
+  } finally {
+    deleting.value = false;
+    showDeleteConfirm.value = false;
+  }
+};
+
+// Сбрасываем текст подтверждения при закрытии диалога
+watch(showDeleteConfirm, (newValue) => {
+  if (!newValue) {
+    deleteConfirmationText.value = '';
+  }
+});
+
+const leaveTeam = async () => {
+  try {
+    leaving.value = true;
+    await teamsApi.leaveTeam();
+
+    ElMessage({
+      message: 'Вы успешно покинули команду',
+      type: 'success'
+    });
+
+    // Обновляем информацию о пользователе
+    await authStore.updateUserInfo();
+
+    // Перенаправляем на главную страницу
+    router.push('/');
+  } catch (error) {
+    console.error('Error leaving team:', error);
+    ElMessage({
+      message: error.message || 'Ошибка при выходе из команды',
+      type: 'error'
+    });
+  } finally {
+    leaving.value = false;
+    showLeaveConfirm.value = false;
+  }
+};
+
+// Добавляем watch для сброса состояния при закрытии диалога
+watch(showLeaveConfirm, (newValue) => {
+  if (!newValue) {
+    leaving.value = false;
+  }
+});
 
 onMounted(() => {
   loadTeamData()
@@ -725,6 +905,155 @@ const showUserSearch = () => {
   padding: 0;
 }
 
+.danger-zone {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #dcdfe6;
+}
+
+.danger-zone-title {
+  color: #f56c6c;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.danger-zone-content {
+  background: #fef0f0;
+  border: 1px solid #fbc4c4;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.danger-zone-description {
+  color: #f56c6c;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.delete-team-btn {
+  background: #f56c6c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.delete-team-btn:hover {
+  background: #f78989;
+}
+
+.delete-confirmation {
+  padding: 1rem;
+}
+
+.delete-warning {
+  font-weight: 500;
+  color: #f56c6c;
+  margin-bottom: 1rem;
+}
+
+.delete-description {
+  color: #606266;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.confirmation-input {
+  margin-top: 1.5rem;
+}
+
+.confirmation-input label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #606266;
+  font-size: 0.9rem;
+}
+
+.confirm-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  color: #f56c6c;
+}
+
+.confirm-input:focus {
+  border-color: #f56c6c;
+  outline: none;
+}
+
+.delete-confirm-btn {
+  background: #f56c6c;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.delete-confirm-btn:hover {
+  background: #f78989;
+}
+
+.delete-confirm-btn:disabled {
+  background: #fbc4c4;
+  cursor: not-allowed;
+}
+
+.leave-team-btn {
+  background: #909399;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.leave-team-btn:hover {
+  background: #a6a9ad;
+}
+
+.leave-warning {
+  font-weight: 500;
+  color: #909399;
+  margin-bottom: 1rem;
+}
+
+.leave-description {
+  color: #606266;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.leave-confirm-btn {
+  background: #909399;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.leave-confirm-btn:hover {
+  background: #a6a9ad;
+}
+
+.leave-confirm-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .team-header {
     flex-direction: column;
@@ -733,6 +1062,19 @@ const showUserSearch = () => {
 
   .team-details {
     width: 100%;
+  }
+
+  .danger-zone {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+  }
+
+  .danger-zone-content {
+    padding: 1rem;
+  }
+
+  .delete-confirmation {
+    padding: 0.5rem;
   }
 }
 </style>

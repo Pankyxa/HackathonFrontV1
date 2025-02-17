@@ -60,6 +60,17 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const updateUserInfo = async () => {
+    try {
+      const userData = await authApi.getCurrentUser()
+      user.value = userData
+      return userData
+    } catch (error) {
+      console.error('Error updating user info:', error)
+      throw error
+    }
+  }
+
   const logout = () => {
     authApi.logout()
     isAuthenticated.value = false
@@ -76,6 +87,7 @@ export const useAuthStore = defineStore('auth', () => {
     checkTeam,
     initializeAuth,
     logout,
-    setUser
+    setUser,
+    updateUserInfo
   }
 })

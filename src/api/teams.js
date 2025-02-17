@@ -125,5 +125,24 @@ export const teamsApi = {
         } catch (error) {
             throw error.response?.data || error.message;
         }
+    },
+
+    async deleteTeam(teamId) {
+        try {
+            const response = await api.delete(`/teams/${teamId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async leaveTeam() {
+        try {
+            const response = await api.post(`/teams/leave`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
     }
+
 };
