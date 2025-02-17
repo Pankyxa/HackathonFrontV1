@@ -401,7 +401,6 @@ const loadTeamData = async () => {
 }
 
 const openEditModal = () => {
-  console.log(currentUserId)
   editFormData.value = {
     team_name: teamData.value.team_name || '',
     team_motto: teamData.value.team_motto || ''

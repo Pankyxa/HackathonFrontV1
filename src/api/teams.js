@@ -110,7 +110,6 @@ export const teamsApi = {
 
     async removeTeamMember(teamId, memberId) {
         try {
-            console.log(memberId);
             const response = await api.delete(`/teams/${teamId}/members/${memberId}`);
             return response.data;
         } catch (error) {
