@@ -85,7 +85,6 @@
           </button>
         </template>
 
-        <!-- Для участника команды -->
         <template v-else>
           <p class="danger-zone-description">
             Выход из команды приведет к потере доступа к материалам команды.
@@ -495,11 +494,9 @@ const deleteTeam = async () => {
       type: 'success'
     });
 
-    // Обновляем состояние авторизации, так как пользователь больше не в команде
     const authStore = useAuthStore();
     await authStore.updateUserInfo();
 
-    // Перенаправляем на главную страницу
     router.push('/');
   } catch (error) {
     console.error('Error deleting team:', error);
@@ -513,7 +510,6 @@ const deleteTeam = async () => {
   }
 };
 
-// Сбрасываем текст подтверждения при закрытии диалога
 watch(showDeleteConfirm, (newValue) => {
   if (!newValue) {
     deleteConfirmationText.value = '';
@@ -530,10 +526,8 @@ const leaveTeam = async () => {
       type: 'success'
     });
 
-    // Обновляем информацию о пользователе
     await authStore.updateUserInfo();
 
-    // Перенаправляем на главную страницу
     router.push('/');
   } catch (error) {
     console.error('Error leaving team:', error);
@@ -547,7 +541,6 @@ const leaveTeam = async () => {
   }
 };
 
-// Добавляем watch для сброса состояния при закрытии диалога
 watch(showLeaveConfirm, (newValue) => {
   if (!newValue) {
     leaving.value = false;
@@ -566,7 +559,6 @@ const handleMemberSelect = async (user) => {
       role: 'member'
     });
 
-    // Обновляем список участников
     const membersData = await teamsApi.getTeamMembers(teamData.value.id);
     teamMembers.value = membersData.members;
 

@@ -47,7 +47,6 @@ import { ref, computed, onMounted } from 'vue'
 import TheHeader from "@/components/TheHeader.vue"
 import TheFooter from "@/components/TheFooter.vue"
 import TeamInfo from '@/components/team/TeamInfo.vue'
-import TeamMembers from '@/components/team/TeamMembers.vue'
 import { teamsApi } from '@/api/teams'
 
 const activeTab = ref('info')
@@ -107,28 +106,31 @@ onMounted(async () => {
 
 <style scoped>
 .my-team-container {
-  min-height: calc(100vh - 316px);
+  height: calc(100vh - 316px);
   margin: 105px 20px 20px;
   display: flex;
-    flex-direction: column;
-  }
+  flex-direction: column;
+}
 
 .team-page {
   background: var(--color-background);
   border-radius: 16px;
-    display: flex;
-    flex: 1;
+  display: flex;
+  flex: 1;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  }
+  height: 100%;
+}
 
 .team-sidebar {
   width: 250px;
   background: linear-gradient(90deg, #00A3FF 0%, #5B51D8 100%);
-  min-height: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  }
+  position: sticky;
+  top: 0;
+}
 
 .sidebar-menu {
   padding: 1rem;
@@ -137,6 +139,7 @@ onMounted(async () => {
   flex-direction: column;
   gap: 0.5rem;
 }
+
 
 .menu-item {
   padding: 0.75rem 1rem;
@@ -161,10 +164,11 @@ onMounted(async () => {
 .content-area {
   flex: 1;
   padding: 2rem;
-  overflow-y: auto;
   background: white;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  height: 100%;
 }
 
 .content-wrapper {
@@ -205,15 +209,23 @@ onMounted(async () => {
   }
 
 @media (max-width: 768px) {
+  .my-team-container {
+    height: auto;
+    min-height: calc(100vh - 316px);
+  }
+
   .team-page {
     flex-direction: column;
     min-height: 500px;
+    height: auto;
   }
 
   .team-sidebar {
     width: 100%;
     min-height: auto;
-}
+    position: relative;
+    height: auto;
+  }
 
   .sidebar-menu {
     flex-direction: row;
@@ -230,6 +242,7 @@ onMounted(async () => {
 
   .content-area {
     padding: 1rem;
+    height: auto;
   }
 }
 </style>
