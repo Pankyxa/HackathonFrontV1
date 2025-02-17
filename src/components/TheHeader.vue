@@ -1,7 +1,7 @@
 <template>
   <el-header class="header" :class="{ 'header-hidden': isHeaderHidden, 'menu-open': isMenuOpen }">
     <div class="header-content">
-      <div class="logo">
+      <div class="logo desktop-menu">
         <router-link to="/">
           <img src="../assets/img/logo_top.png" alt="logo" height="40">
         </router-link>
@@ -25,11 +25,16 @@
       </div>
 
       <div class="mobile-menu" ref="mobileMenuRef">
-        <el-button class="hamburger-btn" @click="toggleMobileMenu">
-          <el-icon>
-            <Menu/>
-          </el-icon>
-        </el-button>
+        <div class="mobile-header">
+          <router-link to="/" class="mobile-logo">
+            <img src="../assets/img/logo_top.png" alt="logo" height="40">
+          </router-link>
+          <el-button class="hamburger-btn" @click="toggleMobileMenu">
+            <el-icon>
+              <Menu/>
+            </el-icon>
+          </el-button>
+        </div>
 
         <Transition name="slide-fade">
           <div class="mobile-menu-dropdown" v-show="isMenuOpen">
@@ -151,7 +156,7 @@ onBeforeUnmount(() => {
   height: auto !important;
 }
 
-  .header-content {
+.header-content {
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
@@ -159,17 +164,17 @@ onBeforeUnmount(() => {
   align-items: center;
   height: 100%;
   padding: 0 20px;
-  }
+}
 
 .logo img {
   height: 40px;
   object-fit: contain;
-  }
+}
 
 .desktop-menu {
   display: flex;
   align-items: center;
-  }
+}
 
 .nav-menu {
   border: none;
@@ -263,25 +268,50 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 768px) {
+  .header {
+    transition: height 0.3s ease;
+    height: 80px !important;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .header.menu-open {
+    height: auto !important;
+  }
+
+  .header-content {
+    padding: 0 20px;
+    flex-direction: column;
+    height: auto;
+  }
+
   .desktop-menu {
     display: none;
   }
 
   .mobile-menu {
     display: block;
-  }
-
-  .mobile-menu-dropdown {
-    position: static;
-    width: 100%;
-    margin-top: 10px;
-    padding-bottom: 10px;
-  }
-
-  .mobile-nav-menu {
     width: 100%;
   }
+
+  .mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 80px;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+    background: linear-gradient(90deg, #00A3FF 0%, #5B51D8 100%);
+  }
+
+  .mobile-logo {
+    display: flex;
+    align-items: center;
+  }
+
   .hamburger-btn {
+    display: flex;
     background: transparent;
     border: 2px solid white;
     color: white;
@@ -294,34 +324,52 @@ onBeforeUnmount(() => {
     background-color: rgba(255, 255, 255, 0.1);
   }
 
-  .header-content {
-    padding: 0 15px;
-  }
-
-  :deep(.mobile-nav-menu .el-menu-item) {
-    margin: 8px 15px;
-    width: calc(100% - 30px);
+  .mobile-menu-dropdown {
+    position: initial;
+    width: 100%;
+    background: transparent;
+    box-shadow: none;
+    padding: 20px 0;
+    z-index: 1;
+    transform-origin: top;
   }
 
   .slide-fade-enter-active,
   .slide-fade-leave-active {
     transition: all 0.3s ease;
-    overflow: hidden;
+    max-height: 400px;
   }
 
   .slide-fade-enter-from,
   .slide-fade-leave-to {
-    transform: translateY(-20px);
+    max-height: 0;
     opacity: 0;
-}
-
-  .header {
-    transition: all 0.3s ease;
+    margin-top: -20px;
   }
 
-  .header.menu-open {
-    height: auto !important;
-    padding-bottom: 10px;
+  .mobile-nav-menu {
+    width: 100%;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: transparent !important;
+  }
+
+  :deep(.mobile-nav-menu .el-menu-item) {
+    margin: 0;
+    width: 100%;
+    height: 44px;
+    line-height: 40px;
+    font-size: 16px;
+    text-align: center;
+    border: 2px solid white !important;
+    border-radius: 8px;
+  }
+
+  .mobile-header {
+    position: sticky;
+    top: 0;
   }
 }
 </style>
