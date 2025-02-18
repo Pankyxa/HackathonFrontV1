@@ -27,9 +27,15 @@
         </div>
       </div>
       <div class="team-details">
-        <div class="info-group">
-          <label>Название команды</label>
-          <div class="info-value">{{ teamData.team_name }}</div>
+        <div class="team-header-info">
+          <div class="info-group">
+            <label>Название команды</label>
+            <div class="info-value">{{ teamData.team_name }}</div>
+          </div>
+          <div class="team-status" :class="statusClass">
+            <span class="status-icon"></span>
+            <span class="status-text">{{ statusText }}</span>
+          </div>
         </div>
         <div class="info-group">
           <label>Девиз команды</label>
@@ -41,35 +47,13 @@
       </div>
     </div>
 
-    <div class="team-members-section">
-      <div class="section-header">
-        <h2 class="section-title">Участники команды</h2>
-        <div class="header-right">
-          <span class="member-count">{{ teamMembers.length }}/4 участников</span>
-          <button
-              v-if="isTeamLeader"
-              class="add-member-btn"
-              @click="showUserSearch"
-              :disabled="teamMembers.length >= 5"
-          >
-            Добавить участника
-          </button>
-        </div>
-      </div>
-      <div class="members-list">
-        <div v-for="member in teamMembers" :key="member.id" class="member-card">
-          <div class="member-info">
-            <div class="member-name">{{ member.user.full_name }}</div>
-            <div class="member-role">{{ getRoleName(member.role) }}</div>
-          </div>
-          <div class="member-actions" v-if="isTeamLeader && member.user.id !== currentUserId">
-            <button class="remove-btn" @click="confirmRemoveMember(member)">
-              Удалить
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <TeamMembers
+        :members="teamMembers"
+        :is-team-leader="isTeamLeader"
+        :current-user-id="currentUserId"
+        @add-member="showUserSearch"
+        @remove-member="confirmRemoveMember"
+    />
 
     <div v-if="isTeamLeader || isTeamMember" class="danger-zone">
       <h3 class="danger-zone-title">Опасная зона</h3>
@@ -246,6 +230,7 @@ import {ref, computed, onMounted, watch} from 'vue'
 import {teamsApi} from '@/api/teams'
 import {useAuthStore} from '@/stores/auth'
 import {ElMessage} from 'element-plus'
+import TeamMembers from "@/components/team/TeamMembers.vue";
 import TeamPhotoEditor from './TeamPhotoEditor.vue'
 import UserSearchModal from './UserSearchModal.vue'
 import {useRouter} from "vue-router";
@@ -288,6 +273,29 @@ const isTeamLeader = computed(() => teamData.value?.team_leader_id === currentUs
 const isMobile = computed(() => window.innerWidth <= 768)
 
 const showAddMemberModal = ref(false)
+
+const statusText = computed(() => {
+  const status = teamData.value?.status_details?.status
+  switch (status) {
+    case 'incomplete':
+      return 'Неполный состав команды'
+    case 'pending':
+      return 'Некоторые участники ожидают подтверждения документов'
+    case 'needs_update':
+      return 'Некоторым участникам необходимо обновить личные данные'
+    case 'active':
+      return 'Все участники подтверждены'
+    default:
+      return 'Статус неизвестен'
+  }
+})
+
+const statusClass = computed(() => ({
+  'status-incomplete': teamData.value?.status_details?.status === 'incomplete',
+  'status-pending': teamData.value?.status_details?.status === 'pending',
+  'status-needs-update': teamData.value?.status_details?.status === 'needs_update',
+  'status-active': teamData.value?.status_details?.status === 'active'
+}))
 
 const validateFile = (file) => {
   const maxSize = 5 * 1024 * 1024;
@@ -365,15 +373,6 @@ const handleLogoChange = async (file) => {
     }
   }
 };
-
-const getRoleName = (role) => {
-  const upperRole = role.toUpperCase()
-  const roles = {
-    'TEAMLEAD': 'Лидер команды',
-    'MEMBER': 'Участник команды'
-  }
-  return roles[upperRole] || role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()
-}
 
 const loadTeamData = async () => {
   try {
@@ -706,108 +705,6 @@ const showUserSearch = () => {
   transform: translateY(1px);
 }
 
-.team-members-section {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #dcdfe6;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.add-member-btn {
-  padding: 8px 20px;
-  background: white;
-  color: #5B51D8;
-  border: 2px solid #5B51D8;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
-}
-
-.add-member-btn:hover {
-  background: rgba(91, 81, 216, 0.1);
-}
-
-.add-member-btn:active {
-  transform: translateY(1px);
-}
-
-.add-member-form {
-  padding: 1rem;
-}
-
-.section-title {
-  font-size: 1.5rem;
-  color: #333;
-  margin-bottom: 1.5rem;
-  font-weight: 500;
-}
-
-.members-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.member-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background: white;
-  border: 1px solid #dcdfe6;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.member-card:hover {
-  border-color: #5B51D8;
-  box-shadow: 0 2px 8px rgba(91, 81, 216, 0.1);
-}
-
-.member-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.member-name {
-  font-size: 1.1rem;
-  color: #333;
-  font-weight: 500;
-}
-
-.member-role {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.member-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.remove-btn {
-  padding: 6px 16px;
-  background: white;
-  color: #f56c6c;
-  border: 1px solid #f56c6c;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-}
-
-.remove-btn:hover {
-  background: #fef0f0;
-}
-
 .edit-form {
   padding: 1rem;
 }
@@ -1045,6 +942,71 @@ const showUserSearch = () => {
   cursor: not-allowed;
 }
 
+.team-header-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.team-header-info .info-group {
+  margin-bottom: 0;
+}
+
+.team-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  height: fit-content;
+  margin-top: 24px;
+}
+
+.status-icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-incomplete {
+  background: rgba(255, 152, 0, 0.1);
+  color: #FF9800;
+}
+
+.status-incomplete .status-icon {
+  background: #FF9800;
+}
+
+.status-pending {
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196F3;
+}
+
+.status-pending .status-icon {
+  background: #2196F3;
+}
+
+.status-needs-update {
+  background: rgba(244, 67, 54, 0.1);
+  color: #F44336;
+}
+
+.status-needs-update .status-icon {
+  background: #F44336;
+}
+
+.status-active {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+}
+
+.status-active .status-icon {
+  background: #4CAF50;
+}
+
 @media (max-width: 768px) {
   .team-header {
     flex-direction: column;
@@ -1053,6 +1015,17 @@ const showUserSearch = () => {
 
   .team-details {
     width: 100%;
+    text-align: center;
+  }
+
+  .info-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .info-value {
+    text-align: center;
   }
 
   .danger-zone {
@@ -1066,6 +1039,16 @@ const showUserSearch = () => {
 
   .delete-confirmation {
     padding: 0.5rem;
+  }
+
+  .team-header-info {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .team-status {
+    margin-top: 0;
   }
 }
 </style>
