@@ -9,14 +9,18 @@
   </template>
   <template v-else>
     <template v-if="!isHaveTeam">
-      <el-menu-item index="1" @click="handleItemClick('application')">
-        Подать заявку
-      </el-menu-item>
+      <template v-if="isMember">
+        <el-menu-item index="1" @click="handleItemClick('application')">
+          Подать заявку
+        </el-menu-item>
+      </template>
     </template>
     <template v-else>
-      <el-menu-item index="1" @click="handleItemClick('my-team')">
-        Моя команда
-      </el-menu-item>
+      <template v-if="isMember">
+        <el-menu-item index="1" @click="handleItemClick('my-team')">
+          Моя команда
+        </el-menu-item>
+      </template>
     </template>
     <el-menu-item index="3" @click="handleItemClick('profile')">
       Личный кабинет
@@ -29,6 +33,9 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
+import { computed } from "vue";
+
+import { useAuthStore } from '@/stores/auth.js';
 
 const router = useRouter();
 
@@ -43,11 +50,16 @@ const props = defineProps({
   }
 });
 
+const user = computed(() => useAuthStore().user);
+const isMember = computed(() =>
+    user.value?.roles?.some(role => role.name === 'participant')
+);
+
 const emit = defineEmits(['applicationClick', 'logout', 'menuItemClick']);
 
 const handleItemClick = (action) => {
   emit('menuItemClick');
-  
+
   switch (action) {
     case 'application':
       emit('applicationClick');
