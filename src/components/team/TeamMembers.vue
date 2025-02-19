@@ -57,7 +57,16 @@ const props = defineProps({
 const emit = defineEmits(['add-member', 'remove-member'])
 
 const filteredMembers = computed(() => {
-  return props.members.filter(member => member.role.toUpperCase() === 'MEMBER' || member.role.toUpperCase() === 'TEAMLEAD')
+  const members = props.members.filter(member =>
+      member.role.toUpperCase() === 'MEMBER' ||
+      member.role.toUpperCase() === 'TEAMLEAD'
+  );
+
+  return members.sort((a, b) => {
+    if (a.role.toUpperCase() === 'TEAMLEAD') return -1;
+    if (b.role.toUpperCase() === 'TEAMLEAD') return 1;
+    return 0;
+  });
 })
 
 const getRoleName = (role) => {
