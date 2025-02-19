@@ -14,9 +14,13 @@ api.interceptors.request.use((config) => {
 });
 
 export const usersApi = {
-    async searchUsers(query) {
+    async searchUsers(query, role = 'member') {
         try {
-            const response = await api.get(`/users/search?query=${query}`);
+            const endpoint = role === 'mentor'
+                ? '/users/search/mentors'
+                : '/users/search';
+
+            const response = await api.get(endpoint+`?query=${query}`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

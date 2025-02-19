@@ -1,7 +1,7 @@
 <template>
   <el-dialog
       v-model="visible"
-      title="Поиск участника"
+      :title="role === 'mentor' ? 'Поиск наставника' : 'Поиск участника'"
       width="500px"
       :close-on-click-modal="false"
       class="user-search-dialog"
@@ -10,7 +10,7 @@
     <div class="search-container">
       <el-input
           v-model="searchQuery"
-          placeholder="Введите ФИО участника"
+          :placeholder="role === 'mentor' ? 'Введите ФИО наставника' : 'Введите ФИО участника'"
           :suffix-icon="Search"
           @input="handleSearch"
           class="search-input"
@@ -71,6 +71,10 @@ const props = defineProps({
   existingMembers: {
     type: Array,
     default: () => []
+  },
+  role: {
+    type: String,
+    default: 'member'
   }
 });
 
@@ -120,10 +124,11 @@ const performSearch = async () => {
 
   try {
     isLoading.value = true;
-    const results = await usersApi.searchUsers(searchQuery.value);
-    searchResults.value = results.filter(
-        user => !props.existingMembers.some(member => member.id === user.id)
-    );
+    const results = await usersApi.searchUsers(searchQuery.value, props.role);
+
+    searchResults.value = props.role === 'mentor'
+        ? results
+        : results.filter(user => !props.existingMembers.some(member => member.id === user.id));
   } catch (error) {
     ElMessage.error('Ошибка при поиске пользователей');
     console.error(error);
