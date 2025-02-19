@@ -3,19 +3,19 @@
     <div class="section-header">
       <h2 class="section-title">Участники команды</h2>
       <div class="header-right">
-        <span class="member-count">{{ members.length }}/5 участников</span>
+        <span class="member-count">{{ filteredMembers.length }}/5 участников</span>
         <button
             v-if="isTeamLeader"
             class="add-member-btn"
             @click="showUserSearch"
-            :disabled="members.length >= 5"
+            :disabled="filteredMembers.length >= 5"
         >
           Добавить участника
         </button>
       </div>
     </div>
     <div class="members-list">
-      <div v-for="member in members" :key="member.id" class="member-card">
+      <div v-for="member in filteredMembers" :key="member.id" class="member-card">
         <div class="member-info">
           <div class="member-name">{{ member.user.full_name }}</div>
           <div class="member-details">
@@ -37,6 +37,8 @@
 </template>
 
 <script setup>
+import {computed} from "vue";
+
 const props = defineProps({
   members: {
     type: Array,
@@ -53,6 +55,10 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['add-member', 'remove-member'])
+
+const filteredMembers = computed(() => {
+  return props.members.filter(member => member.role.toUpperCase() === 'MEMBER' || member.role.toUpperCase() === 'TEAMLEAD')
+})
 
 const getRoleName = (role) => {
   const upperRole = role.toUpperCase()

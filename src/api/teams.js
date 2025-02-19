@@ -126,6 +126,42 @@ export const teamsApi = {
         }
     },
 
+    async addTeamMentor(teamId, mentorId) {
+        try {
+            const response = await api.post(`/teams/${teamId}/mentor?mentor_id=${mentorId}`, {}, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            if (error.response?.data?.detail) {
+                if (Array.isArray(error.response.data.detail)) {
+                    const messages = error.response.data.detail
+                        .map(err => err.msg)
+                        .join(', ');
+                    throw new Error(messages);
+                } else {
+                    throw new Error(error.response.data.detail);
+                }
+            }
+            throw error;
+        }
+    },
+
+    async removeTeamMentor(teamId, mentorMemberId) {
+        try {
+            console.log(mentorMemberId);
+            const response = await api.delete(`/teams/${teamId}/members/${mentorMemberId}`);
+            return response.data;
+        } catch (error) {
+            if (error.response?.data?.detail) {
+                throw new Error(error.response.data.detail);
+            }
+            throw error;
+        }
+    },
+
     async deleteTeam(teamId) {
         try {
             const response = await api.delete(`/teams/${teamId}`);

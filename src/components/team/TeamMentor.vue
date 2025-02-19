@@ -57,23 +57,24 @@ const emit = defineEmits(['add-mentor', 'remove-mentor'])
 
 const mentor = computed(() => {
   if (!props.members) return null;
-  return props.members.find(member => member.role === 'MENTOR')
+  return props.members.find(member => member.role === 'mentor')
 })
 
 const getMentorStatusText = (status) => {
   const statusMap = {
-    'PENDING': 'Ожидает проверки документов',
-    'NEED_UPDATE': 'Требуется обновить данные',
-    'APPROVED': 'Подтвержден'
+    'pending': 'В ожидании проверки документов',
+    'need_update': 'Требуется обновить личные данные',
+    'approved': 'Подтвержден'
   }
-  return statusMap[status] || status
+  return statusMap[status.toLowerCase()] || status
 }
 
 const getMentorStatusClass = (status) => {
+  const statusLower = status.toLowerCase()
   return {
-    'status-pending': status === 'PENDING',
-    'status-need-update': status === 'NEED_UPDATE',
-    'status-approved': status === 'APPROVED'
+    'status-pending': statusLower === 'pending',
+    'status-need-update': statusLower === 'need_update',
+    'status-approved': statusLower === 'approved'
   }
 }
 </script>
@@ -137,20 +138,20 @@ const getMentorStatusClass = (status) => {
 
 .mentor-details {
   display: flex;
-    flex-direction: column;
+  flex-direction: column;
   gap: 0.5rem;
-  }
+}
 
 .mentor-name {
   font-size: 1.1rem;
   color: #333;
   font-weight: 500;
-  }
+}
 
 .mentor-role {
   font-size: 0.9rem;
   color: #666;
-  }
+}
 
 .mentor-job {
   font-size: 0.9rem;
@@ -175,21 +176,21 @@ const getMentorStatusClass = (status) => {
 }
 
 .status-pending {
-  background: rgba(255, 152, 0, 0.1);
-  color: #FF9800;
-}
-
-.status-pending .status-icon {
-  background: #FF9800;
-}
-
-.status-need-update {
   background: rgba(33, 150, 243, 0.1);
   color: #2196F3;
 }
 
-.status-need-update .status-icon {
+.status-pending .status-icon {
   background: #2196F3;
+}
+
+.status-need-update {
+  background: rgba(244, 67, 54, 0.1);
+  color: #F44336;
+}
+
+.status-need-update .status-icon {
+  background: #F44336;
 }
 
 .status-approved {

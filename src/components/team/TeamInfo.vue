@@ -537,7 +537,8 @@ const removeMentor = async () => {
 
   try {
     loading.value = true
-    await teamsApi.removeTeamMentor(teamData.value.id)
+    await teamsApi.removeTeamMentor(teamData.value.id, selectedMentor.value.id)
+    teamMembers.value = teamMembers.value.filter(member => member.role !== 'mentor')
     teamMentor.value = null
     showMentorConfirmDialog.value = false
     ElMessage({
@@ -557,30 +558,43 @@ const removeMentor = async () => {
 
 const handleMentorSelect = async (user) => {
   try {
-    loading.value = true
-    await teamsApi.addTeamMentor(teamData.value.id, {
-      user_id: user.id
-    })
+    loading.value = true;
 
-    const mentorData = await teamsApi.getTeamMentor(teamData.value.id)
-    teamMentor.value = mentorData.mentor
+    if (!user?.id) {
+      throw new Error('ID пользователя не определен');
+    }
 
-    showMentorSearchModal.value = false
+    if (!teamData.value?.id) {
+      throw new Error('ID команды не определен');
+    }
+
+    await teamsApi.addTeamMentor(teamData.value.id, user.id);
+
+    const membersData = await teamsApi.getTeamMembers(teamData.value.id);
+    teamMembers.value = membersData.members;
+
+    const mentor = membersData.members.find(member => member.role === 'MENTOR');
+    if (mentor) {
+      teamMentor.value = mentor;
+    }
+
+    showMentorSearchModal.value = false;
 
     ElMessage({
-      message: 'Наставник успешно добавлен в команду',
+      message: 'Приглашение наставнику успешно отправлено',
       type: 'success'
-    })
+    });
   } catch (error) {
-    console.error('Error adding team mentor:', error)
+    console.error('Error adding team mentor:', error);
     ElMessage({
       message: error.message || 'Ошибка при добавлении наставника',
-      type: 'error'
-    })
+      type: 'error',
+      duration: 5000
+    });
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const deleteTeam = async () => {
   if (deleteConfirmationText.value !== teamData.value.team_name) return;
