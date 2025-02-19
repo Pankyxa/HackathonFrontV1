@@ -642,6 +642,7 @@ const moveToLogin = () => {
     margin: 10px;
   }
   .registration-form :deep(.el-form-item) {
+    flex-direction: column;
     margin-bottom: 20px !important;
   }
 
