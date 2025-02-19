@@ -54,6 +54,12 @@
         @add-member="showUserSearch"
         @remove-member="confirmRemoveMember"
     />
+    <TeamMentor
+        :members="teamMembers"
+        :is-team-leader="isTeamLeader"
+        @add-mentor="showMentorSearch"
+        @remove-mentor="confirmRemoveMentor"
+    />
 
     <div v-if="isTeamLeader || isTeamMember" class="danger-zone">
       <h3 class="danger-zone-title">Опасная зона</h3>
@@ -222,6 +228,35 @@
         </div>
       </template>
     </el-dialog>
+
+    <el-dialog
+        v-model="showMentorConfirmDialog"
+        title="Подтверждение удаления наставника"
+        width="400px"
+    >
+      <div class="confirm-content">
+        <p>Вы действительно хотите удалить наставника {{ selectedMentor?.user.full_name }} из команды?</p>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <button class="cancel-btn" @click="showMentorConfirmDialog = false">Отмена</button>
+          <button
+              class="confirm-btn"
+              @click="removeMentor"
+              :disabled="loading"
+          >
+            {{ loading ? 'Удаление...' : 'Удалить' }}
+          </button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <UserSearchModal
+        v-model="showMentorSearchModal"
+        :existing-members="[...(teamMentor ? [teamMentor.user] : []), ...teamMembers.map(member => member.user)]"
+        :role="'mentor'"
+        @select="handleMentorSelect"
+    />
   </div>
 </template>
 
@@ -231,6 +266,7 @@ import {teamsApi} from '@/api/teams'
 import {useAuthStore} from '@/stores/auth'
 import {ElMessage} from 'element-plus'
 import TeamMembers from "@/components/team/TeamMembers.vue";
+import TeamMentor from "@/components/team/TeamMentor.vue"
 import TeamPhotoEditor from './TeamPhotoEditor.vue'
 import UserSearchModal from './UserSearchModal.vue'
 import {useRouter} from "vue-router";
@@ -273,6 +309,11 @@ const isTeamLeader = computed(() => teamData.value?.team_leader_id === currentUs
 const isMobile = computed(() => window.innerWidth <= 768)
 
 const showAddMemberModal = ref(false)
+
+const teamMentor = ref(null)
+const showMentorSearchModal = ref(false)
+const selectedMentor = ref(null)
+const showMentorConfirmDialog = ref(false)
 
 const statusText = computed(() => {
   const status = teamData.value?.status_details?.status
@@ -387,6 +428,8 @@ const loadTeamData = async () => {
 
       const membersData = await teamsApi.getTeamMembers(team.id)
       teamMembers.value = membersData.members
+
+      teamMentor.value = membersData.members.find(member => member.role === 'MENTOR')
     }
   } catch (error) {
     console.error('Error loading team data:', error)
@@ -477,6 +520,65 @@ const removeMember = async () => {
     })
   } finally {
     removing.value = false
+  }
+}
+
+const showMentorSearch = () => {
+  showMentorSearchModal.value = true
+}
+
+const confirmRemoveMentor = (mentor) => {
+  selectedMentor.value = mentor
+  showMentorConfirmDialog.value = true
+}
+
+const removeMentor = async () => {
+  if (!selectedMentor.value) return
+
+  try {
+    loading.value = true
+    await teamsApi.removeTeamMentor(teamData.value.id)
+    teamMentor.value = null
+    showMentorConfirmDialog.value = false
+    ElMessage({
+      message: 'Наставник успешно удален из команды',
+      type: 'success'
+    })
+  } catch (error) {
+    console.error('Error removing team mentor:', error)
+    ElMessage({
+      message: 'Ошибка при удалении наставника',
+      type: 'error'
+    })
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleMentorSelect = async (user) => {
+  try {
+    loading.value = true
+    await teamsApi.addTeamMentor(teamData.value.id, {
+      user_id: user.id
+    })
+
+    const mentorData = await teamsApi.getTeamMentor(teamData.value.id)
+    teamMentor.value = mentorData.mentor
+
+    showMentorSearchModal.value = false
+
+    ElMessage({
+      message: 'Наставник успешно добавлен в команду',
+      type: 'success'
+    })
+  } catch (error) {
+    console.error('Error adding team mentor:', error)
+    ElMessage({
+      message: error.message || 'Ошибка при добавлении наставника',
+      type: 'error'
+    })
+  } finally {
+    loading.value = false
   }
 }
 
