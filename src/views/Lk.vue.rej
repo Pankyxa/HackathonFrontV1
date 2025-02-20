@@ -1,0 +1,6 @@
+diff a/src/views/Lk.vue b/src/views/Lk.vue	(rejected hunks)
+@@ -143,2 +143,3 @@
+   margin-top: 10px;
+ }
+\ No newline at end of file
++</style>
