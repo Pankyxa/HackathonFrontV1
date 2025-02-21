@@ -151,7 +151,6 @@ export const teamsApi = {
 
     async removeTeamMentor(teamId, mentorMemberId) {
         try {
-            console.log(mentorMemberId);
             const response = await api.delete(`/teams/${teamId}/members/${mentorMemberId}`);
             return response.data;
         } catch (error) {

@@ -125,11 +125,11 @@ const participantFields = [
   },
   {
     name: 'vuz',
-    label: 'ВУЗ',
+    label: 'Учебная организация',
     type: 'text',
-    placeholder: 'Введите название ВУЗа',
+    placeholder: 'Введите название учебной организации',
     rules: [
-      {required: true, message: 'Пожалуйста, введите название ВУЗа', trigger: 'blur'}
+      {required: true, message: 'Пожалуйста, введите название учебной организации', trigger: 'blur'}
     ]
   },
   {
@@ -166,7 +166,8 @@ const participantFields = [
       {value: '3', label: '3 курс'},
       {value: '4', label: '4 курс'},
       {value: '5', label: '5 курс'},
-      {value: '6', label: '6 курс'}
+      {value: '6', label: '6 курс'},
+      {value: '0', label: 'Окончил'}
     ],
     rules: [
       {required: true, message: 'Пожалуйста, выберите курс', trigger: 'change'}
@@ -174,13 +175,13 @@ const participantFields = [
   },
   {
     name: 'education_certificate_file',
-    label: 'Справка с места учёбы',
+    label: 'Справка с места учёбы/работы',
     type: 'file',
-    placeholder: 'Прикрепите справку с места учебы',
+    placeholder: 'Прикрепите справку с места учебы/работы',
     rules: [
       {
         required: true,
-        message: 'Пожалуйста, прикрепите справку с места учебы',
+        message: 'Пожалуйста, прикрепите справку с места учебы/работы',
         trigger: 'change'
       },
       {
