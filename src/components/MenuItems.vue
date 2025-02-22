@@ -57,16 +57,30 @@ const props = defineProps({
   isHaveTeam: {
     type: Boolean,
     required: true
+  },
+  isMentor: {
+    type: Boolean,
+    required: true
+  },
+  isMember: {
+    type: Boolean,
+    required: true
+  },
+  isJudge: {
+    type: Boolean,
+    required: true
+  },
+  isAdmin: {
+    type: Boolean,
+    required: true
+  },
+  isOrganizer: {
+    type: Boolean,
+    required: true
   }
 });
 
 const user = computed(() => useAuthStore().user);
-const isMember = computed(() =>
-    user.value?.roles?.some(role => role.name === 'participant')
-);
-const isMentor = computed(() =>
-    user.value?.roles?.some(role => role.name === 'mentor')
-);
 
 const emit = defineEmits(['applicationClick', 'logout', 'menuItemClick']);
 

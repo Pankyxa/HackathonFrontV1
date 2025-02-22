@@ -43,6 +43,11 @@
                 <MenuItems
                     :is-authenticated="authStore.isAuthenticated"
                     :is-have-team="authStore.isHaveTeam"
+                    :is-member="authStore.isMember"
+                    :is-mentor="authStore.isMentor"
+                    :is-admin="authStore.isAdmin"
+                    :is-judge="authStore.isJudge"
+                    :is-organizer="authStore.isOrganizer"
                     @application-click="handleMobileMenuItemClick('application')"
                     @logout="handleMobileMenuItemClick('logout')"
                     @menu-item-click="handleMobileMenuItemClick"
