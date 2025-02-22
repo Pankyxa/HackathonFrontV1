@@ -28,7 +28,7 @@ export const teamsApi = {
                 formData.append('member_ids', JSON.stringify([]));
             }
 
-            const response = await api.post('/teams/create', formData, {
+            const response = await api.post('/teams/create', {formData}, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 }
@@ -90,23 +90,12 @@ export const teamsApi = {
         }
     },
 
-    async getMentorTeam(teamId) {
-        try {
-            const response = await api.get(`/teams/mentor/teams/${teamId}/`);
-            return response.data[0];
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    },
-
     async getTeam(teamId = null) {
         try {
             let response;
             if (teamId) {
-                // Если передан ID команды, получаем конкретную команду
                 response = await api.get(`/teams/mentor/teams/${teamId}`);
             } else {
-                // Если ID не передан, получаем свою команду
                 response = await api.get('/teams/my/team');
             }
             return response.data;

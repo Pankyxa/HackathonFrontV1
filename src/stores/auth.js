@@ -7,7 +7,7 @@ import { useLoadingStore } from './loading'
 export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false)
   const isHaveTeam = ref(false)
-  const user = ref(null) // Добавляем user
+  const user = ref(null)
   const loadingStore = useLoadingStore()
 
   const setUser = (userData) => {

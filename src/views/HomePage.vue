@@ -2,12 +2,32 @@
   <TheHeader :class="{ 'header-hidden': isHeaderHidden }"></TheHeader>
   <div class="home-page">
     <div class="hero-section">
-      <div class="hero-content">
+      <!-- Десктоп версия -->
+      <div class="desktop-container">
+        <div class="hero-content">
+          <h1>Хакатон</h1>
+          <p>Цифровые двойники в энергетике</p>
+          <p class="subtitle">Командные соревнования по решению производственной задачи</p>
+          <div class="prize-info">Призовой фонд 225 000 рублей</div>
+          <el-button type="primary" class="custom-button" @click="handleApplicationClick">Подать заявку</el-button>
+        </div>
+        <div class="synergy-text">
+          <div>Энергетик будущего 2050</div>
+          <div>СИНЕРГИЯ</div>
+        </div>
+      </div>
+
+      <!-- Мобильная версия -->
+      <div class="mobile-container">
         <h1>Хакатон</h1>
         <p>Цифровые двойники в энергетике</p>
         <p class="subtitle">Командные соревнования по решению производственной задачи</p>
         <div class="prize-info">Призовой фонд 225 000 рублей</div>
         <el-button type="primary" class="custom-button" @click="handleApplicationClick">Подать заявку</el-button>
+        <div class="synergy-text">
+          <div>Энергетик будущего 2050</div>
+          <div>СИНЕРГИЯ</div>
+        </div>
       </div>
     </div>
 
@@ -185,9 +205,6 @@ const handleApplicationClick = () => {
   position: relative;
   border-radius: 16px;
   margin: 20px;
-  display: flex;
-  align-items: center;
-  padding-left: 60px;
 }
 
 .hero-section::before {
@@ -201,11 +218,62 @@ const handleApplicationClick = () => {
   border-radius: 16px;
 }
 
+/* Десктоп стили */
+.desktop-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 60px;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.desktop-container .hero-content {
+  color: white;
+  max-width: 600px;
+}
+
+.desktop-container .synergy-text {
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: right;
+  position: absolute;
+  right: 60px;
+  bottom: 40px;
+  white-space: nowrap;
+}
+
+/* Мобильная версия */
+.mobile-container {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 20px;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+  color: white;
+}
+
+.mobile-container .synergy-text {
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 30px;
+}
+
+
 .hero-content {
   position: relative;
   z-index: 1;
   color: white;
-  max-width: 600px;
+  max-width: 100%;
+  text-align: left;
+  padding: 0 20px;
 }
 
 .hero-content h1 {
@@ -394,11 +462,43 @@ const handleApplicationClick = () => {
   transform: translateY(-100%);
 }
 
+
 @media (max-width: 768px) {
   .hero-section {
-    height: 400px;
-    padding: 20px;
+    height: 500px;
     margin: 10px;
+  }
+
+  .desktop-container {
+    display: none;
+  }
+
+  .mobile-container {
+    display: flex;
+  }
+
+  .mobile-container h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+  }
+
+  .mobile-container p {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+
+  .mobile-container .subtitle {
+    font-size: 16px;
+  }
+
+  .mobile-container .prize-info {
+    font-size: 20px;
+    color: #FFD700;
+    margin: 20px 0;
+  }
+
+  .mobile-container .custom-button {
+    margin: 20px 0;
   }
 
   .hero-content {
@@ -491,6 +591,10 @@ const handleApplicationClick = () => {
     height: 500px;
   }
 
+  .desktop-container .hero-content h1 {
+    font-size: 42px;
+  }
+
   .hero-content h1 {
     font-size: 42px;
   }
@@ -501,6 +605,18 @@ const handleApplicationClick = () => {
 
   .info-card {
     padding: 20px;
+  }
+
+  .synergy-text {
+    position: static;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 }
 </style>

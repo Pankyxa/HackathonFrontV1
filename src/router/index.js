@@ -46,7 +46,7 @@ const router = createRouter({
         {
             path: '/mentor/teams/:id',
             name: 'MentorTeamView',
-            component: () => import('@/views/MyTeamPage.vue'), // Изменено на новый компонент
+            component: () => import('@/views/MyTeamPage.vue'),
             meta: {
                 requiresAuth: true,
                 roles: ['mentor']
