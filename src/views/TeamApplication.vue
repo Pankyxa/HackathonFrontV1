@@ -31,26 +31,44 @@
         <div v-if="currentStep === 1" class="step-content">
           <h2>Участники команды</h2>
           <div class="members-info">
-            <el-form :model="teamForm">
-              <div v-for="(member, index) in teamForm.members" :key="index" class="member-item">
-                <el-form-item :label="`Участник ${index + 1}`" required>
-                  <el-input v-model="member.name" placeholder="ФИО участника" />
-                </el-form-item>
+            <div class="members-list">
+              <div v-for="(member, index) in teamForm.members" :key="member.id" class="member-card">
+                <div class="member-info">
+                  <div class="member-name">{{ member.full_name }}</div>
+                  <div class="member-details">{{ member.vuz }} | {{ member.course }} курс</div>
+                </div>
                 <el-button
                     type="danger"
                     circle
                     @click="removeMember(index)"
-                    v-if="teamForm.members.length > 1"
+                    class="remove-button"
                 >
                   <el-icon><Delete /></el-icon>
                 </el-button>
               </div>
-            </el-form>
-            <el-button type="primary" @click="addMember" class="add-member-button">
+            </div>
+            <el-button
+                type="primary"
+                @click="showUserSearch"
+                class="add-member-button"
+                :disabled="teamForm.members.length >= 4"
+            >
               Добавить участника
-            </el-button>
-            <p class="note">* В дальнейшем вы сможете добавить дополнительных участников</p>
+              </el-button>
+
+            <p class="note">
+              * Максимальное количество участников: 4
+            </p>
+            <p class="note">
+              Если ещё не все ваши участники зарегистрировались, ничего страшного — вы сможете добавить их позже.
+            </p>
           </div>
+
+          <UserSearchModal
+              v-model="showSearchModal"
+              :existing-members="teamForm.members"
+              @select="handleMemberSelect"
+          />
         </div>
 
         <div v-if="currentStep === 2" class="step-content success-step">
@@ -63,7 +81,7 @@
               <el-button type="primary" @click="handleFinish" class="finish-button">
                 Завершить
               </el-button>
-            </template>
+</template>
           </el-result>
         </div>
 
@@ -85,17 +103,20 @@ import {ref, computed, onMounted} from 'vue';
 import { Delete } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
 import PrimaryLayout from "@/components/PrimaryLayout.vue";
-import TeamPhotoEditor from '@/components/TeamPhotoEditor.vue';
+import TeamPhotoEditor from '@/components/team/TeamPhotoEditor.vue';
 import { teamsApi } from '@/api/teams';
 import {useAuthStore} from "@/stores/auth.js";
+import UserSearchModal from '@/components/team/UserSearchModal.vue';
+import { ElMessage } from 'element-plus';
 
 const router = useRouter();
 const currentStep = ref(0);
+const showSearchModal = ref(false);
 const teamForm = ref({
   name: '',
   motto: '',
-  logo: null,
-  members: [{ name: '' }]
+  photo: null,
+  members: []
 });
 const store = useAuthStore()
 const isHaveTeam = store.isHaveTeam
@@ -110,9 +131,6 @@ const canProceed = computed(() => {
   if (currentStep.value === 0) {
     return teamForm.value.name && teamForm.value.motto && teamForm.value.photo;
   }
-  if (currentStep.value === 1) {
-    return teamForm.value.members.every(member => member.name.trim());
-  }
   return true;
 });
 
@@ -120,27 +138,44 @@ const handlePhotoChange = (file) => {
   teamForm.value.photo = file.raw;
 };
 
-const addMember = () => {
-  teamForm.value.members.push({ name: '' });
+const showUserSearch = () => {
+  if (teamForm.value.members.length < 4) {
+    showSearchModal.value = true;
+  }
+};
+
+const handleMemberSelect = (user) => {
+  if (teamForm.value.members.length >= 4) {
+    ElMessage.warning('Максимальное количество участников: 4');
+    return;
+  }
+  teamForm.value.members.push(user);
 };
 
 const removeMember = (index) => {
   teamForm.value.members.splice(index, 1);
-};
+    };
 
 const createTeam = async () => {
   try {
     const formattedData = {
       team_name: teamForm.value.name,
       team_motto: teamForm.value.motto,
-      logo: teamForm.value.photo, // предполагая, что TeamPhotoEditor возвращает File объект
-      members: teamForm.value.members
+      logo: teamForm.value.photo,
+      member_ids: teamForm.value.members.length > 0
+          ? JSON.stringify(teamForm.value.members.map(member => member.id))
+          : JSON.stringify([])
     };
+
     await teamsApi.createTeam(formattedData);
     currentStep.value = 2;
   } catch (error) {
     console.error('Ошибка при создании команды:', error);
-    ElMessage.error('Не удалось создать команду. Пожалуйста, попробуйте снова.');
+    if (error.message === 'Некорректный формат файла логотипа') {
+      ElMessage.error('Пожалуйста, загрузите корректный файл логотипа');
+    } else {
+      ElMessage.error('Не удалось создать команду. Пожалуйста, попробуйте снова.');
+    }
   }
 };
 
@@ -260,6 +295,47 @@ h2 {
 
 :deep(.el-step__title) {
   font-size: 16px;
+}
+
+.members-list {
+  display: flex;
+    flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+  }
+
+.member-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: #F5F7FA;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+  }
+
+.member-card:hover {
+  background-color: #EBEEF5;
+  }
+
+.member-info {
+  flex: 1;
+  }
+
+.member-name {
+  font-weight: 500;
+  color: #303133;
+}
+
+.member-details {
+  font-size: 13px;
+  color: #909399;
+  margin-top: 4px;
+}
+
+.remove-button {
+  flex-shrink: 0;
+  margin-left: 12px;
 }
 
 @media (max-width: 768px) {

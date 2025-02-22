@@ -7,17 +7,32 @@
       Вход
     </el-menu-item>
   </template>
+
   <template v-else>
-    <template v-if="!isHaveTeam">
-      <el-menu-item index="1" @click="handleItemClick('application')">
-        Подать заявку
-      </el-menu-item>
-    </template>
-    <template v-else>
-      <el-menu-item index="1" @click="handleItemClick('my-team')">
-        Моя команда
-      </el-menu-item>
-    </template>
+    <el-menu-item
+        v-if="authStore.isMentor"
+        index="1"
+        @click="handleItemClick('mentor-teams')"
+    >
+      Мои команды
+    </el-menu-item>
+
+    <el-menu-item
+        v-if="authStore.isMember && !isHaveTeam"
+        index="1"
+        @click="handleItemClick('application')"
+    >
+      Подать заявку
+    </el-menu-item>
+
+    <el-menu-item
+        v-if="authStore.isMember && isHaveTeam"
+        index="1"
+        @click="handleItemClick('my-team')"
+    >
+      Моя команда
+    </el-menu-item>
+
     <el-menu-item index="3" @click="handleItemClick('profile')">
       Личный кабинет
     </el-menu-item>
@@ -29,8 +44,10 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth.js';
 
 const router = useRouter();
+const authStore = useAuthStore();
 
 const props = defineProps({
   isAuthenticated: {
@@ -40,15 +57,21 @@ const props = defineProps({
   isHaveTeam: {
     type: Boolean,
     required: true
+  },
+  isMentor: {
+    type: Boolean,
+    required: true
   }
 });
-
 const emit = defineEmits(['applicationClick', 'logout', 'menuItemClick']);
 
 const handleItemClick = (action) => {
   emit('menuItemClick');
-  
+
   switch (action) {
+    case 'mentor-teams':
+      router.push('/mentor/teams');
+      break;
     case 'application':
       emit('applicationClick');
       break;

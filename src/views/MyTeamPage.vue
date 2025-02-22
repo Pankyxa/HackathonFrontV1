@@ -4,18 +4,39 @@
     <div class="team-page">
       <div class="team-sidebar">
         <div class="sidebar-menu">
-          <div class="menu-item"
-               v-for="item in menuItems"
-               :key="item.id"
-               :class="{ active: activeTab === item.id }"
-               @click="activeTab = item.id">
+          <div
+            class="menu-item team-header-item"
+            :class="{ active: activeTab === 'info' }"
+            @click="activeTab = 'info'"
+          >
+            <img
+              v-if="teamLogo"
+              :src="teamLogoUrl"
+              alt="Team Logo"
+              class="menu-logo"
+            />
+            <div v-else class="menu-logo-placeholder"></div>
+            <span class="team-name">{{ teamName || getDefaultTitle }}</span>
+          </div>
+          <div
+            v-for="item in menuItems"
+            :key="item.id"
+            class="menu-item"
+            :class="{ active: activeTab === item.id }"
+            @click="activeTab = item.id"
+          >
             {{ item.title }}
           </div>
         </div>
       </div>
       <div class="content-area">
         <div class="content-wrapper">
-          <component :is="currentComponent"></component>
+          <component
+            :is="currentComponent"
+            :view-mode="viewMode"
+            :team-id="teamId"
+            @update:teamInfo="handleTeamInfoUpdate"
+          ></component>
         </div>
       </div>
     </div>
@@ -24,54 +45,105 @@
 </template>
 
 <script setup>
-import {ref, computed} from 'vue'
-import TheHeader from "@/components/TheHeader.vue";
-import TheFooter from "@/components/TheFooter.vue";
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import TheHeader from "@/components/TheHeader.vue"
+import TheFooter from "@/components/TheFooter.vue"
 import TeamInfo from '@/components/team/TeamInfo.vue'
+import { teamsApi } from '@/api/teams'
 
+const route = useRoute()
 const activeTab = ref('info')
+const teamName = ref('')
+const teamLogo = ref(null)
+const teamId = ref(route.params.id || null)
+const teamLogoTimestamp = ref(Date.now())
+
+const viewMode = computed(() => {
+  return route.path.includes('/mentor/teams/') ? 'mentor' : 'default'
+})
+
+const getDefaultTitle = computed(() => {
+  return viewMode.value === 'mentor' ? 'Команда' : 'Моя команда'
+})
 
 const menuItems = [
-  {id: 'info', title: 'Название'},
-  {id: 'team', title: 'Состав'},
   {id: 'task', title: 'Задача'},
-  {id: 'examples', title: 'Примеры сайтов'}
+  {id: 'atach solution', title: 'Прикрепить решение'}
 ]
+
+const teamLogoUrl = computed(() => {
+  if (!teamLogo.value) return null;
+  return `${teamLogo.value}?t=${teamLogoTimestamp.value}`;
+})
 
 const currentComponent = computed(() => {
   switch (activeTab.value) {
     case 'info':
       return TeamInfo
+    case 'task':
+      return null
     default:
       return null
+  }
+})
+
+const handleTeamInfoUpdate = (info) => {
+  teamName.value = info.team_name
+  teamId.value = info.id
+
+  if (info.logo_file_id) {
+    teamLogo.value = `${import.meta.env.VITE_API_URL}/teams/${info.id}/logo`
+    if (info.logo_updated_at) {
+      teamLogoTimestamp.value = info.logo_updated_at
+    }
+  }
+
+  if (info.updated_at) {
+    teamLogoTimestamp.value = info.updated_at
+  }
+}
+
+
+onMounted(async () => {
+  try {
+    const teamInfo = await teamsApi.getTeam(teamId.value);
+    if (teamInfo) {
+      handleTeamInfoUpdate(teamInfo);
+    }
+  } catch (error) {
+    console.error('Error loading team info:', error);
   }
 })
 </script>
 
 <style scoped>
 .my-team-container {
-  min-height: calc(100vh - 316px);
+  height: calc(100vh - 316px);
   margin: 105px 20px 20px;
   display: flex;
-    flex-direction: column;
-  }
+  flex-direction: column;
+}
 
 .team-page {
   background: var(--color-background);
   border-radius: 16px;
-    display: flex;
-    flex: 1;
+  display: flex;
+  flex: 1;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  }
+  height: 100%;
+}
 
 .team-sidebar {
   width: 250px;
   background: linear-gradient(90deg, #00A3FF 0%, #5B51D8 100%);
-  min-height: 100%; /* Занимает всю высоту родителя */
+  height: 100%;
   display: flex;
   flex-direction: column;
-  }
+  position: sticky;
+  top: 0;
+}
 
 .sidebar-menu {
   padding: 1rem;
@@ -80,6 +152,7 @@ const currentComponent = computed(() => {
   flex-direction: column;
   gap: 0.5rem;
 }
+
 
 .menu-item {
   padding: 0.75rem 1rem;
@@ -104,10 +177,11 @@ const currentComponent = computed(() => {
 .content-area {
   flex: 1;
   padding: 2rem;
-  overflow-y: auto;
   background: white;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  height: 100%;
 }
 
 .content-wrapper {
@@ -117,20 +191,53 @@ const currentComponent = computed(() => {
   flex: 1;
 }
 
+.team-header-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  }
+
+.menu-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: white;
+  }
+
+.menu-logo-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  }
+
+.team-name {
+  font-weight: 500;
+    flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  }
+
 @media (max-width: 768px) {
   .my-team-container {
-    min-height: 80%;
-    margin: 90px 10px 10px 10px;
+    height: auto;
+    min-height: calc(100vh - 316px);
   }
 
   .team-page {
     flex-direction: column;
     min-height: 500px;
+    height: auto;
   }
 
   .team-sidebar {
     width: 100%;
     min-height: auto;
+    position: relative;
+    height: auto;
   }
 
   .sidebar-menu {
@@ -148,6 +255,7 @@ const currentComponent = computed(() => {
 
   .content-area {
     padding: 1rem;
+    height: auto;
   }
 }
 </style>

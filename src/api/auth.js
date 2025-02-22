@@ -18,11 +18,17 @@ export const authApi = {
     async register(data) {
         try {
             const formData = new FormData();
+            const { role, ...dataWithoutRole } = data;
 
-            Object.keys(data).forEach(key => {
-                formData.append(key, data[key]);
+            Object.keys(dataWithoutRole).forEach(key => {
+                formData.append(key, dataWithoutRole[key]);
             });
-            const response = await api.post('/auth/register', formData, {
+
+            const endpoint = role === 'participant'
+                ? '/auth/register'
+                : 'auth/register/mentor'
+
+            const response = await api.post(endpoint, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }

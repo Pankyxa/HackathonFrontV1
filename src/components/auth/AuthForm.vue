@@ -17,22 +17,61 @@
           :error="fieldErrors[field.name]"
       >
         <template v-if="field.type === 'file'">
-          <el-upload
-              class="upload-field"
-              action="#"
-              :auto-upload="false"
-              :on-change="(file) => handleFileChange(file, field.name)"
-              :on-remove="() => handleFileRemove(field.name)"
+          <div class="file-upload-container">
+            <div class="file-upload-header">
+              <el-tooltip
+                  v-if="field.tooltip"
+                  :content="field.tooltip"
+                  placement="top"
+                  effect="light"
+                  popper-class="custom-tooltip-popper"
+              >
+                <el-icon class="tooltip-icon">
+                  <InfoFilled/>
+                </el-icon>
+              </el-tooltip>
+              <el-button
+                  v-if="field.downloadTemplate"
+                  type="primary"
+                  link
+                  @click="$emit('download-consent')"
+                  class="download-template-btn"
+              >
+                <el-icon>
+                  <Download/>
+                </el-icon>
+                Скачать шаблон
+              </el-button>
+            </div>
+            <el-upload
+                class="upload-field"
+                action="#"
+                :auto-upload="false"
+                :on-change="(file) => handleFileChange(file, field.name)"
+                :on-remove="() => handleFileRemove(field.name)"
+            >
+              <el-button type="primary">Выбрать файл</el-button>
+            </el-upload>
+          </div>
+        </template>
+        <template v-else-if="field.type === 'checkbox'">
+          <el-checkbox
+              v-model="formModel[field.name]"
+              @change="handleInput"
           >
-            <el-button type="primary">Выбрать файл</el-button>
-          </el-upload>
-</template>
+            <span v-if="field.name === 'terms_accepted'">
+              Я ознакомился и согласен с <a href="#" @click.prevent="$emit('download-terms')"
+                                            style="color: #409EFF; text-decoration: underline;">условиями проведения хакатона</a>
+            </span>
+            <span v-else v-html="field.customContent"></span>
+          </el-checkbox>
+        </template>
         <el-select
             v-else-if="field.type === 'select'"
             v-model="formModel[field.name]"
             :placeholder="field.placeholder"
             class="full-width"
-      >
+        >
           <el-option
               v-for="option in field.options"
               :key="option.value"
@@ -40,6 +79,24 @@
               :value="option.value"
           />
         </el-select>
+        <el-input
+            v-else-if="field.name === 'number'"
+            v-model="formModel[field.name]"
+            v-mask="'+7 (###) ###-##-##'"
+            :mask-placeholder="{ '#': '_' }"
+            placeholder="+7 (___) ___-__-__"
+            :class="`input-${field.name}`"
+            @input="handleInput"
+        ></el-input>
+        <el-input
+            v-else-if="field.name === 'code_speciality'"
+            v-model="formModel[field.name]"
+            v-mask="'##.##.##'"
+            :mask-placeholder="{ '#': '_' }"
+            placeholder="__.__.__ "
+            :class="`input-${field.name}`"
+            @input="handleInput"
+        ></el-input>
         <el-input
             v-else
             v-model="formModel[field.name]"
@@ -71,7 +128,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import {ref, watch} from 'vue';
+import {InfoFilled, Download} from '@element-plus/icons-vue';
 
 const props = defineProps({
   loading: {
@@ -96,7 +154,18 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['submit', 'secondaryAction', 'update:model-value']);
+const validateSpecialityCode = (rule, value, callback) => {
+  const regex = /^\d{2}\.\d{2}\.\d{2}$/;
+  if (!value) {
+    callback(new Error('Пожалуйста, введите код специальности'));
+  } else if (!regex.test(value)) {
+    callback(new Error('Формат: XX.XX.XX, где X - цифры'));
+  } else {
+    callback();
+  }
+};
+
+const emit = defineEmits(['submit', 'secondaryAction', 'update:model-value', 'download-terms', 'download-consent']);
 const formModel = ref({});
 const rules = ref({});
 const fieldErrors = ref({});
@@ -118,11 +187,11 @@ watch(() => props.fields, (newFields) => {
   formModel.value = newModel;
   rules.value = newRules;
   fieldErrors.value = newErrors;
-}, { immediate: true });
+}, {immediate: true});
 
 watch(formModel, (newValue) => {
   emit('update:model-value', newValue);
-}, { deep: true });
+}, {deep: true});
 const handleInput = () => {
   emit('update:model-value', formModel.value);
 };
@@ -146,7 +215,6 @@ const handleSubmit = async () => {
         emit('submit', formModel.value);
       } else {
         console.error('Ошибка валидации:', fields);
-        // Обновляем ошибки для каждого поля
         Object.keys(fields).forEach(key => {
           fieldErrors.value[key] = fields[key][0].message;
         });
@@ -161,6 +229,12 @@ const handleSecondaryAction = () => {
   emit('secondaryAction');
 };
 </script>
+
+<style>
+.el-popper.custom-tooltip-popper {
+  color: #333333 !important;
+}
+</style>
 
 <style scoped>
 .auth-form {
@@ -237,5 +311,59 @@ const handleSecondaryAction = () => {
 
 .full-width {
   width: 100%;
+}
+
+.form-fields-container :deep(.el-checkbox) {
+  height: auto;
+  margin-right: 0;
+}
+
+.form-fields-container :deep(.el-checkbox__label) {
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.form-fields-container :deep(.el-checkbox__input) {
+  margin-top: 2px;
+}
+
+.form-fields-container :deep(.el-checkbox__label a) {
+  color: #409EFF;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.form-fields-container :deep(.el-checkbox__label a:hover) {
+  color: #66b1ff;
+}
+
+.file-upload-container {
+  width: 100%;
+}
+
+.file-upload-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+
+.tooltip-icon {
+  color: #909399;
+  font-size: 16px;
+  cursor: help;
+}
+
+.download-template-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  height: auto;
+  font-size: 14px;
+}
+
+.download-template-btn :deep(.el-icon) {
+  margin-right: 4px;
 }
 </style>

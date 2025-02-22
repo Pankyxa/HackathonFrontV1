@@ -1,7 +1,7 @@
 <template>
-  <el-header class="header">
+  <el-header class="header" :class="{ 'header-hidden': isHeaderHidden, 'menu-open': isMenuOpen }">
     <div class="header-content">
-      <div class="logo">
+      <div class="logo desktop-menu">
         <router-link to="/">
           <img src="../assets/img/logo_top.png" alt="logo" height="40">
         </router-link>
@@ -25,11 +25,16 @@
       </div>
 
       <div class="mobile-menu" ref="mobileMenuRef">
-        <el-button class="hamburger-btn" @click="toggleMobileMenu">
-          <el-icon>
-            <Menu/>
-          </el-icon>
-        </el-button>
+        <div class="mobile-header">
+          <router-link to="/" class="mobile-logo">
+            <img src="../assets/img/logo_top.png" alt="logo" height="40">
+          </router-link>
+          <el-button class="hamburger-btn" @click="toggleMobileMenu">
+            <el-icon>
+              <Menu/>
+            </el-icon>
+          </el-button>
+        </div>
 
         <Transition name="slide-fade">
           <div class="mobile-menu-dropdown" v-show="isMenuOpen">
@@ -38,6 +43,11 @@
                 <MenuItems
                     :is-authenticated="authStore.isAuthenticated"
                     :is-have-team="authStore.isHaveTeam"
+                    :is-member="authStore.isMember"
+                    :is-mentor="authStore.isMentor"
+                    :is-admin="authStore.isAdmin"
+                    :is-judge="authStore.isJudge"
+                    :is-organizer="authStore.isOrganizer"
                     @application-click="handleMobileMenuItemClick('application')"
                     @logout="handleMobileMenuItemClick('logout')"
                     @menu-item-click="handleMobileMenuItemClick"
@@ -57,11 +67,18 @@
 import {ref, onMounted, onBeforeUnmount} from 'vue'
 import {useRouter} from 'vue-router'
 import {Menu} from '@element-plus/icons-vue'
-import AuthRequiredModal from "@/components/AuthRequiredModal.vue"
+import AuthRequiredModal from "@/components/auth/AuthRequiredModal.vue"
 import MenuItems from './MenuItems.vue'
 import {useAuthStore} from '@/stores/auth'
 import {useLoadingStore} from "@/stores/loading.js";
 import {storeToRefs} from "pinia";
+
+const props = defineProps({
+  isHeaderHidden: {
+    type: Boolean,
+    default: false
+  }
+});
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -132,6 +149,16 @@ onBeforeUnmount(() => {
   z-index: 1000;
   width: calc(100% - 10px);
   box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.header-hidden {
+  transform: translateY(-100%);
+}
+
+.header.menu-open {
+  height: auto !important;
 }
 
 .header-content {
@@ -246,25 +273,50 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 768px) {
+  .header {
+    transition: height 0.3s ease;
+    height: 80px !important;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .header.menu-open {
+    height: auto !important;
+  }
+
+  .header-content {
+    padding: 0 20px;
+    flex-direction: column;
+    height: auto;
+  }
+
   .desktop-menu {
     display: none;
   }
 
   .mobile-menu {
     display: block;
+    width: 100%;
   }
 
-  .mobile-menu-dropdown {
-    position: fixed;
-    top: 80px;
-    left: 5px;
-    right: 5px;
-    width: calc(100% - 10px);
-    margin: 0;
-    border-radius: 16px;
+  .mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 80px;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+    background: linear-gradient(90deg, #00A3FF 0%, #5B51D8 100%);
+  }
+
+  .mobile-logo {
+    display: flex;
+    align-items: center;
   }
 
   .hamburger-btn {
+    display: flex;
     background: transparent;
     border: 2px solid white;
     color: white;
@@ -277,17 +329,52 @@ onBeforeUnmount(() => {
     background-color: rgba(255, 255, 255, 0.1);
   }
 
-  .header-content {
-    padding: 0 15px;
+  .mobile-menu-dropdown {
+    position: initial;
+    width: 100%;
+    background: transparent;
+    box-shadow: none;
+    padding: 20px 0;
+    z-index: 1;
+    transform-origin: top;
+  }
+
+  .slide-fade-enter-active,
+  .slide-fade-leave-active {
+    transition: all 0.3s ease;
+    max-height: 400px;
+  }
+
+  .slide-fade-enter-from,
+  .slide-fade-leave-to {
+    max-height: 0;
+    opacity: 0;
+    margin-top: -20px;
+  }
+
+  .mobile-nav-menu {
+    width: 100%;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: transparent !important;
   }
 
   :deep(.mobile-nav-menu .el-menu-item) {
-    margin: 8px 16px;
-    transition: transform 0.2s ease;
+    margin: 0;
+    width: 100%;
+    height: 44px;
+    line-height: 40px;
+    font-size: 16px;
+    text-align: center;
+    border: 2px solid white !important;
+    border-radius: 8px;
   }
 
-  :deep(.mobile-nav-menu .el-menu-item:active) {
-    transform: scale(0.98);
+  .mobile-header {
+    position: sticky;
+    top: 0;
   }
 }
 </style>
