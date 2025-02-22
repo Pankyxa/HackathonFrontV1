@@ -90,18 +90,34 @@ export const teamsApi = {
         }
     },
 
-    async getCurrentTeam(teamId) {
+    async getMentorTeam(teamId) {
         try {
-            const response = await api.get(`/teams/${teamId}/`);
+            const response = await api.get(`/teams/mentor/teams/${teamId}/`);
             return response.data[0];
         } catch (error) {
             throw error.response?.data || error.message;
         }
     },
 
-    async getMyTeam() {
+    async getTeam(teamId = null) {
         try {
-            const response = await api.get(`/teams/my/team`);
+            let response;
+            if (teamId) {
+                // Если передан ID команды, получаем конкретную команду
+                response = await api.get(`/teams/mentor/teams/${teamId}`);
+            } else {
+                // Если ID не передан, получаем свою команду
+                response = await api.get('/teams/my/team');
+            }
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async getMentorTeams() {
+        try {
+            const response = await api.get('/teams/mentor/teams');
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

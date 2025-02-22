@@ -7,21 +7,32 @@
       Вход
     </el-menu-item>
   </template>
+
   <template v-else>
-    <template v-if="!isHaveTeam">
-      <template v-if="isMember">
-        <el-menu-item index="1" @click="handleItemClick('application')">
-          Подать заявку
-        </el-menu-item>
-      </template>
-    </template>
-    <template v-else>
-      <template v-if="isMember">
-        <el-menu-item index="1" @click="handleItemClick('my-team')">
-          Моя команда
-        </el-menu-item>
-      </template>
-    </template>
+    <el-menu-item
+        v-if="isMentor"
+        index="1"
+        @click="handleItemClick('mentor-teams')"
+    >
+      Мои команды
+    </el-menu-item>
+
+    <el-menu-item
+        v-if="isMember && !isHaveTeam"
+        index="1"
+        @click="handleItemClick('application')"
+    >
+      Подать заявку
+    </el-menu-item>
+
+    <el-menu-item
+        v-if="isMember && isHaveTeam"
+        index="1"
+        @click="handleItemClick('my-team')"
+    >
+      Моя команда
+    </el-menu-item>
+
     <el-menu-item index="3" @click="handleItemClick('profile')">
       Личный кабинет
     </el-menu-item>
@@ -34,7 +45,6 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { computed } from "vue";
-
 import { useAuthStore } from '@/stores/auth.js';
 
 const router = useRouter();
@@ -54,6 +64,9 @@ const user = computed(() => useAuthStore().user);
 const isMember = computed(() =>
     user.value?.roles?.some(role => role.name === 'participant')
 );
+const isMentor = computed(() =>
+    user.value?.roles?.some(role => role.name === 'mentor')
+);
 
 const emit = defineEmits(['applicationClick', 'logout', 'menuItemClick']);
 
@@ -61,6 +74,9 @@ const handleItemClick = (action) => {
   emit('menuItemClick');
 
   switch (action) {
+    case 'mentor-teams':
+      router.push('/mentor/teams');
+      break;
     case 'application':
       emit('applicationClick');
       break;

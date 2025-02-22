@@ -16,7 +16,7 @@
               class="menu-logo"
             />
             <div v-else class="menu-logo-placeholder"></div>
-            <span class="team-name">{{ teamName || 'Моя команда' }}</span>
+            <span class="team-name">{{ teamName || getDefaultTitle }}</span>
           </div>
           <div
             v-for="item in menuItems"
@@ -33,6 +33,8 @@
         <div class="content-wrapper">
           <component
             :is="currentComponent"
+            :view-mode="viewMode"
+            :team-id="teamId"
             @update:teamInfo="handleTeamInfoUpdate"
           ></component>
         </div>
@@ -44,16 +46,26 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import TheHeader from "@/components/TheHeader.vue"
 import TheFooter from "@/components/TheFooter.vue"
 import TeamInfo from '@/components/team/TeamInfo.vue'
 import { teamsApi } from '@/api/teams'
 
+const route = useRoute()
 const activeTab = ref('info')
 const teamName = ref('')
 const teamLogo = ref(null)
-const teamId = ref(null)
+const teamId = ref(route.params.id || null)
 const teamLogoTimestamp = ref(Date.now())
+
+const viewMode = computed(() => {
+  return route.path.includes('/mentor/teams/') ? 'mentor' : 'default'
+})
+
+const getDefaultTitle = computed(() => {
+  return viewMode.value === 'mentor' ? 'Команда' : 'Моя команда'
+})
 
 const menuItems = [
   {id: 'task', title: 'Задача'},
@@ -92,14 +104,15 @@ const handleTeamInfoUpdate = (info) => {
   }
 }
 
+
 onMounted(async () => {
   try {
-    const teamInfo = await teamsApi.getMyTeam()
+    const teamInfo = await teamsApi.getTeam(teamId.value);
     if (teamInfo) {
-      handleTeamInfoUpdate(teamInfo)
+      handleTeamInfoUpdate(teamInfo);
     }
   } catch (error) {
-    console.error('Error loading team info:', error)
+    console.error('Error loading team info:', error);
   }
 })
 </script>

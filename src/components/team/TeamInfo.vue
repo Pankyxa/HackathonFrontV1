@@ -29,6 +29,7 @@
     <TeamDangerZone
         :is-team-leader="isTeamLeader"
         :is-team-member="isTeamMember"
+        :is-team-mentor="isTeamMentor"
         @delete="showDeleteConfirm = true"
         @leave="showLeaveConfirm = true"
     />
@@ -121,6 +122,17 @@ const router = useRouter()
 const authStore = useAuthStore()
 const emit = defineEmits(['update:teamInfo'])
 
+const props = defineProps({
+  viewMode: {
+    type: String,
+    default: 'default'
+  },
+  teamId: {
+    type: [String, Number],
+    default: null
+  }
+})
+
 // State
 const teamData = ref({})
 const teamMembers = ref([])
@@ -157,13 +169,25 @@ const selectedMentor = ref(null)
 
 // Computed
 const currentUserId = computed(() => authStore.user?.id)
-const isTeamLeader = computed(() => teamData.value?.team_leader_id === currentUserId.value)
+const isTeamLeader = computed(() => {
+  if (props.viewMode === 'mentor') {
+    return false
+  }
+  return teamData.value?.team_leader_id === currentUserId.value
+})
 const isTeamMember = computed(() => {
   return teamMembers.value.some(
       member => member.user.id === currentUserId.value && member.role.toUpperCase() === 'MEMBER'
   )
 })
+const isTeamMentor = computed(() => {
+  return teamMembers.value.some(
+      member => member.user.id === currentUserId.value && member.role.toUpperCase() === 'MENTOR'
+  )
+})
 const isMobile = computed(() => window.innerWidth <= 768)
+const isMentorView = computed(() => props.viewMode === 'mentor')
+
 const statusText = computed(() => {
   const status = teamData.value?.status_details?.status
   switch (status) {
@@ -200,7 +224,8 @@ const statusClass = computed(() => {
 const loadTeamData = async () => {
   try {
     loading.value = true
-    const team = await teamsApi.getMyTeam()
+    const team = await teamsApi.getTeam(props.teamId)
+
     if (team) {
       teamData.value = team
       if (team.logo_file_id) {
