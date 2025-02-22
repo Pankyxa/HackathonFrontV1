@@ -6,6 +6,7 @@ import {useAuthStore} from "@/stores/auth.js";
 import {useLoadingStore} from "@/stores/loading.js";
 import TeamApplication from "@/views/TeamApplication.vue";
 import MyTeamPage from "@/views/MyTeamPage.vue";
+import JudgePage from "@/views/JudgePage.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -59,6 +60,23 @@ const router = createRouter({
             meta: {
                 requiresAuth: true,
                 roles: ['mentor']
+            }
+        },
+        {
+            path: '/judge/teams',
+            name: 'JudgeTeams',
+            component: JudgePage,
+            meta: {
+                title: 'Страница Жюри'
+                // todo: добавь потом сюда проверку на залогинен/не залогинен и проверку на роль
+            }
+        },
+        {
+            path: '/judge/teams/pseudo_id', // todo: тут я не посал :id чтобы просто внешний вид страницы проверить, потом можно написать
+            name: 'JudgeTeamView',
+            component: () => import('@/views/JudgeViewTeamPage.vue'),
+            meta: {
+                // todo: добавь потом сюда проверку на залогинен/не залогинен и проверку на роль
             }
         },
     ]

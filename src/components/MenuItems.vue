@@ -9,6 +9,13 @@
   </template>
 
   <template v-else>
+    <template v-if="isJudge">
+      <el-menu-item
+          index="1"
+          @click="handleItemClick('judge')">
+        Жюри
+      </el-menu-item>
+    </template>
     <el-menu-item
         v-if="authStore.isMentor"
         index="1"
@@ -69,6 +76,9 @@ const handleItemClick = (action) => {
   emit('menuItemClick');
 
   switch (action) {
+    case 'judge':
+      router.push('/judge/teams');
+      break;
     case 'mentor-teams':
       router.push('/mentor/teams');
       break;
