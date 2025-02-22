@@ -10,7 +10,7 @@
 
   <template v-else>
     <el-menu-item
-        v-if="isMentor"
+        v-if="authStore.isMentor"
         index="1"
         @click="handleItemClick('mentor-teams')"
     >
@@ -18,7 +18,7 @@
     </el-menu-item>
 
     <el-menu-item
-        v-if="isMember && !isHaveTeam"
+        v-if="authStore.isMember && !isHaveTeam"
         index="1"
         @click="handleItemClick('application')"
     >
@@ -26,7 +26,7 @@
     </el-menu-item>
 
     <el-menu-item
-        v-if="isMember && isHaveTeam"
+        v-if="authStore.isMember && isHaveTeam"
         index="1"
         @click="handleItemClick('my-team')"
     >
@@ -44,10 +44,10 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { computed } from "vue";
 import { useAuthStore } from '@/stores/auth.js';
 
 const router = useRouter();
+const authStore = useAuthStore();
 
 const props = defineProps({
   isAuthenticated: {
@@ -61,27 +61,8 @@ const props = defineProps({
   isMentor: {
     type: Boolean,
     required: true
-  },
-  isMember: {
-    type: Boolean,
-    required: true
-  },
-  isJudge: {
-    type: Boolean,
-    required: true
-  },
-  isAdmin: {
-    type: Boolean,
-    required: true
-  },
-  isOrganizer: {
-    type: Boolean,
-    required: true
   }
 });
-
-const user = computed(() => useAuthStore().user);
-
 const emit = defineEmits(['applicationClick', 'logout', 'menuItemClick']);
 
 const handleItemClick = (action) => {
