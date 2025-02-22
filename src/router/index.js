@@ -6,6 +6,7 @@ import {useAuthStore} from "@/stores/auth.js";
 import {useLoadingStore} from "@/stores/loading.js";
 import TeamApplication from "@/views/TeamApplication.vue";
 import MyTeamPage from "@/views/MyTeamPage.vue";
+import AdminPage from '@/views/AdminPage.vue';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -60,6 +61,11 @@ const router = createRouter({
                 requiresAuth: true,
                 roles: ['mentor']
             }
+        },
+        {
+            path: '/Admin',
+            name: 'Admin',
+            component: AdminPage,
         },
     ]
 })
