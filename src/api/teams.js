@@ -22,13 +22,15 @@ export const teamsApi = {
             formData.append('team_motto', teamData.team_motto);
             formData.append('logo', teamData.logo);
 
+            console.log(formData);
+
             if (teamData.member_ids) {
                 formData.append('member_ids', teamData.member_ids);
             } else {
                 formData.append('member_ids', JSON.stringify([]));
             }
 
-            const response = await api.post('/teams/create', {formData}, {
+            const response = await api.post('/teams/create', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 }

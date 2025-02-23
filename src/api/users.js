@@ -20,7 +20,80 @@ export const usersApi = {
                 ? '/users/search/mentors'
                 : '/users/search';
 
-            const response = await api.get(endpoint+`?query=${query}`);
+            const response = await api.get(endpoint + `?query=${query}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async getPendingUsers({limit = 10, offset = 0, search = ''}) {
+        try {
+            const params = new URLSearchParams({
+                limit: limit.toString(),
+                offset: offset.toString(),
+                ...(search && {search})
+            });
+
+            const response = await api.get(`/users/pending?${params}`);
+            // Теперь мы ожидаем объект с полями users и total напрямую из ответа
+            return {
+                users: response.data.users,
+                total: response.data.total
+            };
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async getAllUsers({limit = 10, offset = 0, search = ''}) {
+        try {
+            const params = new URLSearchParams({
+                limit: limit.toString(),
+                offset: offset.toString(),
+                ...(search && {search})
+            });
+
+            const response = await api.get(`/users?${params}`);
+            return {
+                users: response.data,
+                total: parseInt(response.headers['x-total-count'] || '0')
+            };
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async getUserDocuments(userId) {
+        try {
+            const response = await api.get(`/users/${userId}/documents`);
+            const fileResponses = await Promise.all(
+                response.data.map(async doc => {
+                    const fileResponse = await api.get(`/files/${doc.id}`, {
+                        responseType: 'blob'
+                    });
+                    const blob = new Blob([fileResponse.data], {
+                        type: fileResponse.headers['content-type']
+                    });
+                    return {
+                        id: doc.id,
+                        name: doc.filename,
+                        url: URL.createObjectURL(blob)
+                    };
+                })
+            );
+            return fileResponses;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async updateUserStatus(userId, status, comment = '') {
+        try {
+            const response = await api.put(`/users/${userId}/status`, {
+                status,
+                comment
+            });
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

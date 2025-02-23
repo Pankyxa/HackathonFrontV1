@@ -7,6 +7,7 @@ import {useLoadingStore} from "@/stores/loading.js";
 import TeamApplication from "@/views/TeamApplication.vue";
 import MyTeamPage from "@/views/MyTeamPage.vue";
 import SpecialRegistrationPage from "@/views/SpecialRegistrationPage.vue";
+import OrganizerPage from "@/views/OrganizerPage.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -70,12 +71,22 @@ const router = createRouter({
                 requiresAuth: false,
                 hideNavigation: true
             }
+        },
+        {
+            path: '/organizer',
+            name: 'organizer',
+            component: OrganizerPage,
+            meta: {
+                requiresAuth: true,
+                requiresOrganizer: true
+            }
         }
     ]
 })
 
 router.beforeEach(async (to, from, next) => {
     const loadingStore = useLoadingStore();
+    const authStore = useAuthStore()
 
     if (loadingStore.isLoading) {
         await new Promise(resolve => {
@@ -88,17 +99,21 @@ router.beforeEach(async (to, from, next) => {
         });
     }
 
-    if (to.meta.requiresAuth) {
-        const isAuthenticated = useAuthStore().isAuthenticated;
-
-        if (!isAuthenticated) {
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+        if (!authStore.isAuthenticated) {
             next('/login')
-        } else {
-            next()
+            return
         }
-    } else {
-        next()
+
+        if (to.matched.some(record => record.meta.requiresOrganizer)) {
+            if (!authStore.isOrganizer) {
+                next('/')
+                return
+            }
+        }
     }
+
+    next()
 })
 
 export default router

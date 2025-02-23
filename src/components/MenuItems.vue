@@ -11,6 +11,14 @@
 
     <template v-else>
       <el-menu-item
+          v-if="authStore.isOrganizer"
+          index="organizer"
+          @click="handleItemClick('organizer')"
+      >
+        Для организаторов
+      </el-menu-item>
+
+      <el-menu-item
           v-if="authStore.isMentor"
           index="1"
           @click="handleItemClick('mentor-teams')"
@@ -68,6 +76,9 @@ const handleItemClick = (action) => {
   emit('menuItemClick');
 
   switch (action) {
+    case 'organizer':
+      router.push('/organizer');
+      break;
     case 'mentor-teams':
       router.push('/mentor/teams');
       break;
