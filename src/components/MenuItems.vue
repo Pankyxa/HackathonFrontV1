@@ -1,45 +1,47 @@
 <template>
-  <template v-if="!isAuthenticated">
-    <el-menu-item index="1" @click="handleItemClick('application')">
-      Подать заявку
-    </el-menu-item>
-    <el-menu-item index="2" @click="handleItemClick('login')">
-      Вход
-    </el-menu-item>
-  </template>
+  <div class="menu-items-wrapper">
+    <template v-if="!isAuthenticated">
+      <el-menu-item index="1" @click="handleItemClick('application')">
+        Подать заявку
+      </el-menu-item>
+      <el-menu-item index="2" @click="handleItemClick('login')">
+        Вход
+      </el-menu-item>
+    </template>
 
-  <template v-else>
-    <el-menu-item
-        v-if="authStore.isMentor"
-        index="1"
-        @click="handleItemClick('mentor-teams')"
-    >
-      Мои команды
-    </el-menu-item>
+    <template v-else>
+      <el-menu-item
+          v-if="authStore.isMentor"
+          index="1"
+          @click="handleItemClick('mentor-teams')"
+      >
+        Мои команды
+      </el-menu-item>
 
-    <el-menu-item
-        v-if="authStore.isMember && !isHaveTeam"
-        index="1"
-        @click="handleItemClick('application')"
-    >
-      Подать заявку
-    </el-menu-item>
+      <el-menu-item
+          v-if="authStore.isMember && !isHaveTeam"
+          index="1"
+          @click="handleItemClick('application')"
+      >
+        Подать заявку
+      </el-menu-item>
 
-    <el-menu-item
-        v-if="authStore.isMember && isHaveTeam"
-        index="1"
-        @click="handleItemClick('my-team')"
-    >
-      Моя команда
-    </el-menu-item>
+      <el-menu-item
+          v-if="authStore.isMember && isHaveTeam"
+          index="1"
+          @click="handleItemClick('my-team')"
+      >
+        Моя команда
+      </el-menu-item>
 
-    <el-menu-item index="3" @click="handleItemClick('profile')">
-      Личный кабинет
-    </el-menu-item>
-    <el-menu-item index="4" @click="handleItemClick('logout')">
-      Выход
-    </el-menu-item>
-  </template>
+      <el-menu-item index="3" @click="handleItemClick('profile')">
+        Личный кабинет
+      </el-menu-item>
+      <el-menu-item index="4" @click="handleItemClick('logout')">
+        Выход
+      </el-menu-item>
+    </template>
+  </div>
 </template>
 
 <script setup>
@@ -57,12 +59,9 @@ const props = defineProps({
   isHaveTeam: {
     type: Boolean,
     required: true
-  },
-  isMentor: {
-    type: Boolean,
-    required: true
   }
 });
+
 const emit = defineEmits(['applicationClick', 'logout', 'menuItemClick']);
 
 const handleItemClick = (action) => {
@@ -90,3 +89,9 @@ const handleItemClick = (action) => {
   }
 };
 </script>
+
+<style scoped>
+.menu-items-wrapper {
+  display: contents;
+}
+</style>

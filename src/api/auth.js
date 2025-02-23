@@ -39,6 +39,24 @@ export const authApi = {
         }
     },
 
+    async registerSpecial(data) {
+        try {
+            const formData = new FormData();
+            Object.keys(data).forEach(key => {
+                formData.append(key, data[key]);
+            });
+
+            const response = await api.post('/auth/register/special', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
     async login(email, password) {
         try {
             const response = await api.post('/auth/login', {

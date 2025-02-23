@@ -6,6 +6,7 @@ import {useAuthStore} from "@/stores/auth.js";
 import {useLoadingStore} from "@/stores/loading.js";
 import TeamApplication from "@/views/TeamApplication.vue";
 import MyTeamPage from "@/views/MyTeamPage.vue";
+import SpecialRegistrationPage from "@/views/SpecialRegistrationPage.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -61,6 +62,15 @@ const router = createRouter({
                 roles: ['mentor']
             }
         },
+        {
+            path: '/register/special',
+            name: 'SpecialRegistration',
+            component: SpecialRegistrationPage,
+            meta: {
+                requiresAuth: false,
+                hideNavigation: true
+            }
+        }
     ]
 })
 
