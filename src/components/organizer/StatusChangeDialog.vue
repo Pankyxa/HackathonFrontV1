@@ -5,7 +5,11 @@
     width="50%"
   >
     <el-form>
-      <el-form-item label="Комментарий">
+      <el-form-item
+        label="Комментарий"
+        required
+        :error="commentError"
+      >
         <el-input
           v-model="commentModel"
           type="textarea"
@@ -17,7 +21,11 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">Отмена</el-button>
-        <el-button type="primary" @click="$emit('confirm')">
+        <el-button
+          type="primary"
+          @click="handleConfirm"
+          :disabled="!isValid"
+        >
           Подтвердить
         </el-button>
       </span>
@@ -26,7 +34,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps({
   visible: Boolean,
@@ -45,6 +53,20 @@ const commentModel = computed({
   get: () => props.comment,
   set: (value) => emit('update:comment', value)
 })
+
+const commentError = computed(() => {
+  return !commentModel.value?.trim() ? 'Комментарий обязателен' : ''
+})
+
+const isValid = computed(() => {
+  return !!commentModel.value?.trim()
+})
+
+const handleConfirm = () => {
+  if (isValid.value) {
+    emit('confirm')
+  }
+}
 
 const dialogTitle = computed(() => {
   const statusTexts = {

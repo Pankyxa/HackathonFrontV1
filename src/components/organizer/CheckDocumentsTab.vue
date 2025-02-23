@@ -107,6 +107,7 @@ const confirmStatusChange = async () => {
     await usersApi.updateUserStatus(user.id, status, statusComment.value)
     ElMessage.success('Статус пользователя успешно обновлен')
     statusDialogVisible.value = false
+    userDetailsVisible.value = false
     await loadPendingUsers()
   } catch (error) {
     ElMessage.error('Ошибка при обновлении статуса')

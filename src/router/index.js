@@ -8,6 +8,7 @@ import TeamApplication from "@/views/TeamApplication.vue";
 import MyTeamPage from "@/views/MyTeamPage.vue";
 import SpecialRegistrationPage from "@/views/SpecialRegistrationPage.vue";
 import OrganizerPage from "@/views/OrganizerPage.vue";
+import MentorTeamsPage from "@/views/MentorTeamsPage.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,11 +29,21 @@ const router = createRouter({
             component: RegistrationPage
         },
         {
+            path: '/register/special',
+            name: 'SpecialRegistration',
+            component: SpecialRegistrationPage,
+            meta: {
+                requiresAuth: false,
+                hideNavigation: true
+            }
+        },
+        {
             path: '/team/apply',
             name: 'TeamApplication',
             component: TeamApplication,
             meta: {
                 requiresAuth: true,
+                requiresMember: true,
                 title: 'Создание команды'
             }
         },
@@ -42,34 +53,26 @@ const router = createRouter({
             component: MyTeamPage,
             meta: {
                 requiresAuth: true,
+                requiresMember: true,
                 title: 'Moя команда'
             }
         },
         {
             path: '/mentor/teams/:id',
             name: 'MentorTeamView',
-            component: () => import('@/views/MyTeamPage.vue'),
+            component: MyTeamPage,
             meta: {
                 requiresAuth: true,
-                roles: ['mentor']
+                requiresMentor: true
             }
         },
         {
             path: '/mentor/teams',
             name: 'MentorTeams',
-            component: () => import('@/views/MentorTeamsPage.vue'),
+            component: MentorTeamsPage,
             meta: {
                 requiresAuth: true,
-                roles: ['mentor']
-            }
-        },
-        {
-            path: '/register/special',
-            name: 'SpecialRegistration',
-            component: SpecialRegistrationPage,
-            meta: {
-                requiresAuth: false,
-                hideNavigation: true
+                requiresMentor: true
             }
         },
         {
@@ -107,6 +110,20 @@ router.beforeEach(async (to, from, next) => {
 
         if (to.matched.some(record => record.meta.requiresOrganizer)) {
             if (!authStore.isOrganizer) {
+                next('/')
+                return
+            }
+        }
+
+        if (to.matched.some(record => record.meta.requiresMentor)) {
+            if (!authStore.isMentor) {
+                next('/')
+                return
+            }
+        }
+
+        if (to.matched.some(record => record.meta.requiresMember)) {
+            if (!authStore.isMember) {
                 next('/')
                 return
             }
