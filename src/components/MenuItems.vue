@@ -19,6 +19,14 @@
       </el-menu-item>
 
       <el-menu-item
+          v-if="authStore.isAdmin"
+          index="admin"
+          @click="handleItemClick('admin')"
+      >
+        Админ меню
+      </el-menu-item>
+
+      <el-menu-item
           v-if="authStore.isMentor"
           index="1"
           @click="handleItemClick('mentor-teams')"
@@ -76,6 +84,9 @@ const handleItemClick = (action) => {
   emit('menuItemClick');
 
   switch (action) {
+    case 'admin':
+      router.push('/admin');
+      break;
     case 'organizer':
       router.push('/organizer');
       break;

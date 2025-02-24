@@ -46,18 +46,29 @@ export const usersApi = {
         }
     },
 
-    async getAllUsers({limit = 10, offset = 0, search = ''}) {
+    async getAllUsers({limit = 10, offset = 0, search = '', roles = [], statuses = []}) {
         try {
-            const params = new URLSearchParams({
-                limit: limit.toString(),
-                offset: offset.toString(),
-                ...(search && {search})
+            const params = new URLSearchParams();
+
+            params.append('limit', limit.toString());
+            params.append('offset', offset.toString());
+
+            if (search) {
+                params.append('search', search);
+            }
+
+            roles.forEach(role => {
+                params.append('roles', role);
+            });
+
+            statuses.forEach(status => {
+                params.append('statuses', status);
             });
 
             const response = await api.get(`/users?${params}`);
             return {
-                users: response.data,
-                total: parseInt(response.headers['x-total-count'] || '0')
+                users: response.data.users,
+                total: response.data.total
             };
         } catch (error) {
             throw error.response?.data || error.message;
@@ -98,5 +109,10 @@ export const usersApi = {
         } catch (error) {
             throw error.response?.data || error.message;
         }
-    }
+    },
+
+    updateUserRoles: async (userId, roles) => {
+        const response = await api.put(`/users/${userId}/roles`, {roles})
+        return response.data
+    },
 };

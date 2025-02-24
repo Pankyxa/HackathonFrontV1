@@ -14,6 +14,10 @@
         <label>Роли:</label>
         <span>{{ formatRoles(user.roles) }}</span>
       </div>
+      <div class="info-item">
+        <label>Статус:</label>
+        <span>{{ user.current_status.description }}</span>
+      </div>
         <div class="info-item">
         <label>Дата регистрации:</label>
         <span>{{ formatDate(user.registered_at) }}</span>
