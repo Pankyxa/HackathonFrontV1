@@ -27,6 +27,7 @@
     />
 
     <TeamDangerZone
+        v-if="!authStore.isAdmin"
         :is-team-leader="isTeamLeader"
         :is-team-member="isTeamMember"
         :is-team-mentor="isTeamMentor"

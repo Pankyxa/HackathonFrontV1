@@ -184,6 +184,27 @@ export const teamsApi = {
         } catch (error) {
             throw error.response?.data || error.message;
         }
-    }
+    },
 
+    async getAdminTeams({ limit = 10, offset = 0, search = '', status = '' } = {}) {
+        try {
+            const params = {
+                limit,
+                offset
+            }
+
+            if (search && search.trim()) {
+                params.search = search
+            }
+
+            if (status) {
+                params.status = status
+            }
+
+            const response = await api.get('/teams/admin/teams', { params });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 };
