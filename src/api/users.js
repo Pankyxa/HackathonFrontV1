@@ -86,9 +86,11 @@ export const usersApi = {
                     const blob = new Blob([fileResponse.data], {
                         type: fileResponse.headers['content-type']
                     });
+                    console.log(doc);
                     return {
                         id: doc.id,
                         name: doc.filename,
+                        description: doc.file_type.description,
                         url: URL.createObjectURL(blob)
                     };
                 })
@@ -131,5 +133,22 @@ export const usersApi = {
         }
 
         return await response.json()
+    },
+
+    async updateUserDocuments(file, documentType) {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('document_type', documentType);
+
+            const response = await api.put('/users/me/documents', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
     }
 };

@@ -66,6 +66,12 @@
       </div>
     </div>
 
+    <UserDocuments
+      v-if="userData"
+      :user-data="userData"
+      @update="handleDocumentsUpdate"
+    />
+
     <EditProfileDialog
         v-if="showEditModal"
         :user-data="userData"
@@ -79,6 +85,7 @@
 import {ref, computed, onMounted} from 'vue'
 import {authApi} from "@/api/auth.js"
 import EditProfileDialog from './EditProfileDialog.vue'
+import UserDocuments from './UserDocuments.vue'
 
 const userData = ref(null)
 const showEditModal = ref(false)
@@ -109,6 +116,10 @@ const formatRoles = (roles) => {
 const handleUpdate = (updatedData) => {
   userData.value = updatedData
   showEditModal.value = false
+}
+
+const handleDocumentsUpdate = (updatedData) => {
+  userData.value = updatedData
 }
 
 onMounted(async () => {
