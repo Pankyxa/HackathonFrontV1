@@ -45,7 +45,7 @@
               <UserFilled/>
             </el-icon>
           </el-avatar>
-</template>
+        </template>
       </el-table-column>
 
       <el-table-column prop="team_name" label="Название" sortable/>
@@ -169,7 +169,7 @@ const loadTeams = async () => {
     const teamsWithMembers = await Promise.all(
         response.teams.map(async (team) => {
           const members = await loadTeamMembers(team.id)
-          return { ...team, members }
+          return {...team, members}
         })
     )
 
@@ -230,19 +230,19 @@ const getMembersText = (members) => {
 const handleSearch = () => {
   if (searchDebounce.value) {
     clearTimeout(searchDebounce.value)
-}
+  }
 
   currentPage.value = 1
 
   if (!searchQuery.value || searchQuery.value.length < 2) {
-    if (!searchQuery.value) { // Only reload if completely empty
-  loadTeams()
-}
+    if (!searchQuery.value) {
+      loadTeams()
+    }
     return
-}
+  }
 
   searchDebounce.value = setTimeout(() => {
-  loadTeams()
+    loadTeams()
   }, 300)
 }
 
@@ -318,7 +318,7 @@ onBeforeUnmount(() => {
 
 .warning-icon {
   color: var(--el-color-warning);
-  }
+}
 
 :deep(.el-input__suffix) {
   display: flex;
