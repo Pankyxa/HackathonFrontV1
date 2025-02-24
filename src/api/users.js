@@ -115,4 +115,21 @@ export const usersApi = {
         const response = await api.put(`/users/${userId}/roles`, {roles})
         return response.data
     },
+
+    async updateCurrentUser(userData) {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/users/me`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(userData)
+        })
+
+        if (!response.ok) {
+            throw new Error('Failed to update user data')
+        }
+
+        return await response.json()
+    }
 };

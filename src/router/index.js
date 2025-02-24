@@ -10,6 +10,7 @@ import SpecialRegistrationPage from "@/views/SpecialRegistrationPage.vue";
 import OrganizerPage from "@/views/OrganizerPage.vue";
 import MentorTeamsPage from "@/views/MentorTeamsPage.vue";
 import AdminPage from "@/views/AdminPage.vue";
+import ProfilePage from "@/views/ProfilePage.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -93,6 +94,12 @@ const router = createRouter({
                 requiresAuth: true,
                 requiresAdmin: true
             }
+        },
+        {
+            path: '/profile',
+            name: 'profile',
+            component: ProfilePage,
+            meta: { requiresAuth: true }
         }
     ]
 })
