@@ -13,7 +13,6 @@
       </el-tab-pane>
     </el-tabs>
   </div>
-  <TheFooter/>
 </template>
 
 <script setup>
@@ -29,7 +28,7 @@ const activeTab = ref('check-documents')
 .organizer-page {
   width: 100%;
   padding: 105px 20px 20px;
-  height: calc(100vh - 196px);
+  height: 100vh;
   display: flex;
   flex-direction: column;
 }

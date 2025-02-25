@@ -1,7 +1,6 @@
 <template>
-  <PrimaryLayout>
+  <TheHeader/>
     <div class="page-container">
-      <h1 class="page-title">Создание команды</h1>
       <div class="application-container">
         <el-steps :active="currentStep" finish-status="success" class="steps-wrapper">
           <el-step title="Информация о команде" />
@@ -10,7 +9,6 @@
         </el-steps>
 
         <div v-if="currentStep === 0" class="step-content">
-          <h2>Информация о команде</h2>
           <el-form :model="teamForm" label-position="top">
             <el-form-item label="Название команды" required>
               <el-input v-model="teamForm.name" placeholder="Введите название команды" />
@@ -29,7 +27,6 @@
         </div>
 
         <div v-if="currentStep === 1" class="step-content">
-          <h2>Участники команды</h2>
           <div class="members-info">
             <div class="members-list">
               <div v-for="(member, index) in teamForm.members" :key="member.id" class="member-card">
@@ -95,7 +92,6 @@
         </div>
       </div>
     </div>
-  </PrimaryLayout>
 </template>
 
 <script setup>
@@ -108,6 +104,7 @@ import { teamsApi } from '@/api/teams';
 import {useAuthStore} from "@/stores/auth.js";
 import UserSearchModal from '@/components/team/UserSearchModal.vue';
 import { ElMessage } from 'element-plus';
+import TheHeader from "@/components/TheHeader.vue";
 
 const router = useRouter();
 const currentStep = ref(0);
@@ -200,17 +197,8 @@ const handleFinish = () => {
 
 <style scoped>
 .page-container {
-  padding: 40px 20px;
-}
-
-.page-title {
-  text-align: center;
-  margin-bottom: 40px;
-  font-size: 28px;
-  font-weight: bold;
-  background: linear-gradient(90deg, #00A3FF 0%, #5B51D8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  margin: 105px 20px 20px;
+  height: calc(100vh - 125px);
 }
 
 .application-container {
@@ -220,6 +208,7 @@ const handleFinish = () => {
   border-radius: 16px;
   padding: 30px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  height: 100%;
 }
 
 .steps-wrapper {

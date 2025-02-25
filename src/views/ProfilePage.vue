@@ -24,7 +24,6 @@
       </div>
     </div>
   </div>
-  <TheFooter></TheFooter>
 </template>
 
 <script setup>
@@ -55,7 +54,7 @@ const currentComponent = computed(() => {
 
 <style scoped>
 .profile-container {
-  height: calc(100vh - 316px);
+  height: calc(100vh - 120px);
   margin: 105px 20px 20px;
   display: flex;
   flex-direction: column;

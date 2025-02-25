@@ -17,7 +17,7 @@
         v-model:page-size="pageSize"
         :total="totalUsers"
         :page-sizes="[10, 20, 30, 50]"
-        layout="total, sizes, prev, pager, next"
+        layout="sizes, prev, pager, next, total"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       />

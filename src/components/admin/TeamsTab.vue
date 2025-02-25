@@ -81,18 +81,6 @@
           </div>
         </template>
       </el-table-column>
-
-      <el-table-column label="Действия" width="100" fixed="right">
-        <template #default="{ row }">
-          <el-button
-              type="primary"
-              link
-              @click.stop="handleRowClick(row)"
-          >
-            Подробнее
-          </el-button>
-        </template>
-      </el-table-column>
     </el-table>
 
     <div class="pagination-container">

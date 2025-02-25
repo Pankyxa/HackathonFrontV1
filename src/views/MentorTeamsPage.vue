@@ -15,7 +15,6 @@
       </div>
     </div>
   </div>
-  <TheFooter></TheFooter>
 </template>
 
 <script setup>
@@ -46,7 +45,7 @@ onMounted(async () => {
 <style scoped>
 .mentor-teams-container {
   margin: 105px 20px 20px;
-  min-height: calc(100vh - 316px);
+  min-height: calc(100vh - 120px);
 }
 
 h1 {

@@ -11,7 +11,6 @@
       </el-tab-pane>
     </el-tabs>
   </div>
-  <TheFooter/>
 </template>
 
 <script setup>
@@ -28,7 +27,7 @@ const activeTab = ref('users')
 .admin-page {
   width: 100%;
   padding: 105px 20px 15px;
-  height: calc(100vh - 196px);
+  height: 100vh;
   display: flex;
   flex-direction: column;
 }
