@@ -33,7 +33,7 @@
                   accept="application/pdf"
                   :on-change="(file) => handleFileChange(file, getDocumentType(doc.description))"
               >
-                <el-button type="primary" link>
+                <el-button v-if="canEdit" type="primary" link>
                   <el-icon><Upload /></el-icon>
                   {{ doc.url ? 'Обновить' : 'Загрузить' }}
                 </el-button>
@@ -56,6 +56,10 @@ import { usersApi } from '@/api/users'
 const props = defineProps({
   userData: {
     type: Object,
+    required: true
+  },
+  canEdit: {
+    type: Boolean,
     required: true
   }
 })
@@ -154,8 +158,8 @@ onMounted(() => {
 }
 
 .documents-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 20px;
   margin-top: 16px;
 }

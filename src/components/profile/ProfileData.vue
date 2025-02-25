@@ -1,8 +1,24 @@
 <template>
   <div class="profile-data">
     <div class="header-actions">
+      <div v-if="showStatusMessage" class="status-message">
+        <el-alert
+            type="warning"
+            :closable="false"
+            show-icon
+        >
+          <p>Требуется обновление данных</p>
+          <p v-if="latestStatusComment" class="status-comment">
+            Комментарий: {{ latestStatusComment }}
+          </p>
+        </el-alert>
+      </div>
       <h2>Мои данные</h2>
-      <button class="btn-edit" @click="showEditModal = true">
+      <button
+          v-if="canEdit"
+          class="btn-edit"
+          @click="showEditModal = true"
+      >
         Редактировать
       </button>
     </div>
@@ -67,9 +83,10 @@
     </div>
 
     <UserDocuments
-      v-if="userData"
-      :user-data="userData"
-      @update="handleDocumentsUpdate"
+        v-if="userData && (hasMentorRole || hasParticipantRole)"
+        :can-edit="canEdit"
+        :user-data="userData"
+        @update="handleDocumentsUpdate"
     />
 
     <EditProfileDialog
@@ -89,6 +106,22 @@ import UserDocuments from './UserDocuments.vue'
 
 const userData = ref(null)
 const showEditModal = ref(false)
+
+const canEdit = computed(() => {
+  return userData.value?.current_status.name === 'need_update'
+})
+
+const showStatusMessage = computed(() => {
+  return userData.value?.current_status.name === 'need_update'
+})
+
+const latestStatusComment = computed(() => {
+  if (!userData.value?.status_history?.length) return null
+
+  const latestStatusWithComment = userData.value.status_history
+      .find(status => status.status.id === userData.value.current_status.id)
+  return latestStatusWithComment?.comment
+})
 
 const hasParticipantRole = computed(() => {
   return userData.value?.roles?.some(role => role.name === 'participant')
@@ -116,10 +149,14 @@ const formatRoles = (roles) => {
 const handleUpdate = (updatedData) => {
   userData.value = updatedData
   showEditModal.value = false
+  canEdit.value = false
+  showStatusMessage.value = false
 }
 
 const handleDocumentsUpdate = (updatedData) => {
   userData.value = updatedData
+  canEdit.value = false
+  showStatusMessage.value = false
 }
 
 onMounted(async () => {
@@ -193,6 +230,15 @@ h2 {
 
 .btn-edit:hover {
   background: #66b1ff;
+}
+
+.status-message {
+  margin-bottom: 20px;
+}
+
+.status-comment {
+  margin-top: 8px;
+  font-size: 14px;
 }
 
 @media (max-width: 768px) {
