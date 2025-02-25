@@ -104,7 +104,7 @@ const handleFileChange = async (file, documentType) => {
     const updatedUser = await usersApi.updateUserDocuments(file.raw, documentType)
     emit('update', updatedUser)
     ElMessage.success('Документ успешно загружен')
-    await loadDocuments() // Перезагружаем документы после успешной загрузки
+    await loadDocuments()
   } catch (error) {
     console.error('Error uploading file:', error)
     ElMessage.error('Ошибка при загрузке файла')
@@ -119,7 +119,7 @@ const loadDocuments = async () => {
     userDocuments.value = docs.map(doc => {
       let displayName = 'Документ'
       if (doc.description.includes('Сертификат')) {
-        displayName = hasParticipantRole.value ? 'Справка с места учебы' : 'Справка с места работы'
+        displayName = hasParticipantRole.value ? 'Справка с места учебы/работы' : 'Справка с места работы'
       } else if (doc.description.includes('Согласие')) {
         displayName = 'Согласие на обработку ПД'
       }

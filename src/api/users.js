@@ -86,7 +86,6 @@ export const usersApi = {
                     const blob = new Blob([fileResponse.data], {
                         type: fileResponse.headers['content-type']
                     });
-                    console.log(doc);
                     return {
                         id: doc.id,
                         name: doc.filename,
@@ -139,7 +138,11 @@ export const usersApi = {
         try {
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('document_type', documentType);
+            if (documentType) {
+                formData.append('document_type', documentType);
+            } else if (documentType.includes('certificate')) {
+                formData.append('document_type', 'certificate');
+            }
 
             const response = await api.put('/users/me/documents', formData, {
                 headers: {

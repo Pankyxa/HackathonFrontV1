@@ -22,8 +22,6 @@ export const teamsApi = {
             formData.append('team_motto', teamData.team_motto);
             formData.append('logo', teamData.logo);
 
-            console.log(formData);
-
             if (teamData.member_ids) {
                 formData.append('member_ids', teamData.member_ids);
             } else {
