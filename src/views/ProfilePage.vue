@@ -5,7 +5,7 @@
       <div class="profile-sidebar">
         <div class="sidebar-menu">
           <div
-              v-for="item in menuItems"
+              v-for="item in filteredMenuItems"
               :key="item.id"
               class="menu-item"
               :class="{ active: activeTab === item.id }"
@@ -32,13 +32,29 @@ import TheHeader from "@/components/TheHeader.vue"
 import TheFooter from "@/components/TheFooter.vue"
 import ProfileData from '@/components/profile/ProfileData.vue'
 import TeamInvites from '@/components/profile/TeamInvites.vue'
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
 const activeTab = ref('profile')
 
 const menuItems = [
   {id: 'profile', title: 'Мои данные'},
-  {id: 'invites', title: 'Приглашения в команду'}
+  {
+    id: 'invites',
+    title: 'Приглашения в команду',
+    showCondition: () => {
+      // Show for mentors always, and for members (participants) only if they don't have a team
+      return authStore.isMentor || (authStore.isMember && !authStore.isHaveTeam)
+    }
+  }
 ]
+
+const filteredMenuItems = computed(() => {
+  return menuItems.filter(item => {
+    if (!item.showCondition) return true
+    return item.showCondition()
+  })
+})
 
 const currentComponent = computed(() => {
   switch (activeTab.value) {
@@ -54,7 +70,7 @@ const currentComponent = computed(() => {
 
 <style scoped>
 .profile-container {
-  height: calc(100vh - 120px);
+  height: calc(100vh - 125px);
   margin: 105px 20px 20px;
   display: flex;
   flex-direction: column;

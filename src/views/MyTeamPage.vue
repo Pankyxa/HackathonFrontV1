@@ -118,7 +118,7 @@ onMounted(async () => {
 
 <style scoped>
 .my-team-container {
-  height: calc(100vh - 120px);
+  height: calc(100vh - 125px);
   margin: 105px 20px 20px;
   display: flex;
   flex-direction: column;

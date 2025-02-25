@@ -205,4 +205,31 @@ export const teamsApi = {
             throw error.response?.data || error.message;
         }
     },
+
+    async getInvites() {
+        try {
+            const response = await api.get('/teams/invitations');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async acceptInvite(inviteId) {
+        try {
+            const response = await api.post(`/teams/invitations/${inviteId}/accept`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async declineInvite(inviteId) {
+        try {
+            const response = await api.post(`/teams/invitations/${inviteId}/reject`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
 };

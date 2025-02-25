@@ -14,21 +14,22 @@
         </el-alert>
       </div>
       <div class="header-content">
-      <h2>Мои данные</h2>
+        <h2>Мои данные</h2>
         <div class="header-right">
-        <span v-if="userData?.current_status" class="status-badge" :class="statusClass">
+          <span v-if="userData?.current_status" class="status-badge" :class="statusClass">
+          <span class="status-icon"></span>
           {{ userData.current_status.description }}
         </span>
-      <button
-          v-if="canEdit"
-          class="btn-edit"
-          @click="showEditModal = true"
-      >
-        Редактировать
-      </button>
+          <button
+              v-if="canEdit"
+              class="btn-edit"
+              @click="showEditModal = true"
+          >
+            Редактировать
+          </button>
+        </div>
+      </div>
     </div>
-        </div>
-        </div>
 
     <div class="info-section" v-if="userData">
       <div class="info-grid">
@@ -36,18 +37,18 @@
           <label>ФИО:</label>
           <span>{{ userData.full_name }}</span>
         </div>
-          <div class="info-item">
+        <div class="info-item">
           <label>Email:</label>
           <span>{{ userData.email }}</span>
-          </div>
-          <div class="info-item">
+        </div>
+        <div class="info-item">
           <label>Роли:</label>
           <span>{{ formatRoles(userData.roles) }}</span>
-          </div>
-          <div class="info-item">
+        </div>
+        <div class="info-item">
           <label>Дата регистрации:</label>
           <span>{{ formatDate(userData.registered_at) }}</span>
-          </div>
+        </div>
 
         <template v-if="hasParticipantRole">
           <div class="info-item">
@@ -76,16 +77,16 @@
           <div class="info-item">
             <label>Номер телефона:</label>
             <span>{{ userData.mentor_info?.number }}</span>
-      </div>
+          </div>
           <div class="info-item">
             <label>Место работы:</label>
             <span>{{ userData.mentor_info?.job }}</span>
-    </div>
+          </div>
           <div class="info-item">
             <label>Должность:</label>
             <span>{{ userData.mentor_info?.job_title }}</span>
-  </div>
-</template>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -144,7 +145,6 @@ const statusClass = computed(() => {
     'status-pending': statusName === 'pending',
     'status-approved': statusName === 'approved',
     'status-need-update': statusName === 'need_update',
-    'status-rejected': statusName === 'rejected'
   }
 })
 
@@ -224,11 +224,12 @@ h2 {
   border-radius: 8px;
   padding: 20px;
 }
-  .info-grid {
+
+.info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 16px;
-  }
+}
 
 .info-item {
   display: flex;
@@ -272,29 +273,46 @@ h2 {
 
 .status-badge {
   padding: 4px 12px;
-  border-radius: 4px;
+  border-radius: 16px;
   font-size: 14px;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
 }
 
 .status-pending {
-  background-color: #e6a23c;
-  color: white;
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196F3;
+}
+
+.status-pending .status-icon {
+  background: #2196F3;
 }
 
 .status-approved {
-  background-color: #67c23a;
-  color: white;
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+}
+
+.status-approved .status-icon {
+  background: #4CAF50;
 }
 
 .status-need-update {
-  background-color: #f56c6c;
-  color: white;
+  background: rgba(244, 67, 54, 0.1);
+  color: #F44336;
 }
 
-.status-rejected {
-  background-color: #909399;
-  color: white;
+.status-need-update .status-icon {
+  background: #F44336;
 }
 
 @media (max-width: 768px) {
