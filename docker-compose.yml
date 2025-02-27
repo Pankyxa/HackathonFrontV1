@@ -1,0 +1,15 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - hackathon-network
+    restart: unless-stopped
+
+networks:
+  hackathon-network:
+    external: true
+    name: hackathon-network

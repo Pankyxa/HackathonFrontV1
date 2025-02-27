@@ -35,7 +35,6 @@ const router = createRouter({
             name: 'SpecialRegistration',
             component: SpecialRegistrationPage,
             meta: {
-                requiresAuth: false,
                 hideNavigation: true
             }
         },

@@ -118,8 +118,7 @@ export const usersApi = {
     },
 
     async updateCurrentUser(userData) {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/users/me`, {
-            method: 'PUT',
+        const response = await api.put(`/users/me`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
