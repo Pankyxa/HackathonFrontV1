@@ -48,24 +48,24 @@ export const usersApi = {
 
     async getAllUsers({limit = 10, offset = 0, search = '', roles = [], statuses = []}) {
         try {
-            const params = new URLSearchParams();
-
-            params.append('limit', limit.toString());
-            params.append('offset', offset.toString());
+            const params = {
+                limit,
+                offset
+            };
 
             if (search) {
-                params.append('search', search);
+                params.search = search;
             }
 
-            roles.forEach(role => {
-                params.append('roles', role);
-            });
+            if (roles.length > 0) {
+                params.roles = roles;
+            }
 
-            statuses.forEach(status => {
-                params.append('statuses', status);
-            });
+            if (statuses.length > 0) {
+                params.statuses = statuses;
+            }
 
-            const response = await api.get(`/users?${params}`);
+            const response = await api.get('/users/all', { params });
             return {
                 users: response.data.users,
                 total: response.data.total
