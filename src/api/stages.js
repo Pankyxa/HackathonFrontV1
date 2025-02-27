@@ -26,7 +26,7 @@ export const stagesApi = {
 
   async getAllStages() {
     try {
-      const response = await api.get('/stages');
+      const response = await api.get('/stages/all');
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;

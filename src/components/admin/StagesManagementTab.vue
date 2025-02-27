@@ -28,7 +28,7 @@
           </template>
           <template v-else>
             <el-button
-                v-if="!stage.is_active"
+                v-if="!stage.is_active && isAdjacentStage(stage)"
                 class="activate-button"
                 @click="activateStage(stage.id)"
                 :loading="activating"
@@ -54,6 +54,15 @@ const error = ref(null)
 const activating = ref(false)
 
 const stageStore = useStageStore()
+
+function isAdjacentStage(stage) {
+  const activeStage = stages.value.find(s => s.is_active)
+  if (!activeStage) return false
+
+  const activeOrder = activeStage.order
+
+  return Math.abs(stage.order - activeOrder) === 1
+}
 
 async function loadStages() {
   try {
@@ -81,6 +90,7 @@ async function activateStage(stageId) {
     activating.value = false
   }
 }
+console.log(stages)
 
 onMounted(loadStages)
 </script>
