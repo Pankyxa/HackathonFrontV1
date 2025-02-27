@@ -33,7 +33,7 @@
                   accept="application/pdf"
                   :on-change="(file) => handleFileChange(file, getDocumentType(doc.description))"
               >
-                <el-button v-if="canEdit" type="primary" link>
+                <el-button v-if="canEdit && stageStore.isRegistration" type="primary" link>
                   <el-icon><Upload /></el-icon>
                   {{ doc.url ? 'Обновить' : 'Загрузить' }}
                 </el-button>
@@ -52,6 +52,9 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Download, Upload } from '@element-plus/icons-vue'
 import { usersApi } from '@/api/users'
+import { useStageStore} from "@/stores/stage.js"
+
+const stageStore = useStageStore()
 
 const props = defineProps({
   userData: {

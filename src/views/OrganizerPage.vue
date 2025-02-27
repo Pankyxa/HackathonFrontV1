@@ -2,7 +2,7 @@
   <TheHeader/>
   <div class="organizer-page">
     <el-tabs v-model="activeTab" class="tabs-container">
-      <el-tab-pane label="Проверить документы пользователей" name="check-documents">
+      <el-tab-pane v-if="stageStore.isRegistration" label="Проверить документы пользователей" name="check-documents">
         <CheckDocumentsTab/>
       </el-tab-pane>
 
@@ -18,10 +18,13 @@
 <script setup>
 import { ref } from 'vue'
 import TheHeader from "@/components/TheHeader.vue"
-import TheFooter from "@/components/TheFooter.vue"
 import CheckDocumentsTab from "@/components/organizer/CheckDocumentsTab.vue"
 
-const activeTab = ref('check-documents')
+import {useStageStore} from "@/stores/stage.js";
+
+const stageStore = useStageStore()
+
+const activeTab = ref(stageStore.isRegistration? 'check-documents' : 'jury-scores')
 </script>
 
 <style scoped>

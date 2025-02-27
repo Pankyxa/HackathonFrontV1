@@ -256,7 +256,7 @@ const handleRowClick = (row) => {
 }
 
 const handleTeamUpdate = () => {
-  loadTeams() // Перезагружаем список после обновления команды
+  loadTeams()
 }
 
 onMounted(() => {

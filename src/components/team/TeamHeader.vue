@@ -21,7 +21,7 @@
             style="display: none"
         >
         <button
-            v-if="isTeamLeader"
+            v-if="isTeamLeader && stageStore.isRegistration"
             class="change-logo-btn"
             @click="triggerFileInput"
         >
@@ -44,7 +44,7 @@
         <label>Девиз команды</label>
         <div class="info-value">{{ teamData.team_motto }}</div>
       </div>
-      <button class="edit-btn" v-if="isTeamLeader" @click="$emit('edit')">
+      <button class="edit-btn" v-if="isTeamLeader && stageStore.isRegistration" @click="$emit('edit')">
         Редактировать информацию
       </button>
     </div>
@@ -53,6 +53,10 @@
 
 <script setup>
 import { ref } from 'vue'
+
+import {useStageStore} from "@/stores/stage.js";
+
+const stageStore = useStageStore();
 
 const props = defineProps({
   teamData: {

@@ -11,6 +11,8 @@ import OrganizerPage from "@/views/OrganizerPage.vue";
 import MentorTeamsPage from "@/views/MentorTeamsPage.vue";
 import AdminPage from "@/views/AdminPage.vue";
 import ProfilePage from "@/views/ProfilePage.vue";
+import NotFoundPage from "@/views/NotFoundPage.vue";
+import {useStageStore} from "@/stores/stage.js";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,19 +25,27 @@ const router = createRouter({
         {
             path: '/login',
             name: 'login',
-            component: LoginPage
+            component: LoginPage,
+            meta: {
+                requiresGuest: true
+            }
         },
         {
             path: '/registration',
             name: 'registration',
-            component: RegistrationPage
+            component: RegistrationPage,
+            meta: {
+                requiresGuest: true,
+                requiresRegistrationStage: true,
+            }
         },
         {
             path: '/register/special',
             name: 'SpecialRegistration',
             component: SpecialRegistrationPage,
             meta: {
-                hideNavigation: true
+                hideNavigation: true,
+                requiresGuest: true
             }
         },
         {
@@ -45,6 +55,8 @@ const router = createRouter({
             meta: {
                 requiresAuth: true,
                 requiresMember: true,
+                requiresRegistrationStage: true,
+                requiresNotHaveTeam: true,
                 title: 'Создание команды'
             }
         },
@@ -99,6 +111,11 @@ const router = createRouter({
             name: 'profile',
             component: ProfilePage,
             meta: { requiresAuth: true }
+        },
+        {
+            path: '/:pathMatch(.*)*',
+            name: 'not-found',
+            component: NotFoundPage
         }
     ]
 })
@@ -106,6 +123,15 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     const loadingStore = useLoadingStore();
     const authStore = useAuthStore()
+    const stageStore = useStageStore()
+
+    if (!stageStore.currentStage) {
+        try {
+            await stageStore.initializeStage()
+        } catch (error) {
+            console.error('Failed to initialize stage:', error)
+        }
+    }
 
     if (loadingStore.isLoading) {
         await new Promise(resolve => {
@@ -116,6 +142,27 @@ router.beforeEach(async (to, from, next) => {
                 }
             });
         });
+    }
+
+    if (to.matched.some(record => record.meta.requiresNotHaveTeam)) {
+        if (authStore.isHaveTeam) {
+            next('/')
+            return
+        }
+    }
+
+    if (to.matched.some(record => record.meta.requiresGuest)) {
+        if (authStore.isAuthenticated) {
+            next('/')
+            return
+        }
+    }
+
+    if (to.matched.some(record => record.meta.requiresRegistrationStage)) {
+        if (!stageStore.isRegistration) {
+            next('/')
+            return
+        }
     }
 
     if (to.matched.some(record => record.meta.requiresAuth)) {

@@ -3,7 +3,7 @@
     <div class="section-header">
       <h2 class="section-title">Наставник команды</h2>
       <button
-          v-if="isTeamLeader && !mentor"
+          v-if="isTeamLeader && !mentor && stageStore.isRegistration"
           class="add-mentor-btn"
           @click="$emit('add-mentor')"
       >
@@ -23,7 +23,7 @@
           </div>
         </div>
       </div>
-      <div class="mentor-actions" v-if="isTeamLeader">
+      <div class="mentor-actions" v-if="isTeamLeader && stageStore.isRegistration">
         <button class="remove-btn" @click="$emit('remove-mentor', mentor)">
           Удалить
         </button>
@@ -40,6 +40,10 @@
 
 <script setup>
 import {computed} from "vue";
+
+import {useStageStore} from "@/stores/stage.js";
+
+const stageStore = useStageStore();
 
 const props = defineProps({
   members: {

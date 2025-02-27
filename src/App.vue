@@ -10,12 +10,15 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useStageStore } from "@/stores/stage.js"
 import GlobalLoader from '@/components/GlobalLoader.vue'
 
 const authStore = useAuthStore()
+const stageStore = useStageStore()
 
 onMounted(() => {
   authStore.initializeAuth()
+  stageStore.initializeStage()
 })
 </script>
 

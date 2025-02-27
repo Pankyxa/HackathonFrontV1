@@ -70,7 +70,6 @@ const isMobile = computed(() => window.innerWidth <= 768)
 const selectedRoles = ref([])
 const savingRoles = ref(false)
 
-// Здесь определите доступные роли в вашей системе
 const availableRoles = [
   { name: 'admin', description: 'Администратор' },
   { name: 'organizer', description: 'Организатор' },

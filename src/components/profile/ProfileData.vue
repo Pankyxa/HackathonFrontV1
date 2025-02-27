@@ -18,7 +18,11 @@
         <div class="header-right">
           <span v-if="userData?.current_status" class="status-badge" :class="statusClass">
           <span class="status-icon"></span>
-          {{ userData.current_status.description }}
+          {{
+              !stageStore.isRegistration && statusName !== 'approved' ?
+                  "Регистрация закрыта, вы не можете учавствовать в хакатоне" :
+                  userData.current_status.description
+            }}
         </span>
           <button
               v-if="canEdit"
@@ -111,6 +115,9 @@ import {ref, computed, onMounted} from 'vue'
 import {authApi} from "@/api/auth.js"
 import EditProfileDialog from './EditProfileDialog.vue'
 import UserDocuments from './UserDocuments.vue'
+import {useStageStore} from "@/stores/stage.js"
+
+const stageStore = useStageStore()
 
 const userData = ref(null)
 const showEditModal = ref(false)
@@ -141,6 +148,10 @@ const hasMentorRole = computed(() => {
 
 const statusClass = computed(() => {
   const statusName = userData.value?.current_status?.name
+  if (!stageStore.isRegistration && statusName !== 'approved') {
+    return 'status-need-update'
+  }
+
   return {
     'status-pending': statusName === 'pending',
     'status-approved': statusName === 'approved',

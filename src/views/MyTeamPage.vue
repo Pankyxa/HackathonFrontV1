@@ -5,25 +5,25 @@
       <div class="team-sidebar">
         <div class="sidebar-menu">
           <div
-            class="menu-item team-header-item"
-            :class="{ active: activeTab === 'info' }"
-            @click="activeTab = 'info'"
+              class="menu-item team-header-item"
+              :class="{ active: activeTab === 'info' }"
+              @click="activeTab = 'info'"
           >
             <img
-              v-if="teamLogo"
-              :src="teamLogoUrl"
-              alt="Team Logo"
-              class="menu-logo"
+                v-if="teamLogo"
+                :src="teamLogoUrl"
+                alt="Team Logo"
+                class="menu-logo"
             />
             <div v-else class="menu-logo-placeholder"></div>
             <span class="team-name">{{ teamName || getDefaultTitle }}</span>
           </div>
           <div
-            v-for="item in menuItems"
-            :key="item.id"
-            class="menu-item"
-            :class="{ active: activeTab === item.id }"
-            @click="activeTab = item.id"
+              v-for="item in menuItems"
+              :key="item.id"
+              class="menu-item"
+              :class="{ active: activeTab === item.id }"
+              @click="activeTab = item.id"
           >
             {{ item.title }}
           </div>
@@ -32,10 +32,10 @@
       <div class="content-area">
         <div class="content-wrapper">
           <component
-            :is="currentComponent"
-            :view-mode="viewMode"
-            :team-id="teamId"
-            @update:teamInfo="handleTeamInfoUpdate"
+              :is="currentComponent"
+              :view-mode="viewMode"
+              :team-id="teamId"
+              @update:teamInfo="handleTeamInfoUpdate"
           ></component>
         </div>
       </div>
@@ -44,12 +44,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import {ref, computed, onMounted} from 'vue'
+import {useRoute} from 'vue-router'
 import TheHeader from "@/components/TheHeader.vue"
-import TheFooter from "@/components/TheFooter.vue"
 import TeamInfo from '@/components/team/TeamInfo.vue'
-import { teamsApi } from '@/api/teams'
+import {teamsApi} from '@/api/teams'
+
+import {useStageStore} from "@/stores/stage.js";
+import {useLoadingStore} from "@/stores/loading.js";
+
+const stageStore = useStageStore();
+const loadingStore = useLoadingStore();
 
 const route = useRoute()
 const activeTab = ref('info')
@@ -57,6 +62,7 @@ const teamName = ref('')
 const teamLogo = ref(null)
 const teamId = ref(route.params.id || null)
 const teamLogoTimestamp = ref(Date.now())
+const teamInfo = ref({})
 
 const viewMode = computed(() => {
   return route.path.includes('/mentor/teams/') ? 'mentor' : 'default'
@@ -66,10 +72,25 @@ const getDefaultTitle = computed(() => {
   return viewMode.value === 'mentor' ? 'Команда' : 'Моя команда'
 })
 
-const menuItems = [
-  {id: 'task', title: 'Задача'},
-  {id: 'atach solution', title: 'Прикрепить решение'}
-]
+const teamStatus = computed(() => {
+  return teamInfo.value?.status_details?.status
+})
+
+const menuItems = computed(() => {
+  const baseItem = { id: 'task', title: 'Задача' };
+
+  const currentOrder = stageStore.currentStage?.order || 0;
+  const taskDistributionOrder = 3;
+
+  if (currentOrder >= taskDistributionOrder && teamStatus.value === 'active') {
+    return [
+      baseItem,
+      { id: 'solution', title: 'Решение' }
+    ];
+  }
+
+  return [baseItem];
+});
 
 const teamLogoUrl = computed(() => {
   if (!teamLogo.value) return null;
@@ -88,8 +109,9 @@ const currentComponent = computed(() => {
 })
 
 const handleTeamInfoUpdate = (info) => {
+  loadingStore.isLoading = true
   teamName.value = info.team_name
-  teamId.value = info.id
+  teamInfo.value = info
 
   if (info.logo_file_id) {
     teamLogo.value = `${import.meta.env.VITE_API_URL}/teams/${info.id}/logo`
@@ -101,6 +123,7 @@ const handleTeamInfoUpdate = (info) => {
   if (info.updated_at) {
     teamLogoTimestamp.value = info.updated_at
   }
+  loadingStore.isLoading = false
 }
 
 
@@ -195,7 +218,7 @@ onMounted(async () => {
   align-items: center;
   gap: 1rem;
   padding: 0.75rem;
-  }
+}
 
 .menu-logo {
   width: 40px;
@@ -203,22 +226,22 @@ onMounted(async () => {
   border-radius: 50%;
   object-fit: cover;
   background: white;
-  }
+}
 
 .menu-logo-placeholder {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.2);
-  }
+}
 
 .team-name {
   font-weight: 500;
-    flex: 1;
+  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  }
+}
 
 @media (max-width: 768px) {
   .my-team-container {

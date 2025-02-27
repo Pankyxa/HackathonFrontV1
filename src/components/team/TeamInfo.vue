@@ -1,5 +1,5 @@
 <template>
-  <div class="team-info">
+  <div class="team-info" v-if="!loading">
     <TeamHeader
         :team-data="teamData"
         :team-logo="teamLogo"
@@ -27,7 +27,7 @@
     />
 
     <TeamDangerZone
-        v-if="!authStore.isAdmin"
+        v-if="!authStore.isAdmin && stageStore.isRegistration"
         :is-team-leader="isTeamLeader"
         :is-team-member="isTeamMember"
         :is-team-mentor="isTeamMentor"
@@ -104,6 +104,7 @@
 import {ref, computed, onMounted} from 'vue'
 import {teamsApi} from '@/api/teams'
 import {useAuthStore} from '@/stores/auth'
+import {useStageStore} from '@/stores/stage'
 import {ElMessage} from 'element-plus'
 import {useRouter} from 'vue-router'
 
@@ -121,6 +122,7 @@ import UserSearchModal from './UserSearchModal.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const stageStore = useStageStore()
 const emit = defineEmits(['update:teamInfo'])
 
 const props = defineProps({
@@ -191,6 +193,9 @@ const isMentorView = computed(() => props.viewMode === 'mentor')
 
 const statusText = computed(() => {
   const status = teamData.value?.status_details?.status
+  if (!stageStore.isRegistration && status !== 'active') {
+    return 'Регистрация закрыта, все команды зарегистрированы'
+  }
   switch (status) {
     case 'incomplete':
       return 'Неполный состав команды'
@@ -199,7 +204,7 @@ const statusText = computed(() => {
     case 'needs_update':
       return 'Некоторым участникам необходимо обновить личные данные'
     case 'active':
-      return 'Все участники подтверждены'
+      return 'Вы участвуете в хакатоне'
     default:
       return 'Статус неизвестен'
   }
@@ -207,6 +212,9 @@ const statusText = computed(() => {
 
 const statusClass = computed(() => {
   const status = teamData.value?.status_details?.status
+  if (!stageStore.isRegistration && status !== 'active') {
+    return 'status-needs-update'
+  }
   switch (status) {
     case 'incomplete':
       return 'status-incomplete'
@@ -506,9 +514,13 @@ const handleMemberSelect = async (user) => {
 }
 
 const showUserSearch = () => {
-  if (teamMembers.value.length >= 4) {
+  const filteredMembers = teamMembers.value.filter(member =>
+      member.role.toUpperCase() !== 'MENTOR'
+  );
+
+  if (filteredMembers.length >= 5) {
     ElMessage({
-      message: 'Достигнуто максимальное количество участников (4)',
+      message: 'Достигнуто максимальное количество участников (5)',
       type: 'warning'
     })
     return

@@ -136,7 +136,7 @@ const handlePhotoChange = (file) => {
 };
 
 const showUserSearch = () => {
-  if (teamForm.value.members.length < 4) {
+  if (teamForm.value.members.length < 5) {
     showSearchModal.value = true;
   }
 };

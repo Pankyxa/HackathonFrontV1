@@ -29,7 +29,6 @@
               />
             </el-form-item>
 
-            <!-- Поля для участника -->
             <template v-if="hasParticipantRole">
               <el-form-item label="Номер телефона:" prop="participant_info.number">
                 <el-input

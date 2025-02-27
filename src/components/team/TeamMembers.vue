@@ -5,7 +5,7 @@
       <div class="header-right">
         <span class="member-count">{{ filteredMembers.length }}/5 участников</span>
         <button
-            v-if="isTeamLeader"
+            v-if="isTeamLeader && stageStore.isRegistration"
             class="add-member-btn"
             @click="showUserSearch"
             :disabled="filteredMembers.length >= 5"
@@ -26,7 +26,7 @@
             </div>
           </div>
         </div>
-        <div class="member-actions" v-if="isTeamLeader && member.user.id !== currentUserId">
+        <div class="member-actions" v-if="isTeamLeader && member.user.id !== currentUserId && stageStore.isRegistration">
           <button class="remove-btn" @click="$emit('remove-member', member)">
             Удалить
           </button>
@@ -38,6 +38,10 @@
 
 <script setup>
 import {computed} from "vue";
+
+import {useStageStore} from "@/stores/stage.js";
+
+const stageStore = useStageStore();
 
 const props = defineProps({
   members: {
@@ -79,6 +83,9 @@ const getRoleName = (role) => {
 }
 
 const getMemberStatusText = (status) => {
+  if (!stageStore.isRegistration && status !== "approved") {
+    return 'need_update'
+  }
   const statusMap = {
     'pending': 'В ожидании проверки документов',
     'need_update': 'Требуется обновить личные данные',
@@ -88,6 +95,9 @@ const getMemberStatusText = (status) => {
 }
 
 const getMemberStatusClass = (status) => {
+  if (!stageStore.isRegistration && status !== "approved") {
+    return 'status-need-update'
+  }
   return {
     'status-pending': status === 'pending',
     'status-need-update': status === 'need_update',
@@ -96,7 +106,12 @@ const getMemberStatusClass = (status) => {
 }
 
 const showUserSearch = () => {
-  if (props.members.length >= 5) {
+  const memberCount = props.members.filter(member =>
+      member.role.toUpperCase() === 'MEMBER' ||
+      member.role.toUpperCase() === 'TEAMLEAD'
+  ).length;
+
+  if (memberCount >= 5) {
     return
   }
   emit('add-member')

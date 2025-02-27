@@ -2,14 +2,25 @@
   <TheHeader :class="{ 'header-hidden': isHeaderHidden }"></TheHeader>
   <div class="home-page">
     <div class="hero-section">
-      <!-- Десктоп версия -->
       <div class="desktop-container">
         <div class="hero-content">
           <h1>Хакатон</h1>
           <p>Цифровые двойники в энергетике</p>
           <p class="subtitle">Командные соревнования по решению производственной задачи</p>
           <div class="prize-info">Призовой фонд 225 000 рублей</div>
-          <el-button type="primary" class="custom-button" @click="handleApplicationClick">Подать заявку</el-button>
+          <el-button type="primary" class="custom-button"
+                     v-if="(
+                         stageStore.isRegistration &&
+                          !authStore.isHaveTeam &&
+                          authStore.isMember &&
+                          authStore.isAuthenticated)
+                     || (
+                         stageStore.isRegistration &&
+                         !authStore.isAuthenticated
+                         )"
+                     @click="handleApplicationClick">
+            Подать заявку
+          </el-button>
         </div>
         <div class="synergy-text">
           <div>Энергетик будущего 2050</div>
@@ -17,7 +28,6 @@
         </div>
       </div>
 
-      <!-- Мобильная версия -->
       <div class="mobile-container">
         <h1>Хакатон</h1>
         <p>Цифровые двойники в энергетике</p>
@@ -98,8 +108,17 @@
     <div class="stages-section">
       <h2>Этапы</h2>
       <div class="stages-container">
-        <div class="stage-item" v-for="(stage, index) in stages" :key="index">
-          <div class="stage-number">{{ index + 1 }}</div>
+        <div
+            v-for="(stage, index) in stages"
+            :key="index"
+            class="stage-item"
+            :class="{
+          'stage-completed': isStageCompleted(stage.order),
+          'stage-current': isCurrentStage(stage.order),
+          'stage-upcoming': isStageUpcoming(stage.order)
+        }"
+        >
+          <div class="stage-number">{{ stage.order }}</div>
           <el-icon>
             <component :is="stage.icon"/>
           </el-icon>
@@ -112,18 +131,23 @@
 </template>
 
 <script setup>
-import {ref, onMounted, onUnmounted} from 'vue';
+import {ref, onMounted, onUnmounted, computed} from 'vue';
 import {useRouter} from 'vue-router';
-import {UserFilled, Document, Monitor, Check, Trophy, Star, Medal, User} from '@element-plus/icons-vue'
+import {UserFilled, Document, Monitor, Check, Trophy, Star, Medal, User, Finished} from '@element-plus/icons-vue'
 import TheHeader from "@/components/TheHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
 import AuthRequiredModal from "@/components/auth/AuthRequiredModal.vue";
+import {useStageStore} from "@/stores/stage.js";
+import {useAuthStore} from "@/stores/auth.js";
 
 const router = useRouter();
 const showAuthModal = ref(false);
 const isHeaderHidden = ref(false);
 const lastScrollPosition = ref(0);
 const scrollThreshold = 100;
+
+const stageStore = useStageStore();
+const authStore = useAuthStore();
 
 const handleScroll = () => {
   const currentScrollPosition = window.scrollY;
@@ -145,14 +169,22 @@ onUnmounted(() => {
 });
 
 const stages = [
-  {icon: UserFilled, text: 'Регистрация участников'},
-  {icon: Document, text: 'Рассылка данных для выполнения задания'},
-  {icon: Monitor, text: 'Прием решений'},
-  {icon: Check, text: 'Проверка решений'},
-  {icon: Trophy, text: 'Онлайн защита'},
-  {icon: Star, text: 'Публикация результатов'},
-  {icon: Medal, text: 'Награждение'}
+  {order: 1, icon: UserFilled, text: 'Регистрация участников'},
+  {order: 2, icon: Finished, text: 'Регистрация закрыта'},
+  {order: 3, icon: Document, text: 'Рассылка данных для выполнения задания'},
+  {order: 4, icon: Monitor, text: 'Прием решений'},
+  {order: 5, icon: Check, text: 'Проверка решений'},
+  {order: 6, icon: Trophy, text: 'Онлайн защита'},
+  {order: 7, icon: Star, text: 'Публикация результатов'},
+  {order: 8, icon: Medal, text: 'Награждение'}
 ];
+
+const currentOrder = computed(() => stageStore.currentStage?.order || 0);
+
+const isStageCompleted = (stageOrder) => stageOrder < currentOrder.value;
+const isCurrentStage = (stageOrder) => stageOrder === currentOrder.value;
+const isStageUpcoming = (stageOrder) => stageOrder > currentOrder.value;
+
 
 const handleApplicationClick = () => {
   const token = localStorage.getItem('token');
@@ -162,6 +194,10 @@ const handleApplicationClick = () => {
     router.push('/team/apply');
   }
 };
+
+onMounted(async () => {
+  await stageStore.fetchCurrentStage();
+});
 </script>
 
 <style scoped>
@@ -218,7 +254,6 @@ const handleApplicationClick = () => {
   border-radius: 16px;
 }
 
-/* Десктоп стили */
 .desktop-container {
   display: flex;
   justify-content: space-between;
@@ -245,7 +280,6 @@ const handleApplicationClick = () => {
   white-space: nowrap;
 }
 
-/* Мобильная версия */
 .mobile-container {
   display: none;
   flex-direction: column;
@@ -462,6 +496,86 @@ const handleApplicationClick = () => {
   transform: translateY(-100%);
 }
 
+.stages-section {
+  background: linear-gradient(90deg, #00A3FF 0%, #5B51D8 100%);
+  padding: 40px 20px;
+  color: white;
+  border-radius: 16px;
+  margin: 20px;
+}
+
+.stages-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.stage-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.stage-completed {
+  background: rgba(128, 128, 128, 0.2);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.stage-current {
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid #4CAF50;
+  color: white;
+}
+
+.stage-upcoming {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.stage-number {
+  background: rgba(255, 255, 255, 0.2);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.stage-completed .el-icon {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.stage-current .el-icon {
+  color: #4CAF50;
+}
+
+.stage-upcoming .el-icon {
+  color: white;
+}
+
+.stage-current::before {
+  content: '•';
+  position: absolute;
+  left: -20px;
+  color: #4CAF50;
+  font-size: 24px;
+}
+
+.stage-completed .stage-number {
+  background: rgba(128, 128, 128, 0.3);
+}
+
+.stage-current .stage-number {
+  background: rgba(76, 175, 80, 0.3);
+  border: 1px solid #4CAF50;
+}
 
 @media (max-width: 768px) {
   .hero-section {

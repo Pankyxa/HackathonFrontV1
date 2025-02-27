@@ -1,7 +1,7 @@
 <template>
   <div class="menu-items-wrapper">
     <template v-if="!isAuthenticated">
-      <el-menu-item index="1" @click="handleItemClick('application')">
+      <el-menu-item v-if="stageStore.isRegistration" index="1" @click="handleItemClick('application')">
         Подать заявку
       </el-menu-item>
       <el-menu-item index="2" @click="handleItemClick('login')">
@@ -35,7 +35,7 @@
       </el-menu-item>
 
       <el-menu-item
-          v-if="authStore.isMember && !isHaveTeam"
+          v-if="authStore.isMember && !isHaveTeam && stageStore.isRegistration"
           index="1"
           @click="handleItemClick('application')"
       >
@@ -63,9 +63,11 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.js';
+import { useStageStore } from '@/stores/stage.js';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const stageStore = useStageStore();
 
 const props = defineProps({
   isAuthenticated: {

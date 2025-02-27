@@ -36,7 +36,6 @@ export const usersApi = {
             });
 
             const response = await api.get(`/users/pending?${params}`);
-            // Теперь мы ожидаем объект с полями users и total напрямую из ответа
             return {
                 users: response.data.users,
                 total: response.data.total

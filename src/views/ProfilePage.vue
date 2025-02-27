@@ -29,7 +29,6 @@
 <script setup>
 import {ref, computed} from 'vue'
 import TheHeader from "@/components/TheHeader.vue"
-import TheFooter from "@/components/TheFooter.vue"
 import ProfileData from '@/components/profile/ProfileData.vue'
 import TeamInvites from '@/components/profile/TeamInvites.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -43,7 +42,6 @@ const menuItems = [
     id: 'invites',
     title: 'Приглашения в команду',
     showCondition: () => {
-      // Show for mentors always, and for members (participants) only if they don't have a team
       return authStore.isMentor || (authStore.isMember && !authStore.isHaveTeam)
     }
   }

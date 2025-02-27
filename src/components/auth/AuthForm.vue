@@ -119,6 +119,7 @@
       <el-button
           class="button-secondary"
           type="info"
+          v-if="stageStore.isRegistration"
           @click="handleSecondaryAction"
       >
         {{ secondaryButtonText }}
@@ -130,6 +131,9 @@
 <script setup>
 import {ref, watch} from 'vue';
 import {InfoFilled, Download} from '@element-plus/icons-vue';
+import {useStageStore} from "@/stores/stage.js";
+
+const stageStore = useStageStore();
 
 const props = defineProps({
   loading: {

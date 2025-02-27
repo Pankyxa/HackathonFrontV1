@@ -323,7 +323,6 @@ const closeModal = () => {
   }
 }
 
-/* Для очень маленьких экранов */
 @media (max-width: 320px) {
   .user-search-dialog :deep(.el-dialog__title) {
     font-size: 16px;
