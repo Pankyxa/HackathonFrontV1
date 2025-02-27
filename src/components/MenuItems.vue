@@ -11,6 +11,14 @@
 
     <template v-else>
       <el-menu-item
+          v-if="authStore.isJudge"
+          index="judge"
+          @click="handleItemClick('judge')"
+      >
+        Оценка работ
+      </el-menu-item>
+
+      <el-menu-item
           v-if="authStore.isOrganizer"
           index="organizer"
           @click="handleItemClick('organizer')"
@@ -86,6 +94,9 @@ const handleItemClick = (action) => {
   emit('menuItemClick');
 
   switch (action) {
+    case 'judge':
+      router.push('/judge/teams');
+      break;
     case 'admin':
       router.push('/admin');
       break;

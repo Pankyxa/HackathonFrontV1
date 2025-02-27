@@ -13,6 +13,7 @@ import AdminPage from "@/views/AdminPage.vue";
 import ProfilePage from "@/views/ProfilePage.vue";
 import NotFoundPage from "@/views/NotFoundPage.vue";
 import {useStageStore} from "@/stores/stage.js";
+import JudgePage from "@/views/JudgePage.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -113,6 +114,15 @@ const router = createRouter({
             meta: { requiresAuth: true }
         },
         {
+            path: '/judge/teams',
+            name: 'JudgeTeams',
+            component: JudgePage,
+            meta: {
+                requiresAuth: true,
+                requiresJudge: true
+            }
+        },
+        {
             path: '/:pathMatch(.*)*',
             name: 'not-found',
             component: NotFoundPage
@@ -194,6 +204,13 @@ router.beforeEach(async (to, from, next) => {
 
         if (to.matched.some(record => record.meta.requiresAdmin)) {
             if (!authStore.isAdmin) {
+                next('/')
+                return
+            }
+        }
+
+        if (to.matched.some(record => record.meta.requiresJudge)) {
+            if (!authStore.isJudge) {
                 next('/')
                 return
             }
