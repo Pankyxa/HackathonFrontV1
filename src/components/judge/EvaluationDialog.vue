@@ -97,7 +97,6 @@ const evaluation = ref({
 
 const isMobile = computed(() => window.innerWidth <= 768)
 onMounted(() => {
-  console.log('Initial evaluation:', props.initialEvaluation) // Для отладки
   if (props.initialEvaluation) {
     evaluation.value = {
       criterion_1: Number(props.initialEvaluation.criterion_1) || 0,

@@ -90,7 +90,6 @@ async function activateStage(stageId) {
     activating.value = false
   }
 }
-console.log(stages)
 
 onMounted(loadStages)
 </script>

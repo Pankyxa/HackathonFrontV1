@@ -104,7 +104,6 @@ const loadTeams = async () => {
   try {
     loading.value = true
     const evaluations = await evaluationsApi.getMyEvaluations()
-    console.log('Received evaluations:', evaluations) // Для отладки
     teams.value = evaluations
   } catch (error) {
     console.error('Error loading evaluations:', error)
