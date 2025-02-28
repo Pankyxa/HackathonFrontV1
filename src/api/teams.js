@@ -283,7 +283,6 @@ export const teamsApi = {
 
     async downloadTeamSolution(teamId) {
         try {
-            // Получаем информацию о команде
             const teamInfo = await this.getTeam(teamId);
             const teamName = teamInfo.team_name.replace(/[^a-zA-Z0-9]/g, '_');
 
