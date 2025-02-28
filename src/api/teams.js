@@ -231,5 +231,113 @@ export const teamsApi = {
         } catch (error) {
             throw error.response?.data || error.message;
         }
+    },
+
+    async uploadTeamSolution(teamId, file) {
+        const formData = new FormData()
+        formData.append('solution_file', file)
+
+        const response = await api.post(`/teams/${teamId}/solution`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        return response.data
+    },
+
+    async uploadTeamDeployment(teamId, file) {
+        const formData = new FormData()
+        formData.append('deployment_file', file)
+
+        const response = await api.post(`/teams/${teamId}/deployment`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        return response.data
+    },
+
+    async getTeamSolution(teamId) {
+        try {
+            const response = await api.get(`/teams/${teamId}/solution`)
+            return response.data
+        } catch (error) {
+            if (error.response?.status === 404) {
+                return null
+            }
+            throw error
+        }
+    },
+
+    async getTeamDeployment(teamId) {
+        try {
+            const response = await api.get(`/teams/${teamId}/deployment`)
+            return response.data
+        } catch (error) {
+            if (error.response?.status === 404) {
+                return null
+            }
+            throw error
+        }
+    },
+
+    async downloadTeamSolution(teamId) {
+        try {
+            // Получаем информацию о команде
+            const teamInfo = await this.getTeam(teamId);
+            const teamName = teamInfo.team_name.replace(/[^a-zA-Z0-9]/g, '_');
+
+            const response = await api.get(`/teams/${teamId}/solution`, {
+                responseType: 'blob',
+            })
+
+            const filename = `${teamName}_solution.zip`
+            const url = window.URL.createObjectURL(new Blob([response.data]))
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', filename)
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+            window.URL.revokeObjectURL(url)
+
+            return response.data
+        } catch (error) {
+            if (error.response?.status === 404) {
+                throw new Error('Файл не найден')
+            }
+            throw error
+        }
+    },
+
+    async downloadTeamDeployment(teamId) {
+        try {
+            const teamInfo = await this.getTeam(teamId);
+            const teamName = teamInfo.team_name.replace(/[^a-zA-Z0-9]/g, '_');
+
+            const response = await api.get(`/teams/${teamId}/deployment`, {
+                responseType: 'blob',
+            })
+
+            const contentType = response.headers['content-type'];
+            const extension = contentType?.includes('markdown') ? '.md' : '.txt';
+            const filename = `${teamName}_deployment${extension}`
+
+            const url = window.URL.createObjectURL(new Blob([response.data]))
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', filename)
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+            window.URL.revokeObjectURL(url)
+
+            return response.data
+        } catch (error) {
+            if (error.response?.status === 404) {
+                throw new Error('Файл не найден')
+            }
+            throw error
+        }
     }
 };

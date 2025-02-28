@@ -52,6 +52,7 @@ import {teamsApi} from '@/api/teams'
 
 import {useStageStore} from "@/stores/stage.js";
 import {useLoadingStore} from "@/stores/loading.js";
+import TeamSolution from "@/components/team/TeamSolution.vue";
 
 const stageStore = useStageStore();
 const loadingStore = useLoadingStore();
@@ -85,7 +86,7 @@ const menuItems = computed(() => {
   if (currentOrder >= taskDistributionOrder && teamStatus.value === 'active') {
     return [
       baseItem,
-      { id: 'solution', title: 'Решение' }
+      { id: 'attach solution', title: 'Решение' }
     ];
   }
 
@@ -103,6 +104,8 @@ const currentComponent = computed(() => {
       return TeamInfo
     case 'task':
       return null
+    case 'attach solution':
+      return TeamSolution
     default:
       return null
   }
@@ -112,6 +115,7 @@ const handleTeamInfoUpdate = (info) => {
   loadingStore.isLoading = true
   teamName.value = info.team_name
   teamInfo.value = info
+  teamId.value = info.id
 
   if (info.logo_file_id) {
     teamLogo.value = `${import.meta.env.VITE_API_URL}/teams/${info.id}/logo`
