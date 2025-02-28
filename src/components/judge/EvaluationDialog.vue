@@ -97,13 +97,14 @@ const evaluation = ref({
 
 const isMobile = computed(() => window.innerWidth <= 768)
 onMounted(() => {
+  console.log('Initial evaluation:', props.initialEvaluation) // Для отладки
   if (props.initialEvaluation) {
     evaluation.value = {
-      criterion_1: props.initialEvaluation.criterion_1,
-      criterion_2: props.initialEvaluation.criterion_2,
-      criterion_3: props.initialEvaluation.criterion_3,
-      criterion_4: props.initialEvaluation.criterion_4,
-      criterion_5: props.initialEvaluation.criterion_5,
+      criterion_1: Number(props.initialEvaluation.criterion_1) || 0,
+      criterion_2: Number(props.initialEvaluation.criterion_2) || 0,
+      criterion_3: Number(props.initialEvaluation.criterion_3) || 0,
+      criterion_4: Number(props.initialEvaluation.criterion_4) || 0,
+      criterion_5: Number(props.initialEvaluation.criterion_5) || 0,
     }
   }
 })
@@ -131,7 +132,7 @@ const submitEvaluation = async () => {
   try {
     loading.value = true
     await evaluationsApi.createEvaluation({
-      team_id: props.team.id,
+      team_id: props.team.team_id,
       ...evaluation.value
     })
     emit('evaluation-submitted')

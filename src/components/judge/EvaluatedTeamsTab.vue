@@ -103,7 +103,9 @@ const getCriterionShortLabel = (n) => {
 const loadTeams = async () => {
   try {
     loading.value = true
-    teams.value = await evaluationsApi.getMyEvaluations()
+    const evaluations = await evaluationsApi.getMyEvaluations()
+    console.log('Received evaluations:', evaluations) // Для отладки
+    teams.value = evaluations
   } catch (error) {
     console.error('Error loading evaluations:', error)
     ElMessage({
