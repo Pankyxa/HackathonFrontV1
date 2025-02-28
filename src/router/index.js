@@ -14,6 +14,7 @@ import ProfilePage from "@/views/ProfilePage.vue";
 import NotFoundPage from "@/views/NotFoundPage.vue";
 import {useStageStore} from "@/stores/stage.js";
 import JudgePage from "@/views/JudgePage.vue";
+import EmailVerificationPage from "@/views/EmailVerificationPage.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,6 +31,11 @@ const router = createRouter({
             meta: {
                 requiresGuest: true
             }
+        },
+        {
+            path: '/auth/verify-email/:token',
+            name: 'EmailVerification',
+            component: EmailVerificationPage
         },
         {
             path: '/registration',

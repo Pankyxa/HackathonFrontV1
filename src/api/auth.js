@@ -91,6 +91,16 @@ export const authApi = {
         }
     },
 
+    async verifyEmail(token) {
+        try {
+            const response = await api.get(`/auth/verify-email/${token}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+
     // Функция выхода
     logout() {
         localStorage.removeItem('token');

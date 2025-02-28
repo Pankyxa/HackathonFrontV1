@@ -1,46 +1,45 @@
 <template>
-  <PrimaryLayout>
-    <div class="wrapper">
-      <div class="wrapper__main-container">
-        <h1 class="main-container-name">Регистрация</h1>
-        <div class="role-selector">
-          <el-radio-group v-model="selectedRole" class="role-selector__group">
-            <el-radio-button label="participant">Для участников</el-radio-button>
-            <el-radio-button label="mentor">Для наставников</el-radio-button>
-          </el-radio-group>
-        </div>
-        <AuthForm
-            :loading="loading"
-            :fields="currentFields"
-            submit-button-text="Зарегистрироваться"
-            submit-loading-text="Регистрация..."
-            secondary-button-text="Войти"
-            @submit="submitRegistration"
-            @secondary-action="moveToLogin"
-            @update:model-value="updateFormModel"
-            @download-terms="downloadTerms"
-            @download-consent="downloadConsent"
-            class="registration-form"
-        />
+  <TheHeader/>
+  <div class="wrapper">
+    <div class="wrapper__main-container">
+      <h1 class="main-container-name">Регистрация</h1>
+      <div class="role-selector">
+        <el-radio-group v-model="selectedRole" class="role-selector__group">
+          <el-radio-button label="participant">Для участников</el-radio-button>
+          <el-radio-button label="mentor">Для наставников</el-radio-button>
+        </el-radio-group>
       </div>
+      <AuthForm
+          :loading="loading"
+          :fields="currentFields"
+          submit-button-text="Зарегистрироваться"
+          submit-loading-text="Регистрация..."
+          secondary-button-text="Войти"
+          @submit="submitRegistration"
+          @secondary-action="moveToLogin"
+          @update:model-value="updateFormModel"
+          @download-terms="downloadTerms"
+          @download-consent="downloadConsent"
+          class="registration-form"
+      />
     </div>
+  </div>
 
-    <EmailVerificationModal
-        v-model="showVerificationModal"
-        :email="registeredEmail"
-        @update:modelValue="handleVerificationModalClose"
-    />
-  </PrimaryLayout>
+  <EmailVerificationModal
+      v-model="showVerificationModal"
+      :email="registeredEmail"
+      @update:modelValue="handleVerificationModalClose"
+  />
 </template>
 
 <script setup>
 import {ref, computed} from 'vue';
 import {ElMessage} from 'element-plus';
-import PrimaryLayout from '../components/PrimaryLayout.vue';
 import AuthForm from '../components/auth/AuthForm.vue';
 import {useRouter} from 'vue-router';
 import {authApi} from '../api/auth';
 import EmailVerificationModal from "@/components/auth/EmailVerificationModal.vue";
+import TheHeader from "@/components/TheHeader.vue";
 
 const router = useRouter();
 const loading = ref(false);
@@ -494,21 +493,23 @@ const moveToLogin = () => {
   justify-content: center;
   align-items: center;
   width: 100%;
-  min-height: calc(100vh - 338px);
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 20px 0;
 }
 
 .wrapper__main-container {
   color: black;
-  margin: 0 auto;
   padding: 30px;
   box-shadow: 1px 2px 2px 3px rgba(0, 0, 0, 0.2);
   width: 800px;
   text-align: center;
   border-radius: 8px;
   background: white;
-  max-height: 60vh;
+  max-height: 80vh;
   display: flex;
   flex-direction: column;
+  margin: 80px auto 0;
 }
 
 .main-container-name {
@@ -603,6 +604,7 @@ const moveToLogin = () => {
 .registration-form :deep(.el-checkbox__inner) {
   margin-top: 3px;
 }
+
 .role-selector {
   margin-bottom: 30px;
 }
@@ -639,6 +641,17 @@ const moveToLogin = () => {
 }
 
 @media (max-width: 768px) {
+  .wrapper {
+    padding: 10px;
+  }
+
+  .wrapper__main-container {
+    width: 95%;
+    padding: 20px;
+    margin: 80px auto 0;
+    max-height: calc(100vh - 115px);
+  }
+
   .role-selector {
     margin-bottom: 20px;
   }
@@ -652,11 +665,6 @@ const moveToLogin = () => {
     font-size: 13px;
   }
 
-  .wrapper__main-container {
-    width: 95%;
-    padding: 20px;
-    margin: 10px;
-  }
   .registration-form :deep(.el-form-item) {
     flex-direction: column;
     margin-bottom: 20px !important;

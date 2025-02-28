@@ -6,35 +6,35 @@
         <div class="form-group">
           <label for="email">Email</label>
           <input
-            type="email"
-            id="email"
-            v-model="formData.email"
-            required
-            class="form-input"
+              type="email"
+              id="email"
+              v-model="formData.email"
+              required
+              class="form-input"
           />
         </div>
 
         <div class="form-group">
           <label for="password">Пароль</label>
           <input
-            type="password"
-            id="password"
-            v-model="formData.password"
-            required
-            class="form-input"
-            @input="validatePasswords"
+              type="password"
+              id="password"
+              v-model="formData.password"
+              required
+              class="form-input"
+              @input="validatePasswords"
           />
         </div>
 
         <div class="form-group">
           <label for="confirmPassword">Подтвердите пароль</label>
           <input
-            type="password"
-            id="confirmPassword"
-            v-model="confirmPassword"
-            required
-            class="form-input"
-            @input="validatePasswords"
+              type="password"
+              id="confirmPassword"
+              v-model="confirmPassword"
+              required
+              class="form-input"
+              @input="validatePasswords"
           />
           <span v-if="passwordError" class="password-error">
             {{ passwordError }}
@@ -44,18 +44,18 @@
         <div class="form-group">
           <label for="full_name">ФИО</label>
           <input
-            type="text"
-            id="full_name"
-            v-model="formData.full_name"
-            required
-            class="form-input"
+              type="text"
+              id="full_name"
+              v-model="formData.full_name"
+              required
+              class="form-input"
           />
         </div>
 
         <button
-          type="submit"
-          class="submit-button"
-          :disabled="loading || passwordError || !confirmPassword"
+            type="submit"
+            class="submit-button"
+            :disabled="loading || passwordError || !confirmPassword"
         >
           {{ loading ? 'Регистрация...' : 'Зарегистрироваться' }}
         </button>
@@ -65,22 +65,34 @@
         {{ error }}
       </div>
     </div>
+
+    <EmailVerificationModal
+        v-model="showVerificationModal"
+        :email="registeredEmail"
+        @update:modelValue="handleVerificationModalClose"
+    />
   </div>
 </template>
 
 <script>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { authApi } from '@/api/auth'
+import {ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {authApi} from '@/api/auth'
+import EmailVerificationModal from "@/components/auth/EmailVerificationModal.vue"
 
 export default {
   name: 'SpecialRegistrationPage',
+  components: {
+    EmailVerificationModal
+  },
   setup() {
     const router = useRouter()
     const loading = ref(false)
     const error = ref(null)
     const confirmPassword = ref('')
     const passwordError = ref('')
+    const showVerificationModal = ref(false)
+    const registeredEmail = ref('')
 
     const formData = ref({
       email: '',
@@ -96,6 +108,11 @@ export default {
       }
     }
 
+    const handleVerificationModalClose = () => {
+      showVerificationModal.value = false;
+      router.push('/login');
+    };
+
     const handleSubmit = async () => {
       if (formData.value.password !== confirmPassword.value) {
         error.value = 'Пароли не совпадают'
@@ -107,7 +124,8 @@ export default {
         error.value = null
 
         await authApi.registerSpecial(formData.value)
-        router.push('/login')
+        registeredEmail.value = formData.value.email;
+        showVerificationModal.value = true;
       } catch (err) {
         error.value = err.detail || 'Произошла ошибка при регистрации'
       } finally {
@@ -122,7 +140,10 @@ export default {
       confirmPassword,
       passwordError,
       validatePasswords,
-      handleSubmit
+      handleSubmit,
+      showVerificationModal,
+      registeredEmail,
+      handleVerificationModalClose
     }
   }
 }
@@ -212,5 +233,40 @@ label {
   color: #dc3545;
   font-size: 0.875rem;
   margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .registration-container {
+    width: 90%;
+    margin: 10px;
+    padding: 20px;
+  }
+
+  :deep(.el-dialog) {
+    width: 90% !important;
+    margin: 10px auto !important;
+  }
+
+  :deep(.el-dialog__body) {
+    padding: 15px !important;
+  }
+
+  :deep(.el-dialog__header) {
+    padding: 15px !important;
+  }
+
+  :deep(.el-dialog__footer) {
+    padding: 15px !important;
+  }
+
+  :deep(.el-dialog__footer .el-button) {
+    width: 100%;
+    margin: 5px 0 !important;
+  }
+
+  :deep(.el-dialog__footer) {
+    display: flex;
+    flex-direction: column;
+  }
 }
 </style>
