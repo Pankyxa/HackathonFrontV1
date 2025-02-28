@@ -24,6 +24,12 @@
         />
       </div>
     </div>
+
+    <EmailVerificationModal
+        v-model="showVerificationModal"
+        :email="registeredEmail"
+        @update:modelValue="handleVerificationModalClose"
+    />
   </PrimaryLayout>
 </template>
 
@@ -34,11 +40,20 @@ import PrimaryLayout from '../components/PrimaryLayout.vue';
 import AuthForm from '../components/auth/AuthForm.vue';
 import {useRouter} from 'vue-router';
 import {authApi} from '../api/auth';
+import EmailVerificationModal from "@/components/auth/EmailVerificationModal.vue";
 
 const router = useRouter();
 const loading = ref(false);
 const formModel = ref({});
 const selectedRole = ref('participant');
+
+const showVerificationModal = ref(false);
+const registeredEmail = ref('');
+
+const handleVerificationModalClose = () => {
+  showVerificationModal.value = false;
+  router.push('/login');
+};
 
 const updateFormModel = (newValue) => {
   formModel.value = newValue;
@@ -458,8 +473,8 @@ const submitRegistration = async (formData) => {
     delete dataToSend.confirmPassword;
     delete dataToSend.terms_accepted;
     await authApi.register(dataToSend);
-    ElMessage.success('Регистрация успешна!');
-    router.push('/login');
+    registeredEmail.value = formData.email;
+    showVerificationModal.value = true;
   } catch (error) {
     console.error('Ошибка при регистрации:', error);
     ElMessage.error(error?.detail || 'Ошибка при регистрации');

@@ -13,8 +13,39 @@
             @secondary-action="moveToRegister"
             class="login-form"
         />
+        <div class="resend-email-section">
+          <p class="resend-text">Не получили письмо для подтверждения?</p>
+          <el-button
+            type="primary"
+            link
+            :loading="resendLoading"
+            @click="handleResendEmail"
+          >
+            Отправить повторно
+          </el-button>
+        </div>
       </div>
     </div>
+    <el-dialog
+      v-model="showEmailDialog"
+      title="Повторная отправка письма"
+      width="30%"
+      :close-on-click-modal="false"
+    >
+      <el-form :model="emailForm" ref="emailFormRef" :rules="emailRules">
+        <el-form-item prop="email" label="Email">
+          <el-input v-model="emailForm.email" placeholder="Введите ваш email" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="showEmailDialog = false">Отмена</el-button>
+          <el-button type="primary" @click="submitResendEmail" :loading="resendLoading">
+            Отправить
+          </el-button>
+        </span>
+</template>
+    </el-dialog>
   </PrimaryLayout>
 </template>
 
@@ -28,6 +59,19 @@ import { authApi } from '../api/auth';
 
 const router = useRouter();
 const loading = ref(false);
+const resendLoading = ref(false);
+const showEmailDialog = ref(false);
+const emailFormRef = ref(null);
+
+const emailForm = ref({
+  email: ''
+});
+const emailRules = {
+  email: [
+    { required: true, message: 'Пожалуйста, введите email', trigger: 'blur' },
+    { type: 'email', message: 'Пожалуйста, введите корректный email', trigger: ['blur', 'change'] }
+    ]
+};
 
 const loginFields = [
   {
@@ -50,6 +94,7 @@ const loginFields = [
     ]
   }
 ];
+
 const submitLogin = async (formData) => {
   try {
     loading.value = true;
@@ -62,6 +107,28 @@ const submitLogin = async (formData) => {
     ElMessage.error(error?.detail || 'Ошибка при попытке входа в систему');
   } finally {
     loading.value = false;
+  }
+};
+
+const handleResendEmail = () => {
+  showEmailDialog.value = true;
+};
+
+const submitResendEmail = async () => {
+  if (!emailFormRef.value) return;
+
+  try {
+    await emailFormRef.value.validate();
+    resendLoading.value = true;
+    await authApi.resendVerificationEmail(emailForm.value.email);
+    ElMessage.success('Письмо для подтверждения отправлено повторно');
+    showEmailDialog.value = false;
+    emailForm.value.email = '';
+  } catch (error) {
+    console.error('Ошибка при отправке письма:', error);
+    ElMessage.error(error?.detail || 'Ошибка при отправке письма');
+  } finally {
+    resendLoading.value = false;
   }
 };
 
@@ -128,6 +195,25 @@ const moveToRegister = () => {
 
 .login-form :deep(.el-form-item__label) {
   padding-bottom: 8px;
+}
+
+.resend-email-section {
+  margin-top: 20px;
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #ebeef5;
+  }
+
+.resend-text {
+  color: #606266;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 @media (max-width: 768px) {

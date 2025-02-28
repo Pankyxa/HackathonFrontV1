@@ -80,6 +80,17 @@ export const authApi = {
         }
     },
 
+    async resendVerificationEmail(email) {
+        try {
+            const formData = new FormData();
+            formData.append('email', email);
+            const response = await api.post('/auth/resend-verification-email', formData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
     // Функция выхода
     logout() {
         localStorage.removeItem('token');
