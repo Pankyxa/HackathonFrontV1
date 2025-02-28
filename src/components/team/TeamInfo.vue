@@ -405,8 +405,6 @@ const removeMentor = async () => {
 
 const handleMentorSelect = async (user) => {
   try {
-    loading.value = true
-
     if (!user?.id || !teamData.value?.id) {
       throw new Error('Необходимые данные отсутствуют')
     }
@@ -434,7 +432,6 @@ const handleMentorSelect = async (user) => {
       duration: 5000
     })
   } finally {
-    loading.value = false
   }
 }
 
@@ -488,7 +485,6 @@ const leaveTeam = async () => {
 
 const handleMemberSelect = async (user) => {
   try {
-    loading.value = true
     await teamsApi.addTeamMember(teamData.value.id, {
       user_id: user.id,
       role: 'member'
@@ -509,7 +505,6 @@ const handleMemberSelect = async (user) => {
       type: 'error'
     })
   } finally {
-    loading.value = false
   }
 }
 
