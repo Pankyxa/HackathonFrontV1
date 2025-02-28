@@ -1,6 +1,12 @@
 <template>
   <el-footer class="main-header">
     <el-row type="flex" justify="center" :gutter="20">
+      <div class="docs-section">
+        <h2>Документы</h2>
+        <a href="/files/Положение о хакатоне Цифровые двойники в энергетике.pdf"
+           target="_blank"
+           class="docs-link">Положение о хакатоне</a>
+      </div>
       <div>
         <a href="https://www.tyuiu.ru/">
           <img src="../assets/img/logo_bot.png" alt="">
@@ -30,12 +36,29 @@ div {
   padding: 20px;
 }
 
-.contacts h2 {
+h2 {
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 10px;
   color: white;
   text-align: center;
+}
+
+.docs-section {
+  text-align: center;
+}
+
+.docs-link {
+  color: white;
+  text-decoration: underline;
+  font-size: 14px;
+  transition: opacity 0.3s ease;
+  display: block;
+  margin: 5px 15px;
+}
+
+.docs-link:hover {
+  opacity: 0.8;
 }
 
 .mail {
@@ -75,6 +98,10 @@ img {
 
   .contacts {
     text-align: center;
+  }
+
+  .docs-section {
+    order: 2;
   }
 }
 </style>
