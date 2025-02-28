@@ -53,6 +53,7 @@ import {teamsApi} from '@/api/teams'
 import {useStageStore} from "@/stores/stage.js";
 import {useLoadingStore} from "@/stores/loading.js";
 import TeamSolution from "@/components/team/TeamSolution.vue";
+import TeamTask from "@/components/team/TeamTask.vue";
 
 const stageStore = useStageStore();
 const loadingStore = useLoadingStore();
@@ -103,7 +104,7 @@ const currentComponent = computed(() => {
     case 'info':
       return TeamInfo
     case 'task':
-      return null
+      return TeamTask
     case 'attach solution':
       return TeamSolution
     default:

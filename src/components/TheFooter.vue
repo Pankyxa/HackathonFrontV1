@@ -8,8 +8,7 @@
       </div>
       <div class="contacts">
         <h2>Контакты</h2>
-        <h3 class="number">8 (***) ***-**-**</h3>
-        <p class="mail">Help@mail.ru</p>
+        <h3 class="mail">hackathon@tyuiu.ru</h3>
       </div>
     </el-row>
   </el-footer>
@@ -36,14 +35,7 @@ div {
   font-weight: bold;
   margin-bottom: 10px;
   color: white;
-}
-
-.number {
-  font-family: Arial, sans-serif;
-  font-size: 16px;
-  font-weight: normal;
-  margin: 5px 15px;
-  color: white;
+  text-align: center;
 }
 
 .mail {

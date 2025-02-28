@@ -119,11 +119,7 @@ const submitResendEmail = async () => {
     await emailFormRef.value.validate();
     resendLoading.value = true;
     const response = await authApi.resendVerificationEmail(emailForm.value.email);
-    if (response.message){
-      ElMessage.success(response.message);
-    } else {
-      ElMessage.success("Если указанный email зарегистрирован в системе, на него будет отправлено письмо с подтверждением");
-    }
+    ElMessage.success("Если указанный email зарегистрирован в системе, на него будет отправлено письмо с подтверждением");
     showEmailDialog.value = false;
     emailForm.value.email = '';
   } catch (error) {

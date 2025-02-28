@@ -5,7 +5,7 @@
       <div class="desktop-container">
         <div class="hero-content">
           <h1>Хакатон</h1>
-          <p>Цифровые двойники в энергетике</p>
+          <h1>Цифровые двойники в энергетике</h1>
           <p class="subtitle">Командные соревнования по решению производственной задачи</p>
           <div class="prize-info">Призовой фонд 225 000 рублей</div>
           <el-button type="primary" class="custom-button"
@@ -30,7 +30,7 @@
 
       <div class="mobile-container">
         <h1>Хакатон</h1>
-        <p>Цифровые двойники в энергетике</p>
+        <h1>Цифровые двойники в энергетике</h1>
         <p class="subtitle">Командные соревнования по решению производственной задачи</p>
         <div class="prize-info">Призовой фонд 225 000 рублей</div>
         <el-button type="primary" class="custom-button" @click="handleApplicationClick">Подать заявку</el-button>
@@ -88,12 +88,12 @@
           <div class="note">(регистрация может закончиться раньше)</div>
         </div>
         <div class="timeline-item">
-          <div class="date">09 апреля</div>
+          <div class="date">9 апреля</div>
           <div class="event">Онлайн открытие Хакатона</div>
           <div class="note">Время будет уточнено</div>
         </div>
         <div class="timeline-item">
-          <div class="date">09 апреля</div>
+          <div class="date">9 апреля</div>
           <div class="event">Доступ к данным для решения задачи</div>
           <div class="note">Время будет уточнено</div>
         </div>
