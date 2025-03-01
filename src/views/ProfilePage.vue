@@ -32,7 +32,9 @@ import TheHeader from "@/components/TheHeader.vue"
 import ProfileData from '@/components/profile/ProfileData.vue'
 import TeamInvites from '@/components/profile/TeamInvites.vue'
 import { useAuthStore } from '@/stores/auth'
+import { useStageStore } from '@/stores/stage'
 
+const stageStore = useStageStore()
 const authStore = useAuthStore()
 const activeTab = ref('profile')
 
