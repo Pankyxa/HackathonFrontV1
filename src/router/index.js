@@ -35,7 +35,10 @@ const router = createRouter({
         {
             path: '/auth/verify-email/:token',
             name: 'EmailVerification',
-            component: EmailVerificationPage
+            component: EmailVerificationPage,
+            meta: {
+                requiresGuest: true
+            }
         },
         {
             path: '/registration',
