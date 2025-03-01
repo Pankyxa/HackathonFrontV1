@@ -42,7 +42,8 @@ const menuItems = [
     id: 'invites',
     title: 'Приглашения в команду',
     showCondition: () => {
-      return authStore.isMentor || (authStore.isMember && !authStore.isHaveTeam)
+      const userCanReceiveInvites = authStore.isMentor || (authStore.isMember && !authStore.isHaveTeam);
+      return stageStore.isRegistration && userCanReceiveInvites;
     }
   }
 ]
