@@ -19,7 +19,7 @@
           <span v-if="userData?.current_status" class="status-badge" :class="statusClass">
           <span class="status-icon"></span>
           {{
-              !stageStore.isRegistration && statusName !== 'approved' ?
+              !stageStore.isRegistration && userData.current_status.name !== 'approved' ?
                   "Регистрация закрыта, вы не можете учавствовать в хакатоне" :
                   userData.current_status.description
             }}
