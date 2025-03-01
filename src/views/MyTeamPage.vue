@@ -79,7 +79,7 @@ const teamStatus = computed(() => {
 })
 
 const menuItems = computed(() => {
-  const baseItem = { id: 'task', title: 'Задача' };
+  const baseItem = {id: 'task', title: 'Задача'};
 
   const currentOrder = stageStore.currentStage?.order || 0;
   const taskDistributionOrder = 3;
@@ -87,7 +87,7 @@ const menuItems = computed(() => {
   if (currentOrder >= taskDistributionOrder && teamStatus.value === 'active') {
     return [
       baseItem,
-      { id: 'attach solution', title: 'Решение' }
+      {id: 'attach solution', title: 'Решение'}
     ];
   }
 
@@ -180,7 +180,6 @@ onMounted(async () => {
   gap: 0.5rem;
 }
 
-
 .menu-item {
   padding: 0.75rem 1rem;
   border-radius: 8px;
@@ -189,6 +188,9 @@ onMounted(async () => {
   color: white;
   border: 2px solid transparent;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .menu-item:hover {
