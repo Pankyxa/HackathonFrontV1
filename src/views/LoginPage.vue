@@ -1,55 +1,56 @@
 <template>
   <TheHeader/>
-    <div class="wrapper">
-      <div class="wrapper__main-container">
-        <h1 class="main-container-name">Вход</h1>
-        <AuthForm
-            :loading="loading"
-            :fields="loginFields"
-            submit-button-text="Войти"
-            submit-loading-text="Вход..."
-            secondary-button-text="Зарегистрироваться"
-            @submit="submitLogin"
-            @secondary-action="moveToRegister"
-            class="login-form"
-        />
-        <div class="resend-email-section">
-          <p class="resend-text">Не получили письмо для подтверждения?</p>
-          <el-button
-              type="primary"
-              link
-              :loading="resendLoading"
-              @click="handleResendEmail"
-          >
-            Отправить повторно
-          </el-button>
-        </div>
+  <div class="wrapper">
+    <div class="wrapper__main-container">
+      <h1 class="main-container-name">Вход</h1>
+      <AuthForm
+          :loading="loading"
+          :fields="loginFields"
+          submit-button-text="Войти"
+          submit-loading-text="Вход..."
+          secondary-button-text="Зарегистрироваться"
+          @submit="submitLogin"
+          @secondary-action="moveToRegister"
+          class="login-form"
+      />
+      <div class="resend-email-section">
+        <p class="resend-text">Не получили письмо для подтверждения?</p>
+        <el-button
+            type="primary"
+            link
+            :loading="resendLoading"
+            @click="handleResendEmail"
+        >
+          Отправить повторно
+        </el-button>
       </div>
     </div>
-    <el-dialog
-        v-model="showEmailDialog"
-        title="Повторная отправка письма"
-        width="30%"
-        :close-on-click-modal="false"
-    >
-      <el-form :model="emailForm" ref="emailFormRef" :rules="emailRules">
-        <el-form-item prop="email" label="Email">
-          <el-input v-model="emailForm.email" placeholder="Введите ваш email"/>
-        </el-form-item>
-      </el-form>
-      <template #footer>
+  </div>
+  <el-dialog
+      v-model="showEmailDialog"
+      title="Повторная отправка письма"
+      :width="isMobile ? '100%' : '30%'"
+      :fullscreen="isMobile"
+      :close-on-click-modal="false"
+  >
+    <el-form :model="emailForm" ref="emailFormRef" :rules="emailRules">
+      <el-form-item prop="email" label="Email">
+        <el-input v-model="emailForm.email" placeholder="Введите ваш email"/>
+      </el-form-item>
+    </el-form>
+    <template #footer>
         <span class="dialog-footer">
-          <el-button @click="showEmailDialog = false">Отмена</el-button>
           <el-button type="primary" @click="submitResendEmail" :loading="resendLoading">
             Отправить
           </el-button>
+          <el-button @click="showEmailDialog = false">Отмена</el-button>
         </span>
-      </template>
-    </el-dialog>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
-import {ref} from 'vue';
+import {onUnmounted, ref} from 'vue';
 import {ElMessage} from 'element-plus';
 import AuthForm from '../components/auth/AuthForm.vue';
 import {useRouter} from 'vue-router';
@@ -61,6 +62,12 @@ const loading = ref(false);
 const resendLoading = ref(false);
 const showEmailDialog = ref(false);
 const emailFormRef = ref(null);
+
+const isMobile = ref(window.innerWidth <= 768);
+
+const handleResize = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
 
 const emailForm = ref({
   email: ''
@@ -133,6 +140,10 @@ const submitResendEmail = async () => {
 const moveToRegister = () => {
   router.push('/registration');
 };
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
 </script>
 
 <style scoped>
@@ -224,40 +235,43 @@ const moveToRegister = () => {
   }
 
   :deep(.el-dialog) {
-    width: 90% !important;
-    margin: 10px auto !important;
-  }
-
-  :deep(.el-button) {
-    margin-left: 0 !important;
-  }
-
-  :deep(.el-dialog__body) {
-    padding: 15px !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
   }
 
   :deep(.el-dialog__header) {
-    padding: 15px !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    border-bottom: 1px solid #dcdfe6;
+  }
+
+  :deep(.el-dialog__body) {
+    padding: 20px !important;
+    height: calc(100% - 120px) !important;
+    overflow-y: auto;
   }
 
   :deep(.el-dialog__footer) {
-    padding: 15px !important;
+    padding: 20px !important;
+    border-top: 1px solid #dcdfe6;
   }
 
   .dialog-footer {
     flex-direction: column;
     gap: 10px;
+    width: 100%;
   }
 
   .dialog-footer .el-button {
     width: 100%;
+    margin: 0 !important;
   }
 
-  :deep(.el-form-item__label) {
-    float: none;
-    display: block;
-    text-align: left;
-    padding-bottom: 8px;
+  :deep(.el-overlay) {
+    background-color: white !important;
   }
 }
 </style>

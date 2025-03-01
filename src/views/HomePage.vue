@@ -96,7 +96,7 @@
         </div>
         <div class="timeline-item">
           <div class="date">9 апреля</div>
-          <div class="event">Доступ к данным для решения задачи</div>
+          <div class="event">Доступ к тестовым данным для решения задачи</div>
           <div class="note">Время будет уточнено</div>
         </div>
         <div class="timeline-item">
@@ -173,7 +173,7 @@ onUnmounted(() => {
 const stages = [
   {order: 1, icon: UserFilled, text: 'Регистрация участников'},
   {order: 2, icon: Finished, text: 'Регистрация закрыта'},
-  {order: 3, icon: Document, text: 'Рассылка данных для выполнения задания'},
+  {order: 3, icon: Document, text: 'Рассылка тестовых данных для выполнения задания'},
   {order: 4, icon: Monitor, text: 'Прием решений'},
   {order: 5, icon: Check, text: 'Проверка решений'},
   {order: 6, icon: Trophy, text: 'Онлайн защита'},
@@ -287,7 +287,7 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 40px 20px;
+  padding: 20px 20px;
   height: 100%;
   position: relative;
   z-index: 2;
@@ -590,17 +590,33 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
-  .hero-section {
-    height: 500px;
-    margin: 10px;
-  }
-
   .desktop-container {
     display: none;
   }
 
+  .hero-section {
+    min-height: 500px;
+    height: auto;
+    margin: 10px;
+  }
+
   .mobile-container {
     display: flex;
+    justify-content: space-between;
+    min-height: 500px;
+    padding: 40px 20px;
+  }
+
+  .mobile-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .mobile-container .synergy-text {
+    margin-top: auto;
+    padding-top: 30px;
+    width: 100%;
   }
 
   .mobile-container h1 {
