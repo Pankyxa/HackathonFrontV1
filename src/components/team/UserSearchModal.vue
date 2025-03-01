@@ -28,7 +28,8 @@
             <div class="user-info">
               <div class="user-name">{{ user.full_name }}</div>
               <div class="user-details">
-                {{ user.vuz }} | {{ user.course }} курс
+                {{ role === 'mentor' ? user.mentor_info.job : user.participant_info.vuz }} |
+                {{ role === 'mentor' ? user.mentor_info.job_title : user.participant_info.course }}
               </div>
             </div>
           </div>
@@ -61,10 +62,10 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
-import { Search } from '@element-plus/icons-vue';
-import { usersApi } from '@/api/users.js';
-import { ElMessage } from 'element-plus';
+import {ref, watch, onMounted} from 'vue';
+import {Search} from '@element-plus/icons-vue';
+import {usersApi} from '@/api/users.js';
+import {ElMessage} from 'element-plus';
 
 const props = defineProps({
   modelValue: Boolean,
