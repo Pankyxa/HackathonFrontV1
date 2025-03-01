@@ -188,9 +188,6 @@ onMounted(async () => {
   color: white;
   border: 2px solid transparent;
   white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .menu-item:hover {
@@ -280,6 +277,9 @@ onMounted(async () => {
     flex: 1;
     min-width: 140px;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .content-area {
