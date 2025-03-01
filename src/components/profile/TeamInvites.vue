@@ -42,7 +42,10 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { teamsApi } from '@/api/teams'
+import { useAuthStore } from '@/stores/auth'
 
+const emit = defineEmits(['changeTab'])
+const authStore = useAuthStore()
 const invites = ref([])
 const loading = ref(false)
 const isProcessing = ref(false)
@@ -68,8 +71,16 @@ const acceptInvite = async (inviteId) => {
   try {
     isProcessing.value = true
     await teamsApi.acceptInvite(inviteId)
+
+    await authStore.initializeAuth()
+
     await loadInvites()
+
     ElMessage.success('Приглашение принято')
+
+    if (authStore.isMember && !authStore.isMentor) {
+      emit('changeTab', 'profile')
+    }
   } catch (error) {
     console.error('Error accepting invite:', error)
     ElMessage.error('Ошибка при принятии приглашения')

@@ -19,6 +19,7 @@
         <div class="content-wrapper">
           <component
               :is="currentComponent"
+              @changeTab="handleTabChange"
           ></component>
         </div>
       </div>
@@ -27,13 +28,15 @@
 </template>
 
 <script setup>
-import {ref, computed} from 'vue'
+import {ref, computed, onMounted} from 'vue'
 import TheHeader from "@/components/TheHeader.vue"
 import ProfileData from '@/components/profile/ProfileData.vue'
 import TeamInvites from '@/components/profile/TeamInvites.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useStageStore } from '@/stores/stage'
+import {useRoute} from "vue-router";
 
+const route = useRoute()
 const stageStore = useStageStore()
 const authStore = useAuthStore()
 const activeTab = ref('profile')
@@ -65,6 +68,16 @@ const currentComponent = computed(() => {
       return TeamInvites
     default:
       return null
+  }
+})
+
+const handleTabChange = (tabId) => {
+  activeTab.value = tabId
+}
+
+onMounted(() => {
+  if (route.query.tab) {
+    activeTab.value = route.query.tab
   }
 })
 </script>

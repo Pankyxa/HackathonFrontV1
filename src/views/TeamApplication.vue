@@ -98,7 +98,6 @@
 import {ref, computed, onMounted} from 'vue';
 import { Delete } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
-import PrimaryLayout from "@/components/PrimaryLayout.vue";
 import TeamPhotoEditor from '@/components/team/TeamPhotoEditor.vue';
 import { teamsApi } from '@/api/teams';
 import {useAuthStore} from "@/stores/auth.js";
@@ -106,6 +105,7 @@ import UserSearchModal from '@/components/team/UserSearchModal.vue';
 import { ElMessage } from 'element-plus';
 import TheHeader from "@/components/TheHeader.vue";
 
+const authStore = useAuthStore();
 const router = useRouter();
 const currentStep = ref(0);
 const showSearchModal = ref(false);
@@ -165,6 +165,7 @@ const createTeam = async () => {
     };
 
     await teamsApi.createTeam(formattedData);
+    await authStore.initializeAuth();
     currentStep.value = 2;
   } catch (error) {
     console.error('Ошибка при создании команды:', error);
