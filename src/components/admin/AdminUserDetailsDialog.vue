@@ -9,12 +9,12 @@
     <div v-loading="loading" class="user-details-content">
       <UserInfo :user="user" />
 
-      <div class="roles-section">
+      <div class="roles-section" v-if="authStore.isAdmin">
         <h3>Управление ролями</h3>
         <div class="roles-container">
           <el-checkbox-group v-model="selectedRoles" @change="handleRolesChange">
-            <el-checkbox 
-              v-for="role in availableRoles" 
+            <el-checkbox
+              v-for="role in availableRoles"
               :key="role.name"
               :label="role.name"
               :checked="isRoleSelected(role.name)"
@@ -30,7 +30,7 @@
           :documents="documents"
       />
 
-      <div class="actions-section">
+      <div class="actions-section" v-if="authStore.isAdmin">
         <el-button
             type="primary"
             @click="saveRoles"
@@ -49,6 +49,10 @@ import { ElMessage } from 'element-plus'
 import UserInfo from '../organizer/UserInfo.vue'
 import DocumentsSection from '../organizer/DocumentsSection.vue'
 import { usersApi } from '@/api/users'
+
+import { useAuthStore } from "@/stores/auth.js"
+
+const authStore = useAuthStore()
 
 const props = defineProps({
   visible: Boolean,

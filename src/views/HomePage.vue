@@ -90,9 +90,8 @@
           <div class="note">(регистрация может закончиться раньше)</div>
         </div>
         <div class="timeline-item">
-          <div class="date">9 апреля</div>
+          <div class="date">9 апреля 10:00 (по МСК)</div>
           <div class="event">Онлайн открытие Хакатона</div>
-          <div class="note">Время будет уточнено</div>
         </div>
         <div class="timeline-item">
           <div class="date">9 апреля</div>

@@ -11,6 +11,14 @@
           <el-empty description="Этот раздел находится в разработке"/>
         </div>
       </el-tab-pane>
+
+      <el-tab-pane label="Пользователи" name="users">
+        <UsersTab/>
+      </el-tab-pane>
+
+      <el-tab-pane label="Команды" name="teams">
+        <TeamsTab/>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -21,6 +29,8 @@ import TheHeader from "@/components/TheHeader.vue"
 import CheckDocumentsTab from "@/components/organizer/CheckDocumentsTab.vue"
 
 import {useStageStore} from "@/stores/stage.js";
+import UsersTab from "@/components/admin/UsersTab.vue";
+import TeamsTab from "@/components/admin/TeamsTab.vue";
 
 const stageStore = useStageStore()
 
