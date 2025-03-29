@@ -85,7 +85,7 @@
           <div class="event">Доступ к тексту задания</div>
         </div>
         <div class="timeline-item">
-          <div class="date">C 1 марта до 1 апреля</div>
+          <div class="date">C 1 марта до 3 апреля</div>
           <div class="event">Регистрация на сайте</div>
           <div class="note">(регистрация может закончиться раньше)</div>
         </div>
