@@ -5,7 +5,7 @@
       <div class="task-section download-section">
         <h3>Файлы для скачивания:</h3>
         <div class="download-links">
-          <a href="/files/Хакатон_Цифровые_двойники_Исходные_данные.docx" download class="download-button">
+          <a href="/files/Initial_data.docx" download class="download-button">
             <span class="download-icon">📥</span>
             Скачать исходные данные (.docx)
           </a>
