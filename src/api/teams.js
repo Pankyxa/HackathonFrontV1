@@ -233,13 +233,22 @@ export const teamsApi = {
         }
     },
 
-    async uploadTeamSolution(teamId, file) {
+    async uploadTeamSolution(teamId, file, onProgress = null) {
         const formData = new FormData()
         formData.append('solution_file', file)
 
         const response = await api.post(`/teams/${teamId}/solution`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
+            },
+            timeout: 30 * 60 * 1000,
+            maxContentLength: 500 * 1024 * 1024, // 500MB
+            maxBodyLength: 500 * 1024 * 1024,    // 500MB
+            onUploadProgress: (progressEvent) => {
+                if (onProgress) {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                    onProgress(percentCompleted)
+                }
             }
         })
         return response.data

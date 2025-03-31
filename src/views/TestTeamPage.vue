@@ -51,13 +51,10 @@ import TeamInfo from '@/components/team/TeamInfo.vue'
 import {teamsApi} from '@/api/teams'
 import InitialData from '@/components/team/InitialData.vue'
 import TestData from '@/components/team/TestData.vue'
-
-import {useStageStore} from "@/stores/stage.js";
 import {useLoadingStore} from "@/stores/loading.js";
-import TeamSolution from "@/components/team/TeamSolution.vue";
+import TestTeamSolution from "@/components/team/TestTeamSolution.vue";
 import TeamTask from "@/components/team/TeamTask.vue";
 
-const stageStore = useStageStore();
 const loadingStore = useLoadingStore();
 
 const route = useRoute()
@@ -73,38 +70,17 @@ const viewMode = computed(() => {
 })
 
 const getDefaultTitle = computed(() => {
-  return viewMode.value === 'mentor' ? 'Команда' : 'Моя команда'
+  return viewMode.value === 'mentor' ? 'Команда' : 'Тестовая команда'
 })
 
-const teamStatus = computed(() => {
-  return teamInfo.value?.status_details?.status
-})
-
+// Убираем проверки статуса и этапа
 const menuItems = computed(() => {
-  const baseItems = [
+  return [
     {id: 'task', title: 'Задача'},
+    {id: 'initial-data', title: 'Исходные данные'},
+    {id: 'test-data', title: 'Тестовые данные'},
+    {id: 'attach solution', title: 'Решение'}
   ];
-
-  const currentOrder = stageStore.currentStage?.order || 0;
-  const registrationClosedOrder = 2;
-  const taskDistributionOrder = 3;
-
-  const items = [...baseItems];
-
-  if (currentOrder >= registrationClosedOrder && teamStatus.value === 'active') {
-    items.push(
-        {id: 'initial-data', title: 'Исходные данные'}
-    )
-  }
-
-  if (currentOrder >= taskDistributionOrder && teamStatus.value === 'active') {
-    items.push(
-      {id: 'test-data', title: 'Тестовые данные'},
-      {id: 'attach solution', title: 'Решение'}
-    )
-  }
-
-  return items;
 });
 
 const teamLogoUrl = computed(() => {
@@ -123,7 +99,7 @@ const currentComponent = computed(() => {
     case 'test-data':
       return TestData
     case 'attach solution':
-      return TeamSolution
+      return TestTeamSolution
     default:
       return null
   }
@@ -148,7 +124,6 @@ const handleTeamInfoUpdate = (info) => {
   loadingStore.isLoading = false
 }
 
-
 onMounted(async () => {
   try {
     const teamInfo = await teamsApi.getTeam(teamId.value);
@@ -162,6 +137,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Стили остаются теми же */
 .my-team-container {
   height: calc(100vh - 125px);
   margin: 105px 20px 20px;

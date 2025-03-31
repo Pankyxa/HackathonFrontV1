@@ -31,7 +31,6 @@
                 :on-change="(file) => handleFileChange(file, 'solution')"
             >
               <el-button type="primary"
-                         v-if="authStore.isMember && (stageStore.isTaskDistribution || stageStore.isSolutionSubmission)"
                          :loading="uploadingSolution"
                          link>
                 <el-icon>
@@ -42,10 +41,10 @@
             </el-upload>
 
             <el-progress
-              v-if="uploadingSolution"
-              :percentage="uploadProgress"
-              :format="progressFormat"
-              class="upload-progress"
+                v-if="uploadingSolution"
+                :percentage="uploadProgress"
+                :format="progressFormat"
+                class="upload-progress"
             />
           </div>
         </div>
@@ -78,7 +77,6 @@
                 :on-change="(file) => handleFileChange(file, 'deployment')"
             >
               <el-button type="primary"
-                         v-if="authStore.isMember && (stageStore.isTaskDistribution || stageStore.isSolutionSubmission)"
                          link>
                 <el-icon>
                   <Upload/>
@@ -98,11 +96,6 @@ import {ref, onMounted} from 'vue'
 import {ElMessage} from 'element-plus'
 import {Download, Upload} from '@element-plus/icons-vue'
 import {teamsApi} from '@/api/teams'
-import {useAuthStore} from "@/stores/auth.js"
-import {useStageStore} from "@/stores/stage.js";
-
-const authStore = useAuthStore()
-const stageStore = useStageStore()
 
 const props = defineProps({
   teamId: {
@@ -158,49 +151,49 @@ const downloadFile = async (type) => {
 }
 
 const handleFileChange = async (file, type) => {
-    try {
-        if (!file) return
+  try {
+    if (!file) return
 
-        const maxSize = type === 'solution' ? 500 * 1024 * 1024 : 50 * 1024 * 1024
-        if (file.raw.size > maxSize) {
-            ElMessage.error(`Размер файла не должен превышать ${maxSize / (1024 * 1024)}MB`)
-            return
-        }
-
-        if (type === 'solution' && !file.raw.name.toLowerCase().endsWith('.zip')) {
-            ElMessage.error('Решение должно быть в формате ZIP')
-            return
-        }
-        if (type === 'deployment' &&
-            !file.raw.name.toLowerCase().endsWith('.txt') &&
-            !file.raw.name.toLowerCase().endsWith('.md')) {
-            ElMessage.error('Описание должно быть в формате TXT или MD')
-            return
-        }
-        if (type === 'solution') {
-            uploadingSolution.value = true
-            uploadProgress.value = 0
-
-            await teamsApi.uploadTeamSolution(props.teamId, file.raw, (progress) => {
-                uploadProgress.value = progress
-            })
-
-            ElMessage.success('Решение успешно загружено')
-        } else {
-            await teamsApi.uploadTeamDeployment(props.teamId, file.raw)
-            ElMessage.success('Описание развертывания успешно загружено')
-        }
-
-        await loadFiles()
-    } catch (error) {
-        console.error('Error uploading file:', error)
-        ElMessage.error('Ошибка при загрузке файла')
-    } finally {
-        if (type === 'solution') {
-            uploadingSolution.value = false
-            uploadProgress.value = 0
-        }
+    const maxSize = type === 'solution' ? 500 * 1024 * 1024 : 50 * 1024 * 1024
+    if (file.raw.size > maxSize) {
+      ElMessage.error(`Размер файла не должен превышать ${maxSize / (1024 * 1024)}MB`)
+      return
     }
+
+    if (type === 'solution' && !file.raw.name.toLowerCase().endsWith('.zip')) {
+      ElMessage.error('Решение должно быть в формате ZIP')
+      return
+    }
+    if (type === 'deployment' &&
+        !file.raw.name.toLowerCase().endsWith('.txt') &&
+        !file.raw.name.toLowerCase().endsWith('.md')) {
+      ElMessage.error('Описание должно быть в формате TXT или MD')
+      return
+    }
+    if (type === 'solution') {
+      uploadingSolution.value = true
+      uploadProgress.value = 0
+
+      await teamsApi.uploadTeamSolution(props.teamId, file.raw, (progress) => {
+        uploadProgress.value = progress
+      })
+
+      ElMessage.success('Решение успешно загружено')
+    } else {
+      await teamsApi.uploadTeamDeployment(props.teamId, file.raw)
+      ElMessage.success('Описание развертывания успешно загружено')
+    }
+
+    await loadFiles()
+  } catch (error) {
+    console.error('Error uploading file:', error)
+    ElMessage.error('Ошибка при загрузке файла')
+  } finally {
+    if (type === 'solution') {
+      uploadingSolution.value = false
+      uploadProgress.value = 0
+    }
+  }
 }
 
 onMounted(() => {
