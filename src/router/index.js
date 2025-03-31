@@ -15,7 +15,6 @@ import NotFoundPage from "@/views/NotFoundPage.vue";
 import {useStageStore} from "@/stores/stage.js";
 import JudgePage from "@/views/JudgePage.vue";
 import EmailVerificationPage from "@/views/EmailVerificationPage.vue";
-import TestTeamPage from "@/views/TestTeamPage.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -79,14 +78,6 @@ const router = createRouter({
                 requiresAuth: true,
                 requiresMember: true,
                 title: 'Moя команда'
-            }
-        },
-        {
-            path: '/test/team',
-            name: 'test-team',
-            component: TestTeamPage,
-            meta: {
-                requiresAuth: true
             }
         },
         {
