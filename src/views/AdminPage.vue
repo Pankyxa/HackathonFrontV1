@@ -13,6 +13,10 @@
       <el-tab-pane label="Этап" name="stages">
         <StagesManagementTab/>
       </el-tab-pane>
+
+      <el-tab-pane label="Рассылка" name="notifications">
+        <NotificationsTab/>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -23,7 +27,8 @@ import TheHeader from "@/components/TheHeader.vue"
 import TheFooter from "@/components/TheFooter.vue"
 import UsersTab from "@/components/admin/UsersTab.vue"
 import TeamsTab from "@/components/admin/TeamsTab.vue"
-import StagesManagementTab from "@/components/admin/StagesManagementTab.vue";
+import StagesManagementTab from "@/components/admin/StagesManagementTab.vue"
+import NotificationsTab from "@/components/admin/NotificationsTab.vue"
 
 const activeTab = ref('users')
 </script>

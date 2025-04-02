@@ -41,6 +41,28 @@
       </div>
     </div>
 
+    <div class="consultation-section">
+      <div class="consultation-container">
+        <div class="consultation-content">
+          <div class="consultation-badge">Важно!</div>
+          <h2>Онлайн консультация для участников</h2>
+          <div class="consultation-info">
+            <div class="consultation-date">3 апреля в 9:30 (МСК)</div>
+            <div class="consultation-details">
+              <p>На консультации мы разберем основные моменты задания, ответим на ваши вопросы и обсудим технические детали решения</p>
+              <a href="https://bigbb2.tyuiu.ru/b/hyc-sjb-5lk-prq"
+                 target="_blank"
+                 class="consultation-link">
+                <el-button type="primary" class="join-button">
+                  Присоединиться к консультации
+                </el-button>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <AuthRequiredModal v-model="showAuthModal"/>
     <div class="info-section">
       <div class="info-cards">
@@ -588,7 +610,122 @@ onMounted(async () => {
   color: #66b1ff;
 }
 
+.consultation-section {
+  margin: 20px;
+  margin-top: 20px;
+}
+
+.consultation-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.consultation-content {
+  position: relative;
+  z-index: 2;
+}
+
+.consultation-badge {
+  display: inline-block;
+  background: #F44336;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.consultation-content h2 {
+  color: #1976D2;
+  font-size: 28px;
+  margin-bottom: 16px;
+  font-weight: bold;
+}
+
+.consultation-info {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+}
+
+.consultation-date {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1976D2;
+  white-space: nowrap;
+}
+
+.consultation-details {
+  flex: 1;
+}
+
+.consultation-details p {
+  color: #37474F;
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.consultation-link {
+  text-decoration: none;
+}
+
+.join-button {
+  background: linear-gradient(90deg, #00A3FF 0%, #5B51D8 100%);
+  border: none;
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: 500;
+  width: auto;
+  min-width: 250px;
+}
+
+.join-button:hover {
+  opacity: 0.9;
+}
+
 @media (max-width: 768px) {
+  .consultation-section {
+    margin: 10px;
+    margin-top: 10px;
+  }
+
+  .consultation-container {
+    padding: 20px;
+  }
+
+  .consultation-info {
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .consultation-content h2 {
+    font-size: 24px;
+  }
+
+  .consultation-date {
+    font-size: 20px;
+  }
+
+  .consultation-details p {
+    font-size: 14px;
+  }
+
+  .join-button {
+    width: 100%;
+    min-width: unset;
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
   .desktop-container {
     display: none;
   }

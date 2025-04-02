@@ -347,5 +347,14 @@ export const teamsApi = {
             }
             throw error
         }
-    }
+    },
+
+    async sendConsultationNotification() {
+        try {
+            const response = await api.post('/teams/notify/consultation');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 };
