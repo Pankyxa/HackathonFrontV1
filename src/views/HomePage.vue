@@ -41,7 +41,7 @@
       </div>
     </div>
 
-    <div class="consultation-section">
+    <div v-if="authStore.isAuthenticated" class="consultation-section">
       <div class="consultation-container">
         <div class="consultation-content">
           <div class="consultation-badge">Важно!</div>
