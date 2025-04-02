@@ -184,7 +184,7 @@ export const teamsApi = {
         }
     },
 
-    async getAdminTeams({ limit = 10, offset = 0, search = '', status = '' } = {}) {
+    async getAdminTeams({limit = 10, offset = 0, search = '', status = ''} = {}) {
         try {
             const params = {
                 limit,
@@ -199,7 +199,7 @@ export const teamsApi = {
                 params.status = status
             }
 
-            const response = await api.get('/teams/admin/teams', { params });
+            const response = await api.get('/teams/admin/teams', {params});
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -357,4 +357,13 @@ export const teamsApi = {
             throw error.response?.data || error.message;
         }
     },
+
+    async sendJudgeBriefingNotification() {
+        try {
+            const response = await api.post('/teams/notify/judge-briefing');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
 };

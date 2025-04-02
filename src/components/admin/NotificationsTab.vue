@@ -6,14 +6,24 @@
           <h3>Рассылка уведомлений</h3>
         </div>
       </template>
-      
+
       <div class="notification-actions">
-        <el-button 
-          type="primary" 
-          :loading="isLoading"
-          @click="handleSendConsultationNotification"
+        <el-button
+            type="primary"
+            :loading="isConsultationLoading"
+            @click="handleSendConsultationNotification"
+            class="notification-button"
         >
-          Разослать уведомления об консультации о проведении хакатона
+          Разослать уведомления о консультации
+        </el-button>
+
+        <el-button
+            type="primary"
+            :loading="isBriefingLoading"
+            @click="handleSendBriefingNotification"
+            class="notification-button"
+        >
+          Разослать уведомления о брифинге для жюри
         </el-button>
       </div>
 
@@ -29,28 +39,50 @@ import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { teamsApi } from '@/api/teams'
 
-const isLoading = ref(false)
+const isConsultationLoading = ref(false)
+const isBriefingLoading = ref(false)
 const notificationStatus = ref('')
 const statusClass = ref('')
 
 const handleSendConsultationNotification = async () => {
   try {
-    isLoading.value = true
-    notificationStatus.value = 'Отправка уведомлений...'
+    isConsultationLoading.value = true
+    notificationStatus.value = 'Отправка уведомлений о консультации...'
     statusClass.value = 'status-info'
 
     const response = await teamsApi.sendConsultationNotification()
-    
-    notificationStatus.value = 'Рассылка уведомлений успешно запущена'
+
+    notificationStatus.value = 'Рассылка уведомлений о консультации успешно запущена'
     statusClass.value = 'status-success'
-    ElMessage.success('Рассылка уведомлений успешно запущена')
+    ElMessage.success('Рассылка уведомлений о консультации успешно запущена')
   } catch (error) {
-    console.error('Error sending notifications:', error)
-    notificationStatus.value = `Ошибка при отправке уведомлений: ${error.message || 'Неизвестная ошибка'}`
+    console.error('Error sending consultation notifications:', error)
+    notificationStatus.value = `Ошибка при отправке уведомлений о консультации: ${error.message || 'Неизвестная ошибка'}`
     statusClass.value = 'status-error'
-    ElMessage.error('Ошибка при отправке уведомлений')
+    ElMessage.error('Ошибка при отправке уведомлений о консультации')
   } finally {
-    isLoading.value = false
+    isConsultationLoading.value = false
+  }
+}
+
+const handleSendBriefingNotification = async () => {
+  try {
+    isBriefingLoading.value = true
+    notificationStatus.value = 'Отправка уведомлений о брифинге...'
+    statusClass.value = 'status-info'
+
+    const response = await teamsApi.sendJudgeBriefingNotification()
+
+    notificationStatus.value = 'Рассылка уведомлений о брифинге успешно запущена'
+    statusClass.value = 'status-success'
+    ElMessage.success('Рассылка уведомлений о брифинге успешно запущена')
+  } catch (error) {
+    console.error('Error sending briefing notifications:', error)
+    notificationStatus.value = `Ошибка при отправке уведомлений о брифинге: ${error.message || 'Неизвестная ошибка'}`
+    statusClass.value = 'status-error'
+    ElMessage.error('Ошибка при отправке уведомлений о брифинге')
+  } finally {
+    isBriefingLoading.value = false
   }
 }
 </script>
@@ -78,8 +110,15 @@ const handleSendConsultationNotification = async () => {
 
 .notification-actions {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
   margin-bottom: 20px;
+}
+
+.notification-button {
+  width: 100%;
+  max-width: 400px;
 }
 
 .notification-status {
