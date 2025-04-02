@@ -365,5 +365,40 @@ export const teamsApi = {
         } catch (error) {
             throw error.response?.data || error.message;
         }
+    },
+
+    async searchJudges(query) {
+        try {
+            const params = new URLSearchParams();
+
+            if (query) {
+                params.append('search', query);
+            }
+
+            params.append('roles', 'judge');
+
+            params.append('limit', 50);
+            params.append('offset', 0);
+
+            const response = await api.get('/users/all', {
+                params: params,
+                paramsSerializer: {
+                    indexes: null
+                }
+            });
+
+            return response.data.users;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async sendSingleJudgeBriefingNotification(userId) {
+        try {
+            const response = await api.post(`/teams/notify/judge-briefing/${userId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
     }
 };

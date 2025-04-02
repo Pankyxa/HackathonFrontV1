@@ -17,6 +17,7 @@
           Разослать уведомления о консультации
         </el-button>
 
+        <div class="briefing-buttons">
         <el-button
             type="primary"
             :loading="isBriefingLoading"
@@ -25,12 +26,23 @@
         >
           Разослать уведомления о брифинге для жюри
         </el-button>
+
+          <el-button
+              type="primary"
+              @click="showJudgeSelect"
+              class="notification-button"
+          >
+            Отправить уведомление о брифинге выбранному члену жюри
+          </el-button>
       </div>
+  </div>
 
       <div v-if="notificationStatus" class="notification-status" :class="statusClass">
         {{ notificationStatus }}
       </div>
     </el-card>
+
+    <JudgeSelectDialog v-model="judgeSelectVisible"/>
   </div>
 </template>
 
@@ -38,11 +50,13 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { teamsApi } from '@/api/teams'
+import JudgeSelectDialog from './JudgeSelectDialog.vue'
 
 const isConsultationLoading = ref(false)
 const isBriefingLoading = ref(false)
 const notificationStatus = ref('')
 const statusClass = ref('')
+const judgeSelectVisible = ref(false)
 
 const handleSendConsultationNotification = async () => {
   try {
@@ -85,6 +99,10 @@ const handleSendBriefingNotification = async () => {
     isBriefingLoading.value = false
   }
 }
+
+const showJudgeSelect = () => {
+  judgeSelectVisible.value = true
+}
 </script>
 
 <style scoped>
@@ -121,6 +139,10 @@ const handleSendBriefingNotification = async () => {
   max-width: 400px;
 }
 
+.notification-button:deep(.el-button) {
+  margin: 0;
+}
+
 .notification-status {
   text-align: center;
   padding: 10px;
@@ -141,5 +163,17 @@ const handleSendBriefingNotification = async () => {
 .status-error {
   background-color: #fef0f0;
   color: #f56c6c;
+}
+
+.briefing-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  width: 100%;
+}
+
+.briefing-buttons :deep(.el-button) {
+  margin: 0;
 }
 </style>
