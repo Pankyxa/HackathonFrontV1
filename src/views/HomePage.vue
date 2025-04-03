@@ -41,7 +41,8 @@
       </div>
     </div>
 
-    <div v-if="authStore.isAuthenticated" class="consultation-section">
+    <!-- Убрал временный блок с информацией -->
+    <div v-if="false" class="consultation-section">
       <div class="consultation-container">
         <div class="consultation-content">
           <div class="consultation-badge">Важно!</div>
@@ -49,7 +50,8 @@
           <div class="consultation-info">
             <div class="consultation-date">3 апреля в 9:30 (МСК)</div>
             <div class="consultation-details">
-              <p>На консультации мы разберем основные моменты задания, ответим на ваши вопросы и обсудим технические детали решения</p>
+              <p>На консультации мы разберем основные моменты задания, ответим на ваши вопросы и обсудим технические
+                детали решения</p>
               <a href="https://bigbb2.tyuiu.ru/b/hyc-sjb-5lk-prq"
                  target="_blank"
                  class="consultation-link">
@@ -89,6 +91,9 @@
         </div>
       </div>
     </div>
+
+    <!--    <WinnersSection />-->
+
     <div class="task-section">
       <h2>О соревнованиях</h2>
       <p>Командам необходимо создать цифровую модель энергетической системы месторождения и предложить оптимальный
@@ -160,6 +165,7 @@ import {UserFilled, Document, Monitor, Check, Trophy, Star, Medal, User, Finishe
 import TheHeader from "@/components/TheHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
 import AuthRequiredModal from "@/components/auth/AuthRequiredModal.vue";
+import WinnersSection from "@/components/WinnersSection.vue"
 import {useStageStore} from "@/stores/stage.js";
 import {useAuthStore} from "@/stores/auth.js";
 
