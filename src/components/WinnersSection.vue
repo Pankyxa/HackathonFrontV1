@@ -7,13 +7,17 @@
         <div class="team-logo-container">
           <img :src="secondPlace.logo || '/placeholder-logo.png'" alt="Логотип команды" class="team-logo">
           <div class="medal silver">
-            <el-icon><Medal /></el-icon>
+            <el-icon>
+              <Medal/>
+            </el-icon>
           </div>
         </div>
         <div class="podium-block">2</div>
         <div class="team-info">
           <h3>{{ secondPlace.team_name || 'Второе место' }}</h3>
-          <p>{{ secondPlace.team_motto || 'Девиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз команды' }}</p>
+          <p>{{
+              secondPlace.team_motto || 'Девиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз команды'
+            }}</p>
         </div>
       </div>
 
@@ -22,7 +26,9 @@
         <div class="team-logo-container">
           <img :src="firstPlace.logo || '/placeholder-logo.png'" alt="Логотип команды" class="team-logo">
           <div class="medal gold">
-            <el-icon><Trophy /></el-icon>
+            <el-icon>
+              <Trophy/>
+            </el-icon>
           </div>
         </div>
         <div class="podium-block">1</div>
@@ -37,7 +43,9 @@
         <div class="team-logo-container">
           <img :src="thirdPlace.logo || '/placeholder-logo.png'" alt="Логотип команды" class="team-logo">
           <div class="medal bronze">
-            <el-icon><Medal /></el-icon>
+            <el-icon>
+              <Medal/>
+            </el-icon>
           </div>
         </div>
         <div class="podium-block">3</div>
@@ -51,9 +59,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { Trophy, Medal } from '@element-plus/icons-vue'
-import { teamsApi } from '@/api/teams'
+import {ref, onMounted} from 'vue'
+import {Trophy, Medal} from '@element-plus/icons-vue'
+import {teamsApi} from '@/api/teams'
 
 //todo: сделать апи для получения победителей
 
@@ -100,7 +108,7 @@ onMounted(async () => {
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
-  padding-bottom: 220px; /* Добавляем отступ снизу для текста */
+  padding-bottom: 220px;
 }
 
 .podium-place {
@@ -108,7 +116,7 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   width: 250px;
-  position: relative; /* Добавляем relative позиционирование */
+  position: relative;
 }
 
 .team-logo-container {
@@ -179,11 +187,11 @@ onMounted(async () => {
 .team-info {
   text-align: center;
   margin-top: 20px;
-  position: absolute; /* Делаем абсолютное позиционирование */
-  top: 100%; /* Размещаем под подиумом */
+  position: absolute;
+  top: 100%;
   left: 0;
   right: 0;
-  padding: 0 10px; /* Добавляем отступы по бокам */
+  padding: 0 10px;
 }
 
 .team-info h3 {
@@ -197,15 +205,15 @@ onMounted(async () => {
   font-size: 14px;
   color: #666;
   margin: 0;
-  max-height: 200px; /* Ограничиваем максимальную высоту */
-  overflow-y: auto; /* Добавляем скролл при необходимости */
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 @media (max-width: 768px) {
   .podium-container {
     flex-direction: column;
     align-items: center;
-    gap: 240px; /* Увеличиваем gap для мобильной версии */
+    gap: 240px;
     padding-bottom: 220px;
   }
 

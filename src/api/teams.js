@@ -400,5 +400,21 @@ export const teamsApi = {
         } catch (error) {
             throw error.response?.data || error.message;
         }
+    },
+
+    async updateSolutionLink(teamId, solutionLink) {
+        try {
+            const formData = new FormData();
+            formData.append('solution_link', solutionLink);
+
+            const response = await api.put(`/teams/${teamId}/solution-link`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
     }
 };
