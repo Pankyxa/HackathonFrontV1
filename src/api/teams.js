@@ -416,5 +416,15 @@ export const teamsApi = {
         } catch (error) {
             throw error.response?.data || error.message;
         }
-    }
+    },
+
+    async sendTaskUpdateNotification() {
+        try {
+            const response = await api.post('/teams/notify/task-update');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
 };

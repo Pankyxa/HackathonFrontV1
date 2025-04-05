@@ -17,15 +17,24 @@
           Разослать уведомления о консультации
         </el-button>
 
-        <div class="briefing-buttons">
         <el-button
             type="primary"
-            :loading="isBriefingLoading"
-            @click="handleSendBriefingNotification"
+            :loading="isTaskUpdateLoading"
+            @click="handleSendTaskUpdateNotification"
             class="notification-button"
         >
-          Разослать уведомления о брифинге для жюри
+          Разослать уведомления о дополнении к исходным данным
         </el-button>
+
+        <div class="briefing-buttons">
+          <el-button
+              type="primary"
+              :loading="isBriefingLoading"
+              @click="handleSendBriefingNotification"
+              class="notification-button"
+          >
+            Разослать уведомления о брифинге для жюри
+          </el-button>
 
           <el-button
               type="primary"
@@ -34,8 +43,8 @@
           >
             Отправить уведомление о брифинге выбранному члену жюри
           </el-button>
+        </div>
       </div>
-  </div>
 
       <div v-if="notificationStatus" class="notification-status" :class="statusClass">
         {{ notificationStatus }}
@@ -47,13 +56,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import { teamsApi } from '@/api/teams'
+import {ref} from 'vue'
+import {ElMessage} from 'element-plus'
+import {teamsApi} from '@/api/teams'
 import JudgeSelectDialog from './JudgeSelectDialog.vue'
 
 const isConsultationLoading = ref(false)
 const isBriefingLoading = ref(false)
+const isTaskUpdateLoading = ref(false)
 const notificationStatus = ref('')
 const statusClass = ref('')
 const judgeSelectVisible = ref(false)
@@ -76,6 +86,27 @@ const handleSendConsultationNotification = async () => {
     ElMessage.error('Ошибка при отправке уведомлений о консультации')
   } finally {
     isConsultationLoading.value = false
+  }
+}
+
+const handleSendTaskUpdateNotification = async () => {
+  try {
+    isTaskUpdateLoading.value = true
+    notificationStatus.value = 'Отправка уведомлений о дополнении к исходным данным...'
+    statusClass.value = 'status-info'
+
+    const response = await teamsApi.sendTaskUpdateNotification()
+
+    notificationStatus.value = 'Рассылка уведомлений о дополнении успешно запущена'
+    statusClass.value = 'status-success'
+    ElMessage.success('Рассылка уведомлений о дополнении успешно запущена')
+  } catch (error) {
+    console.error('Error sending task update notifications:', error)
+    notificationStatus.value = `Ошибка при отправке уведомлений о дополнении: ${error.message || 'Неизвестная ошибка'}`
+    statusClass.value = 'status-error'
+    ElMessage.error('Ошибка при отправке уведомлений о дополнении')
+  } finally {
+    isTaskUpdateLoading.value = false
   }
 }
 

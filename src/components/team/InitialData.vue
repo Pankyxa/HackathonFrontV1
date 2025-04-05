@@ -9,6 +9,10 @@
             <span class="download-icon">📥</span>
             Скачать исходные данные (.docx)
           </a>
+          <a href="/files/Addition_to_initial_data.docx" download class="download-button">
+            <span class="download-icon">📥</span>
+            Скачать дополнение к исходным данным (.docx)
+          </a>
         </div>
       </div>
       <h2>Хакатон «Цифровые двойники в энергетике»</h2>
