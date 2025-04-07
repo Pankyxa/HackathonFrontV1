@@ -117,18 +117,18 @@
           <div class="note">(регистрация может закончиться раньше)</div>
         </div>
         <div class="timeline-item">
-          <div class="date">9 апреля 10:00 (по МСК)</div>
+          <div class="date">9 апреля 9:00 (по МСК)</div>
           <div class="event">Онлайн открытие Хакатона</div>
         </div>
         <div class="timeline-item">
           <div class="date">9 апреля</div>
           <div class="event">Доступ к тестовым данным для решения задачи</div>
-          <div class="note">Время будет уточнено</div>
+          <div class="note">9 апреля 9:30 (по МСК)</div>
         </div>
         <div class="timeline-item">
           <div class="date">10 апреля</div>
           <div class="event">Дедлайн загрузки решений</div>
-          <div class="note">Через 24 часа после старта (время будет уточнено)</div>
+          <div class="note">Через 24 часа после старта (10 апреля 9:30 (по МСК))</div>
         </div>
       </div>
     </div>
