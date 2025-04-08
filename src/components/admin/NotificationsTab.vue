@@ -10,6 +10,15 @@
       <div class="notification-actions">
         <el-button
             type="primary"
+            :loading="isOpeningLoading"
+            @click="handleSendOpeningNotification"
+            class="notification-button"
+        >
+          Разослать уведомления об открытии хакатона
+        </el-button>
+
+        <el-button
+            type="primary"
             :loading="isConsultationLoading"
             @click="handleSendConsultationNotification"
             class="notification-button"
@@ -61,12 +70,34 @@ import {ElMessage} from 'element-plus'
 import {teamsApi} from '@/api/teams'
 import JudgeSelectDialog from './JudgeSelectDialog.vue'
 
+const isOpeningLoading = ref(false)
 const isConsultationLoading = ref(false)
 const isBriefingLoading = ref(false)
 const isTaskUpdateLoading = ref(false)
 const notificationStatus = ref('')
 const statusClass = ref('')
 const judgeSelectVisible = ref(false)
+
+const handleSendOpeningNotification = async () => {
+  try {
+    isOpeningLoading.value = true
+    notificationStatus.value = 'Отправка уведомлений об открытии хакатона...'
+    statusClass.value = 'status-info'
+
+    const response = await teamsApi.sendOpeningNotification()
+
+    notificationStatus.value = 'Рассылка уведомлений об открытии хакатона успешно запущена'
+    statusClass.value = 'status-success'
+    ElMessage.success('Рассылка уведомлений об открытии хакатона успешно запущена')
+  } catch (error) {
+    console.error('Error sending opening notifications:', error)
+    notificationStatus.value = `Ошибка при отправке уведомлений об открытии: ${error.message || 'Неизвестная ошибка'}`
+    statusClass.value = 'status-error'
+    ElMessage.error('Ошибка при отправке уведомлений об открытии хакатона')
+  } finally {
+    isOpeningLoading.value = false
+  }
+}
 
 const handleSendConsultationNotification = async () => {
   try {

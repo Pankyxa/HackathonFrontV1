@@ -2,6 +2,7 @@
   <el-container class="layout-container">
     <el-main>
       <GlobalLoader />
+      <CountdownTimer />
       <RouterView />
     </el-main>
   </el-container>
@@ -12,6 +13,7 @@ import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useStageStore } from "@/stores/stage.js"
 import GlobalLoader from '@/components/GlobalLoader.vue'
+import CountdownTimer from '@/components/CountdownTimer.vue'
 
 const authStore = useAuthStore()
 const stageStore = useStageStore()
@@ -33,6 +35,7 @@ onMounted(() => {
   flex: 1;
   padding: 0;
   background-color: #ffffff;
+  /* Удаляем padding-top, так как таймер теперь не влияет на поток документа */
 }
 
 a {

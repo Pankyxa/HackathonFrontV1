@@ -427,4 +427,12 @@ export const teamsApi = {
         }
     },
 
+    async sendOpeningNotification() {
+        try {
+            const response = await api.post('/teams/notify/opening');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
 };

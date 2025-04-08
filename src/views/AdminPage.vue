@@ -10,11 +10,15 @@
         <TeamsTab/>
       </el-tab-pane>
 
-      <el-tab-pane label="Этап" name="stages">
+      <el-tab-pane label="Оценки жюри" name="jury-scores">
+        <JuryScoresTab/>
+      </el-tab-pane>
+
+      <el-tab-pane label="Этапы" name="stages">
         <StagesManagementTab/>
       </el-tab-pane>
 
-      <el-tab-pane label="Рассылка" name="notifications">
+      <el-tab-pane label="Уведомления" name="notifications">
         <NotificationsTab/>
       </el-tab-pane>
     </el-tabs>
@@ -24,11 +28,11 @@
 <script setup>
 import { ref } from 'vue'
 import TheHeader from "@/components/TheHeader.vue"
-import TheFooter from "@/components/TheFooter.vue"
 import UsersTab from "@/components/admin/UsersTab.vue"
 import TeamsTab from "@/components/admin/TeamsTab.vue"
 import StagesManagementTab from "@/components/admin/StagesManagementTab.vue"
 import NotificationsTab from "@/components/admin/NotificationsTab.vue"
+import JuryScoresTab from "@/components/organizer/JudgeScoresTab.vue"
 
 const activeTab = ref('users')
 </script>

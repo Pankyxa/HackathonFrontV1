@@ -4,11 +4,17 @@
     <div v-if="canJudge">
       <el-tabs v-model="activeTab" class="tabs-container">
         <el-tab-pane label="Неоцененные работы" name="unevaluated">
-          <UnevaluatedTeamsTab/>
+          <UnevaluatedTeamsTab
+            ref="unevaluatedTeamsTab"
+            @evaluation-updated="handleEvaluationUpdated"
+          />
         </el-tab-pane>
 
         <el-tab-pane label="Оцененные работы" name="evaluated">
-          <EvaluatedTeamsTab/>
+          <EvaluatedTeamsTab
+            ref="evaluatedTeamsTab"
+            @evaluation-updated="handleEvaluationUpdated"
+          />
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -33,6 +39,8 @@ import { useStageStore } from "@/stores/stage.js";
 
 const stageStore = useStageStore();
 const activeTab = ref('unevaluated')
+const evaluatedTeamsTab = ref(null)
+const unevaluatedTeamsTab = ref(null)
 
 const canJudge = computed(() => {
   return stageStore.isSolutionReview ||
@@ -40,6 +48,21 @@ const canJudge = computed(() => {
       stageStore.isResultsPublication ||
       stageStore.isAwardCeremony;
 })
+
+const handleEvaluationUpdated = async () => {
+  try {
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    if (evaluatedTeamsTab.value) {
+      await evaluatedTeamsTab.value.loadTeams()
+    }
+    if (unevaluatedTeamsTab.value) {
+      await unevaluatedTeamsTab.value.loadTeams()
+    }
+  } catch (error) {
+    console.error('Error updating lists:', error)
+  }
+}
 </script>
 
 <style scoped>

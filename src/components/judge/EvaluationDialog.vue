@@ -38,7 +38,7 @@
             <p class="team-motto">{{ team.team_motto }}</p>
           </div>
         </div>
-        <div class="solution-link-block">
+        <div v-if="team.solution_link" class="solution-link-block">
           <h4>Ссылка на решение</h4>
           <el-link
               type="primary"
@@ -170,6 +170,10 @@ const submitEvaluation = async () => {
       team_id: props.team.team_id,
       ...evaluation.value
     })
+
+    // Добавляем небольшую задержку перед закрытием диалога
+    await new Promise(resolve => setTimeout(resolve, 300));
+
     emit('evaluation-submitted')
     dialogVisible.value = false
     ElMessage({

@@ -200,13 +200,6 @@ const loadFiles = async () => {
     loading.value = true
     const team = await teamsApi.getTeam(props.teamId)
 
-    if (team.solution_link) {
-      solutionType.value = 'link'
-      solutionLink.value = team.solution_link
-    } else {
-      solutionType.value = 'file'
-    }
-
     try {
       const solution = await teamsApi.getTeamSolution(props.teamId)
       const deployment = await teamsApi.getTeamDeployment(props.teamId)

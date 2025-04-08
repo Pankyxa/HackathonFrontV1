@@ -4,6 +4,7 @@
       <el-table
           v-loading="loading"
           :data="sortedTeams"
+          :key="tableKey"
           style="width: 100%"
           :height="tableHeight"
           @row-click="openEvaluationDialog"
@@ -73,6 +74,9 @@ const teams = ref([])
 const dialogVisible = ref(false)
 const selectedTeam = ref(null)
 const tableHeight = 'calc(100vh - 250px)'
+const tableKey = ref(0)
+
+const emit = defineEmits(['evaluation-updated'])
 
 const sortedTeams = computed(() => {
   return [...teams.value].sort((a, b) => b.total_score - a.total_score)
@@ -105,6 +109,7 @@ const loadTeams = async () => {
     loading.value = true
     const evaluations = await evaluationsApi.getMyEvaluations()
     teams.value = evaluations
+    tableKey.value += 1
   } catch (error) {
     console.error('Error loading evaluations:', error)
     ElMessage({
@@ -124,7 +129,12 @@ const openEvaluationDialog = (team) => {
 const handleEvaluationSubmitted = async () => {
   dialogVisible.value = false
   await loadTeams()
+  emit('evaluation-updated')
 }
+
+defineExpose({
+  loadTeams
+})
 
 onMounted(() => {
   loadTeams()

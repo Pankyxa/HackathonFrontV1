@@ -7,9 +7,7 @@
       </el-tab-pane>
 
       <el-tab-pane label="Оценки жюри" name="jury-scores">
-        <div class="coming-soon">
-          <el-empty description="Этот раздел находится в разработке"/>
-        </div>
+        <JuryScoresTab/>
       </el-tab-pane>
 
       <el-tab-pane label="Пользователи" name="users">
@@ -24,17 +22,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import {ref} from 'vue'
 import TheHeader from "@/components/TheHeader.vue"
 import CheckDocumentsTab from "@/components/organizer/CheckDocumentsTab.vue"
-
-import {useStageStore} from "@/stores/stage.js";
-import UsersTab from "@/components/admin/UsersTab.vue";
-import TeamsTab from "@/components/admin/TeamsTab.vue";
+import JuryScoresTab from "@/components/organizer/JudgeScoresTab.vue"
+import UsersTab from "@/components/admin/UsersTab.vue"
+import TeamsTab from "@/components/admin/TeamsTab.vue"
+import {useStageStore} from "@/stores/stage.js"
 
 const stageStore = useStageStore()
-
-const activeTab = ref(stageStore.isRegistration? 'check-documents' : 'jury-scores')
+const activeTab = ref(stageStore.isRegistration ? 'check-documents' : 'jury-scores')
 </script>
 
 <style scoped>

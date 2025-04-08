@@ -39,6 +39,8 @@ import EvaluationDialog from './EvaluationDialog.vue'
 import { ElMessage } from 'element-plus'
 import { evaluationsApi } from '@/api/evaluations'
 
+const emit = defineEmits(['evaluation-updated'])
+
 const loading = ref(false)
 const teams = ref([])
 const dialogVisible = ref(false)
@@ -65,6 +67,7 @@ const openEvaluationDialog = (team) => {
 const handleEvaluationSubmitted = async () => {
   dialogVisible.value = false
   await loadTeams()
+  emit('evaluation-updated')
 }
 
 onMounted(() => {
