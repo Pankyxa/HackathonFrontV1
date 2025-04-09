@@ -8,50 +8,68 @@
       </template>
 
       <div class="notification-actions">
-        <el-button
-            type="primary"
-            :loading="isOpeningLoading"
-            @click="handleSendOpeningNotification"
-            class="notification-button"
-        >
-          Разослать уведомления об открытии хакатона
-        </el-button>
-
-        <el-button
-            type="primary"
-            :loading="isConsultationLoading"
-            @click="handleSendConsultationNotification"
-            class="notification-button"
-        >
-          Разослать уведомления о консультации
-        </el-button>
-
-        <el-button
-            type="primary"
-            :loading="isTaskUpdateLoading"
-            @click="handleSendTaskUpdateNotification"
-            class="notification-button"
-        >
-          Разослать уведомления о дополнении к исходным данным
-        </el-button>
-
-        <div class="briefing-buttons">
+        <!-- Общие уведомления -->
+        <div class="general-notifications">
+          <h4>Общие уведомления</h4>
           <el-button
               type="primary"
-              :loading="isBriefingLoading"
-              @click="handleSendBriefingNotification"
+              :loading="isOpeningLoading"
+              @click="handleSendOpeningNotification"
               class="notification-button"
           >
-            Разослать уведомления о брифинге для жюри
+            Разослать уведомления об открытии хакатона
           </el-button>
 
           <el-button
               type="primary"
-              @click="showJudgeSelect"
+              :loading="isConsultationLoading"
+              @click="handleSendConsultationNotification"
               class="notification-button"
           >
-            Отправить уведомление о брифинге выбранному члену жюри
+            Разослать уведомления о консультации
           </el-button>
+
+          <el-button
+              type="primary"
+              :loading="isTaskUpdateLoading"
+              @click="handleSendTaskUpdateNotification"
+              class="notification-button"
+          >
+            Разослать уведомления о дополнении к исходным данным
+          </el-button>
+        </div>
+
+        <!-- Уведомления для жюри -->
+        <div class="judge-notifications">
+          <el-divider>Уведомления для жюри</el-divider>
+
+          <el-button
+              type="primary"
+              :loading="isJudgeOpeningLoading"
+              @click="handleSendJudgeOpeningNotification"
+              class="notification-button"
+          >
+            Разослать уведомления об очном открытии для жюри
+          </el-button>
+
+          <div class="briefing-buttons">
+            <el-button
+                type="primary"
+                :loading="isBriefingLoading"
+                @click="handleSendBriefingNotification"
+                class="notification-button"
+            >
+              Разослать уведомления о брифинге для жюри
+            </el-button>
+
+            <el-button
+                type="primary"
+                @click="showJudgeSelect"
+                class="notification-button"
+            >
+              Отправить уведомление о брифинге выбранному члену жюри
+            </el-button>
+          </div>
         </div>
       </div>
 
@@ -74,6 +92,7 @@ const isOpeningLoading = ref(false)
 const isConsultationLoading = ref(false)
 const isBriefingLoading = ref(false)
 const isTaskUpdateLoading = ref(false)
+const isJudgeOpeningLoading = ref(false)
 const notificationStatus = ref('')
 const statusClass = ref('')
 const judgeSelectVisible = ref(false)
@@ -162,6 +181,27 @@ const handleSendBriefingNotification = async () => {
   }
 }
 
+const handleSendJudgeOpeningNotification = async () => {
+  try {
+    isJudgeOpeningLoading.value = true
+    notificationStatus.value = 'Отправка уведомлений об очном открытии для жюри...'
+    statusClass.value = 'status-info'
+
+    const response = await teamsApi.sendJudgeOpeningNotification()
+
+    notificationStatus.value = 'Рассылка уведомлений об очном открытии для жюри успешно запущена'
+    statusClass.value = 'status-success'
+    ElMessage.success('Рассылка уведомлений об очном открытии для жюри успешно запущена')
+  } catch (error) {
+    console.error('Error sending judge opening notifications:', error)
+    notificationStatus.value = `Ошибка при отправке уведомлений об очном открытии для жюри: ${error.message || 'Неизвестная ошибка'}`
+    statusClass.value = 'status-error'
+    ElMessage.error('Ошибка при отправке уведомлений об очном открытии для жюри')
+  } finally {
+    isJudgeOpeningLoading.value = false
+  }
+}
+
 const showJudgeSelect = () => {
   judgeSelectVisible.value = true
 }
@@ -191,9 +231,22 @@ const showJudgeSelect = () => {
 .notification-actions {
   display: flex;
   flex-direction: column;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.general-notifications,
+.judge-notifications {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
   align-items: center;
-  margin-bottom: 20px;
+  width: 100%;
+}
+
+.general-notifications h4 {
+  margin: 0 0 8px 0;
+  color: #606266;
 }
 
 .notification-button {
@@ -237,5 +290,9 @@ const showJudgeSelect = () => {
 
 .briefing-buttons :deep(.el-button) {
   margin: 0;
+}
+
+.el-divider {
+  margin: 8px 0;
 }
 </style>

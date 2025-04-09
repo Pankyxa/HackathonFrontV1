@@ -434,5 +434,14 @@ export const teamsApi = {
         } catch (error) {
             throw error.response?.data || error.message;
         }
-    }
+    },
+
+    async sendJudgeOpeningNotification() {
+        try {
+            const response = await api.post('/teams/notify/judge-opening');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 };
