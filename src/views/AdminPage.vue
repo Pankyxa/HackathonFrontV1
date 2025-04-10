@@ -10,6 +10,10 @@
         <TeamsTab/>
       </el-tab-pane>
 
+      <el-tab-pane label="Решения команд" name="teams_solution">
+        <UnevaluatedTeamsTab/>
+      </el-tab-pane>
+
       <el-tab-pane label="Оценки жюри" name="jury-scores">
         <JuryScoresTab/>
       </el-tab-pane>
@@ -33,6 +37,7 @@ import TeamsTab from "@/components/admin/TeamsTab.vue"
 import StagesManagementTab from "@/components/admin/StagesManagementTab.vue"
 import NotificationsTab from "@/components/admin/NotificationsTab.vue"
 import JuryScoresTab from "@/components/organizer/JudgeScoresTab.vue"
+import UnevaluatedTeamsTab from "@/components/judge/UnevaluatedTeamsTab.vue";
 
 const activeTab = ref('users')
 </script>

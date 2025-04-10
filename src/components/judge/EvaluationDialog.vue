@@ -1,7 +1,7 @@
 <template>
   <el-dialog
       v-model="dialogVisible"
-      :title="isEdit ? 'Изменение оценки' : 'Оценка команды'"
+      :title="authStore.isAdmin? 'Решение команды' : isEdit ? 'Изменение оценки' : 'Оценка команды'"
       :width="isMobile ? '100%' : '80%'"
       :fullscreen="isMobile"
       :close-on-click-modal="false"
@@ -56,6 +56,7 @@
       </div>
 
       <div
+          v-if="!authStore.isAdmin"
           class="evaluation-form"
           :class="{ 'mobile-hidden': isMobile && activeTab === 'info' }"
       >
@@ -87,7 +88,7 @@
     </div>
 
     <template #footer>
-      <div class="dialog-footer">
+      <div v-if="!authStore.isAdmin" class="dialog-footer">
         <button class="cancel-btn" @click="handleClose">Отмена</button>
         <button class="save-btn" @click="submitEvaluation" :disabled="loading">
           {{ loading ? 'Сохранение...' : (isEdit ? 'Сохранить' : 'Оценить') }}
@@ -102,6 +103,9 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import TeamSolution from '@/components/team/TeamSolution.vue'
 import { evaluationsApi } from '@/api/evaluations'
+import { useAuthStore } from "@/stores/auth.js";
+
+const authStore = useAuthStore()
 
 const props = defineProps({
   visible: Boolean,
@@ -142,6 +146,7 @@ onMounted(() => {
       criterion_5: Number(props.initialEvaluation.criterion_5) || 0,
     }
   }
+  console.log(props.team)
 })
 
 const totalScore = computed(() => {
