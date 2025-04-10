@@ -41,6 +41,9 @@
       </div>
     </div>
 
+
+    <DefenseScheduleTable />
+
     <!-- Убрал временный блок с информацией -->
     <div v-if="false" class="consultation-section">
       <div class="consultation-container">
@@ -168,6 +171,7 @@ import AuthRequiredModal from "@/components/auth/AuthRequiredModal.vue";
 import WinnersSection from "@/components/WinnersSection.vue"
 import {useStageStore} from "@/stores/stage.js";
 import {useAuthStore} from "@/stores/auth.js";
+import DefenseScheduleTable from "@/components/DefenseScheduleTable.vue";
 
 const router = useRouter();
 const showAuthModal = ref(false);

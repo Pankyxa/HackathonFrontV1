@@ -13,6 +13,15 @@
           <h4>Общие уведомления</h4>
           <el-button
               type="primary"
+              :loading="isDefenseLoading"
+              @click="handleSendDefenseScheduleNotification"
+              class="notification-button"
+          >
+            Разослать уведомления о графике защит
+          </el-button>
+
+          <el-button
+              type="primary"
               :loading="isOpeningLoading"
               @click="handleSendOpeningNotification"
               class="notification-button"
@@ -88,6 +97,7 @@ import {ElMessage} from 'element-plus'
 import {teamsApi} from '@/api/teams'
 import JudgeSelectDialog from './JudgeSelectDialog.vue'
 
+const isDefenseLoading = ref(false)
 const isOpeningLoading = ref(false)
 const isConsultationLoading = ref(false)
 const isBriefingLoading = ref(false)
@@ -96,6 +106,27 @@ const isJudgeOpeningLoading = ref(false)
 const notificationStatus = ref('')
 const statusClass = ref('')
 const judgeSelectVisible = ref(false)
+
+const handleSendDefenseScheduleNotification = async () => {
+  try {
+    isDefenseLoading.value = true
+    notificationStatus.value = 'Отправка уведомлений о защите проектов...'
+    statusClass.value = 'status-info'
+
+    const response = await teamsApi.sendDefenseScheduleNotification()
+
+    notificationStatus.value = 'Рассылка уведомлений о защите проектов успешно запущена'
+    statusClass.value = 'status-success'
+    ElMessage.success('Рассылка уведомлений о защите проектов успешно запущена')
+  } catch (error) {
+    console.error('Error sending opening notifications:', error)
+    notificationStatus.value = `Ошибка при отправке уведомлений о защите проектов: ${error.message || 'Неизвестная ошибка'}`
+    statusClass.value = 'status-error'
+    ElMessage.error('Ошибка при отправке уведомлений о защите проектов')
+  } finally {
+    isDefenseLoading.value = false
+  }
+}
 
 const handleSendOpeningNotification = async () => {
   try {

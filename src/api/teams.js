@@ -444,4 +444,13 @@ export const teamsApi = {
             throw error.response?.data || error.message;
         }
     },
+
+    async sendDefenseScheduleNotification() {
+        try {
+            const response = await api.post('/teams/notify/defense-schedule');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 };
