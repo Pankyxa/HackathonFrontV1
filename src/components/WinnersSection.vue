@@ -114,7 +114,6 @@
           label="Итоговый балл"
           width="120"
           align="center"
-          sortable
         >
           <template #default="scope">
             {{ formatScore(scope.row.total_score) }}
