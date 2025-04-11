@@ -13,6 +13,15 @@
           <h4>Общие уведомления</h4>
           <el-button
               type="primary"
+              :loading="isClosingCeremonyLoading"
+              @click="handleSendClosingCeremonyNotification"
+              class="notification-button"
+          >
+            Разослать уведомления о торжественном закрытии
+          </el-button>
+
+          <el-button
+              type="primary"
               :loading="isDefenseLoading"
               @click="handleSendDefenseScheduleNotification"
               class="notification-button"
@@ -37,7 +46,6 @@
           >
             Разослать уведомления о консультации
           </el-button>
-
           <el-button
               type="primary"
               :loading="isTaskUpdateLoading"
@@ -97,6 +105,7 @@ import {ElMessage} from 'element-plus'
 import {teamsApi} from '@/api/teams'
 import JudgeSelectDialog from './JudgeSelectDialog.vue'
 
+const isClosingCeremonyLoading = ref(false)
 const isDefenseLoading = ref(false)
 const isOpeningLoading = ref(false)
 const isConsultationLoading = ref(false)
@@ -106,6 +115,27 @@ const isJudgeOpeningLoading = ref(false)
 const notificationStatus = ref('')
 const statusClass = ref('')
 const judgeSelectVisible = ref(false)
+
+const handleSendClosingCeremonyNotification = async () => {
+  try {
+    isClosingCeremonyLoading.value = true
+    notificationStatus.value = 'Отправка уведомлений о торжественном закрытии...'
+    statusClass.value = 'status-info'
+
+    const response = await teamsApi.sendClosingCeremonyNotification()
+
+    notificationStatus.value = 'Рассылка уведомлений о торжественном закрытии успешно запущена'
+    statusClass.value = 'status-success'
+    ElMessage.success('Рассылка уведомлений о торжественном закрытии успешно запущена')
+  } catch (error) {
+    console.error('Error sending closing ceremony notifications:', error)
+    notificationStatus.value = `Ошибка при отправке уведомлений о торжественном закрытии: ${error.message || 'Неизвестная ошибка'}`
+    statusClass.value = 'status-error'
+    ElMessage.error('Ошибка при отправке уведомлений о торжественном закрытии')
+  } finally {
+    isClosingCeremonyLoading.value = false
+  }
+}
 
 const handleSendDefenseScheduleNotification = async () => {
   try {

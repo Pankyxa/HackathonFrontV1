@@ -453,4 +453,13 @@ export const teamsApi = {
             throw error.response?.data || error.message;
         }
     },
+
+    async sendClosingCeremonyNotification() {
+        try {
+            const response = await api.post('/teams/notify/closing-ceremony');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 };
