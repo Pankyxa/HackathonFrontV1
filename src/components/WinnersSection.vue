@@ -1,11 +1,14 @@
 <template>
-  <div class="winners-section">
+  <div class="winners-section" v-if="stageStore.isResultsPublication || authStore.isAdmin">
     <h2>Победители хакатона</h2>
     <div class="podium-container">
       <!-- Второе место -->
       <div class="podium-place second-place">
         <div class="team-logo-container">
-          <img :src="secondPlace.logo || '/placeholder-logo.png'" alt="Логотип команды" class="team-logo">
+          <img :src="getTeamLogoUrl(secondPlace)"
+               :alt="`Логотип команды ${secondPlace?.team_name || 'Второе место'}`"
+               class="team-logo"
+          >
           <div class="medal silver">
             <el-icon>
               <Medal/>
@@ -14,17 +17,21 @@
         </div>
         <div class="podium-block">2</div>
         <div class="team-info">
-          <h3>{{ secondPlace.team_name || 'Второе место' }}</h3>
-          <p>{{
-              secondPlace.team_motto || 'Девиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз командыДевиз команды'
-            }}</p>
+          <h3>{{ secondPlace?.team_name || 'Второе место' }}</h3>
+          <p class="team-motto" v-if="secondPlace?.team_motto">{{ secondPlace.team_motto }}</p>
+          <p class="score" v-if="secondPlace">
+            Итоговый балл: {{ formatScore(secondPlace.total_score) }}
+          </p>
         </div>
       </div>
 
       <!-- Первое место -->
       <div class="podium-place first-place">
         <div class="team-logo-container">
-          <img :src="firstPlace.logo || '/placeholder-logo.png'" alt="Логотип команды" class="team-logo">
+          <img :src="getTeamLogoUrl(firstPlace)"
+               :alt="`Логотип команды ${firstPlace?.team_name || 'Первое место'}`"
+               class="team-logo"
+          >
           <div class="medal gold">
             <el-icon>
               <Trophy/>
@@ -33,15 +40,21 @@
         </div>
         <div class="podium-block">1</div>
         <div class="team-info">
-          <h3>{{ firstPlace.team_name || 'Первое место' }}</h3>
-          <p>{{ firstPlace.team_motto || 'Девиз команды' }}</p>
+          <h3>{{ firstPlace?.team_name || 'Первое место' }}</h3>
+          <p class="team-motto" v-if="firstPlace?.team_motto">{{ firstPlace.team_motto }}</p>
+          <p class="score" v-if="firstPlace">
+            Итоговый балл: {{ formatScore(firstPlace.total_score) }}
+          </p>
         </div>
       </div>
 
       <!-- Третье место -->
       <div class="podium-place third-place">
         <div class="team-logo-container">
-          <img :src="thirdPlace.logo || '/placeholder-logo.png'" alt="Логотип команды" class="team-logo">
+          <img :src="getTeamLogoUrl(thirdPlace)"
+               :alt="`Логотип команды ${thirdPlace?.team_name || 'Третье место'}`"
+               class="team-logo"
+          >
           <div class="medal bronze">
             <el-icon>
               <Medal/>
@@ -50,41 +63,173 @@
         </div>
         <div class="podium-block">3</div>
         <div class="team-info">
-          <h3>{{ thirdPlace.team_name || 'Третье место' }}</h3>
-          <p>{{ thirdPlace.team_motto || 'Девиз команды' }}</p>
+          <h3>{{ thirdPlace?.team_name || 'Третье место' }}</h3>
+          <p class="team-motto" v-if="thirdPlace?.team_motto">{{ thirdPlace.team_motto }}</p>
+          <p class="score" v-if="thirdPlace">
+            Итоговый балл: {{ formatScore(thirdPlace.total_score) }}
+          </p>
         </div>
       </div>
+    </div>
+
+    <!-- Добавляем таблицу остальных команд -->
+    <div class="other-teams-container" v-if="otherTeams.length > 0">
+      <h3>Остальные участники</h3>
+      <el-table
+        :data="otherTeams"
+        style="width: 100%"
+        :default-sort="{ prop: 'total_score', order: 'descending' }"
+      >
+        <el-table-column
+          label="Место"
+          width="80"
+          align="center"
+        >
+          <template #default="scope">
+            {{ scope.$index + 4 }}
+</template>
+        </el-table-column>
+
+        <el-table-column
+          label="Команда"
+          min-width="200"
+        >
+          <template #default="scope">
+            <div class="team-cell">
+              <el-avatar
+                :size="40"
+                :src="getTeamLogoUrl(scope.row)"
+                :alt="scope.row.team_name"
+              />
+              <div class="team-info-cell">
+                <div class="team-name">{{ scope.row.team_name }}</div>
+                <div class="team-motto-cell">{{ scope.row.team_motto }}</div>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column
+          prop="total_score"
+          label="Итоговый балл"
+          width="120"
+          align="center"
+          sortable
+        >
+          <template #default="scope">
+            {{ formatScore(scope.row.total_score) }}
+          </template>
+        </el-table-column>
+      </el-table>
     </div>
   </div>
 </template>
 
 <script setup>
-import {ref, onMounted} from 'vue'
-import {Trophy, Medal} from '@element-plus/icons-vue'
-import {teamsApi} from '@/api/teams'
+import { ref, onMounted, watch, computed } from 'vue'
+import { Trophy, Medal } from '@element-plus/icons-vue'
+import { teamsApi } from '@/api/teams'
+import { useStageStore } from '@/stores/stage'
+import {useAuthStore} from "@/stores/auth.js";
 
-//todo: сделать апи для получения победителей
+const authStore = useAuthStore()
+const stageStore = useStageStore()
+const firstPlace = ref(null)
+const secondPlace = ref(null)
+const thirdPlace = ref(null)
+const allTeams = ref([])
 
-const firstPlace = ref({})
-const secondPlace = ref({})
-const thirdPlace = ref({})
+// Вычисляемое свойство для остальных команд (с 4-го места)
+const otherTeams = computed(() => {
+  return allTeams.value.slice(3)
+})
 
-// Здесь можно добавить логику получения победителей
-// Например, через специальный API-endpoint
-onMounted(async () => {
+// Функция для форматирования оценки
+const formatScore = (score) => {
+  return score ? Math.round(score * 10) / 10 : 0
+}
+
+// Функция для получения URL логотипа команды
+const getTeamLogoUrl = (team) => {
+  return team?.team_id ?
+    `${import.meta.env.VITE_API_URL}/teams/${team.team_id}/logo` :
+    '/placeholder-logo.png'
+}
+
+// Функция для загрузки победителей
+const loadWinners = async () => {
   try {
-    // Пример получения команд
-    // const winners = await teamsApi.getWinners()
-    // firstPlace.value = winners[0]
-    // secondPlace.value = winners[1]
-    // thirdPlace.value = winners[2]
-  } catch (error) {
-    console.error('Ошибка при получении победителей:', error)
+      const winners = await teamsApi.getWinners()
+    allTeams.value = winners // Сохраняем все команды
+      if (winners.length > 0) firstPlace.value = winners[0]
+      if (winners.length > 1) secondPlace.value = winners[1]
+      if (winners.length > 2) thirdPlace.value = winners[2]
+    } catch (error) {
+      console.error('Ошибка при получении победителей:', error)
+    }
+  }
+
+// Следим за изменением этапа или статуса админа
+watch(
+  [() => stageStore.isResultsPublication, () => authStore.isAdmin],
+  ([isResultsStage, isAdmin]) => {
+    if (isResultsStage || isAdmin) {
+      loadWinners()
+    } else {
+      // Очищаем данные, если не этап результатов и не админ
+      firstPlace.value = null
+      secondPlace.value = null
+      thirdPlace.value = null
+      allTeams.value = []
+    }
+  }
+)
+
+onMounted(async () => {
+  if (stageStore.isResultsPublication || authStore.isAdmin) {
+    await loadWinners()
   }
 })
 </script>
 
 <style scoped>
+.score {
+  font-size: 16px;
+  color: #666;
+  margin-top: 8px;
+  font-weight: bold;
+}
+
+.team-motto {
+  font-size: 14px;
+  color: #666;
+  margin: 4px 0;
+  font-style: italic;
+  max-height: 60px; /* Максимальная высота для 3 строк текста */
+  overflow-y: auto;
+  scrollbar-width: thin; /* Для Firefox */
+  scrollbar-color: #888 transparent; /* Для Firefox */
+}
+
+/* Стили для скроллбара (Webkit browsers - Chrome, Safari, etc) */
+.team-motto::-webkit-scrollbar {
+  width: 4px;
+}
+
+.team-motto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.team-motto::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+
+.team-motto::-webkit-scrollbar-thumb:hover {
+  background-color: #666;
+}
+
+/* Остальные стили остаются без изменений */
 .winners-section {
   padding: 60px 20px;
   background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
@@ -92,13 +237,13 @@ onMounted(async () => {
   margin: 20px;
 }
 
-.winners-section h2 {
+  .winners-section h2 {
   text-align: center;
   font-size: 32px;
   margin-bottom: 40px;
   color: #333;
   font-weight: bold;
-}
+  }
 
 .podium-container {
   display: flex;
@@ -201,12 +346,44 @@ onMounted(async () => {
   font-weight: bold;
 }
 
-.team-info p {
-  font-size: 14px;
+/* Добавляем новые стили для таблицы */
+.other-teams-container {
+  margin-top: 60px;
+  padding: 0 20px;
+}
+
+.other-teams-container h3 {
+  text-align: center;
+    font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+  }
+
+.team-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.team-info-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.team-name {
+  font-weight: bold;
+  color: #333;
+}
+
+.team-motto-cell {
+  font-size: 12px;
   color: #666;
-  margin: 0;
-  max-height: 200px;
-  overflow-y: auto;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
 }
 
 @media (max-width: 768px) {
@@ -249,5 +426,31 @@ onMounted(async () => {
     font-size: 24px;
     margin-bottom: 30px;
   }
+
+  .other-teams-container {
+    margin-top: 40px;
+    padding: 0 10px;
+  }
+
+  .team-motto-cell {
+    max-width: 150px;
+  }
+}
+
+:deep(.el-table) {
+  --el-table-border-color: #dcdfe6;
+  --el-table-header-bg-color: #f5f7fa;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.el-table th) {
+  background-color: #f5f7fa;
+  font-weight: bold;
+}
+
+:deep(.el-table--enable-row-hover .el-table__body tr:hover > td) {
+  background-color: #f5f7fa;
 }
 </style>

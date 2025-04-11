@@ -462,4 +462,14 @@ export const teamsApi = {
             throw error.response?.data || error.message;
         }
     },
+
+    async getWinners() {
+        try {
+            const response = await api.get('/evaluations/public-results');
+            const sortedTeams = response.data.sort((a, b) => b.total_score - a.total_score);
+            return sortedTeams;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 };

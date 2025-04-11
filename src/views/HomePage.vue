@@ -41,29 +41,31 @@
       </div>
     </div>
 
-    <div v-if="authStore.isAuthenticated" class="consultation-section">
-      <div class="consultation-container">
-        <div class="consultation-content">
-          <h2>Торжественное закрытие Хакатона</h2>
-          <div class="consultation-info">
-            <div class="consultation-date">14:00 (МСК)</div>
-            <div class="consultation-details">
-              <p>Просим всех присоединиться для участия в торжественном закрытии Хакатона</p>
-              <a href="https://bigbb2.tyuiu.ru/b/hyc-sjb-5lk-prq"
-                 target="_blank"
-                 class="consultation-link">
-                <el-button type="primary" class="join-button">
-                  Присоединиться к закрытию
-                </el-button>
-              </a>
+    <div v-if="stageStore.isOnlineDefense">
+      <div v-if="authStore.isAuthenticated" class="consultation-section">
+        <div class="consultation-container">
+          <div class="consultation-content">
+            <h2>Торжественное закрытие Хакатона</h2>
+            <div class="consultation-info">
+              <div class="consultation-date">14:00 (МСК)</div>
+              <div class="consultation-details">
+                <p>Просим всех присоединиться для участия в торжественном закрытии Хакатона</p>
+                <a href="https://bigbb2.tyuiu.ru/b/hyc-sjb-5lk-prq"
+                   target="_blank"
+                   class="consultation-link">
+                  <el-button type="primary" class="join-button">
+                    Присоединиться к закрытию
+                  </el-button>
+                </a>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+
+      <DefenseScheduleTable/>
     </div>
-
-
-    <DefenseScheduleTable/>
 
     <!-- Убрал временный блок с информацией -->
     <div v-if="false" class="consultation-section">
@@ -116,7 +118,7 @@
       </div>
     </div>
 
-    <!--    <WinnersSection />-->
+    <WinnersSection/>
 
     <div class="task-section">
       <h2>О соревнованиях</h2>
