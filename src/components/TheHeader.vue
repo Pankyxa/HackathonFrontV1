@@ -1,5 +1,6 @@
 <template>
   <el-header class="header" :class="{ 'header-hidden': isHeaderHidden, 'menu-open': isMenuOpen }">
+    <GlobalNotification />
     <div class="header-content">
       <div class="logo desktop-menu">
         <router-link to="/">
@@ -33,6 +34,7 @@
             <el-icon>
               <Menu/>
             </el-icon>
+            <span v-if="hasInvites" class="hamburger-notification-badge"></span>
           </el-button>
         </div>
 
@@ -69,9 +71,11 @@ import {useRouter} from 'vue-router'
 import {Menu} from '@element-plus/icons-vue'
 import AuthRequiredModal from "@/components/auth/AuthRequiredModal.vue"
 import MenuItems from './MenuItems.vue'
+import GlobalNotification from './GlobalNotification.vue'
 import {useAuthStore} from '@/stores/auth'
 import {useLoadingStore} from "@/stores/loading.js";
 import {storeToRefs} from "pinia";
+import { useTeamInvites } from '@/composables/useTeamInvites.js';
 
 const props = defineProps({
   isHeaderHidden: {
@@ -82,6 +86,7 @@ const props = defineProps({
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { hasInvites } = useTeamInvites()
 const isMenuOpen = ref(false)
 const showAuthModal = ref(false)
 const mobileMenuRef = ref(null)
@@ -141,16 +146,21 @@ onBeforeUnmount(() => {
 <style scoped>
 .header {
   padding: 0;
-  margin: 5px;
-  background: linear-gradient(90deg, #00A3FF 0%, #5B51D8 100%);
-  height: 80px !important;
-  border-radius: 16px;
+  margin: 0;
+  background: linear-gradient(90deg, #1e40af 0%, #1e3a8a 50%, #1e40af 100%); /* Глубокий синий градиент */
+  height: 64px !important; /* Компактная высота */
+  border-radius: 0;
   position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
-  width: calc(100% - 10px);
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
-  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
   overflow: hidden;
+  overflow-x: hidden;
 }
 
 .header-hidden {
@@ -169,6 +179,9 @@ onBeforeUnmount(() => {
   align-items: center;
   height: 100%;
   padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .logo img {
@@ -184,7 +197,7 @@ onBeforeUnmount(() => {
 .nav-menu {
   border: none;
   background: transparent !important;
-  height: 80px;
+  height: 64px;
   display: flex;
   align-items: center;
 }
@@ -197,12 +210,12 @@ onBeforeUnmount(() => {
 
 .mobile-menu-dropdown {
   position: absolute;
-  top: 60px;
+  top: 64px;
   right: 0;
-  background: linear-gradient(90deg, #00A3FF 0%, #5B51D8 100%);
-  border-radius: 16px;
+  background: linear-gradient(90deg, #1e40af 0%, #1e3a8a 50%, #1e40af 100%);
+  border-radius: 8px;
   min-width: 200px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .mobile-nav-menu {
@@ -213,16 +226,20 @@ onBeforeUnmount(() => {
 
 :deep(.el-menu--horizontal .el-menu-item) {
   color: white !important;
-  border: 2px solid white !important;
-  border-radius: 8px;
-  margin-right: 16px;
-  padding: 0 20px;
-  height: 40px;
-  line-height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  background: transparent !important;
+  border-radius: 6px;
+  margin-right: 12px;
+  padding: 0 16px;
+  height: 36px;
+  line-height: 34px;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
 :deep(.el-menu--horizontal .el-menu-item:hover) {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
   color: white !important;
 }
 
@@ -231,7 +248,8 @@ onBeforeUnmount(() => {
 }
 
 :deep(.el-menu-item.is-active) {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
   color: white !important;
 }
 
@@ -274,8 +292,8 @@ onBeforeUnmount(() => {
 
 @media (max-width: 768px) {
   .header {
-    transition: height 0.3s ease;
-    height: 80px !important;
+    transition: transform 0.3s ease, height 0.3s ease;
+    height: 64px !important;
     padding: 0;
     overflow: hidden;
   }
@@ -288,6 +306,10 @@ onBeforeUnmount(() => {
     padding: 0 20px;
     flex-direction: column;
     height: auto;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 
   .desktop-menu {
@@ -303,11 +325,14 @@ onBeforeUnmount(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 80px;
+    height: 64px;
     width: 100%;
+    max-width: 100%;
     position: relative;
     z-index: 2;
-    background: linear-gradient(90deg, #00A3FF 0%, #5B51D8 100%);
+    background: linear-gradient(90deg, #1e40af 0%, #1e3a8a 50%, #1e40af 100%);
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 
   .mobile-logo {
@@ -317,16 +342,31 @@ onBeforeUnmount(() => {
 
   .hamburger-btn {
     display: flex;
+    position: relative;
     background: transparent;
-    border: 2px solid white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
     padding: 8px;
     font-size: 24px;
-    transition: background-color 0.3s ease;
+    transition: all 0.2s ease;
   }
 
   .hamburger-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  .hamburger-notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 8px;
+    height: 8px;
+    background-color: #f56565;
+    border-radius: 50%;
+    border: 1.5px solid #1e40af;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9);
+    z-index: 10;
   }
 
   .mobile-menu-dropdown {
@@ -365,11 +405,13 @@ onBeforeUnmount(() => {
     margin: 0;
     width: 100%;
     height: 44px;
-    line-height: 40px;
-    font-size: 16px;
+    line-height: 42px;
+    font-size: 14px;
     text-align: center;
-    border: 2px solid white !important;
-    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    background: transparent !important;
+    border-radius: 6px;
+    margin-bottom: 8px;
   }
 
   .mobile-header {

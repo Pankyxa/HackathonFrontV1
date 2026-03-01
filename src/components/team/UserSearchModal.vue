@@ -4,17 +4,20 @@
       :title="role === 'mentor' ? 'Поиск наставника' : 'Поиск участника'"
       width="500px"
       :close-on-click-modal="false"
-      class="user-search-dialog"
+      class="user-search-dialog clean-corporate-modal"
       :fullscreen="isMobile"
   >
     <div class="search-container">
-      <el-input
-          v-model="searchQuery"
-          :placeholder="role === 'mentor' ? 'Введите ФИО наставника' : 'Введите ФИО участника'"
-          :suffix-icon="Search"
-          @input="handleSearch"
-          class="search-input"
-      />
+      <div class="search-input-wrapper">
+        <el-icon class="search-icon"><Search /></el-icon>
+        <el-input
+            v-model="searchQuery"
+            :placeholder="role === 'mentor' ? 'Введите ФИО наставника' : 'Введите ФИО участника'"
+            @input="handleSearch"
+            class="search-input"
+            clearable
+        />
+      </div>
 
       <div class="search-results" v-if="searchResults.length > 0">
         <el-scrollbar class="results-scrollbar">
@@ -28,10 +31,12 @@
             <div class="user-info">
               <div class="user-name">{{ user.full_name }}</div>
               <div class="user-details">
-                {{ role === 'mentor' ? user.mentor_info.job : user.participant_info.vuz }} |
-                {{ role === 'mentor' ? user.mentor_info.job_title : user.participant_info.course }}
+                {{ role === 'mentor' ? (user.mentor_info?.job || '') : (user.participant_info?.vuz || '') }} |
+                {{ role === 'mentor' ? (user.mentor_info?.job_title || '') : (user.participant_info?.course || '') }}
               </div>
             </div>
+            <el-icon v-if="selectedUser?.id === user.id" class="check-icon"><Check /></el-icon>
+            <el-icon v-else class="plus-icon"><Plus /></el-icon>
           </div>
         </el-scrollbar>
       </div>
@@ -47,12 +52,12 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="closeModal" class="footer-button">Отмена</el-button>
+        <el-button @click="closeModal" class="dialog-secondary-btn">Отмена</el-button>
         <el-button
             type="primary"
             @click="addSelectedUser"
             :disabled="!selectedUser"
-            class="footer-button"
+            class="dialog-primary-btn"
         >
           Добавить участника
         </el-button>
@@ -63,7 +68,7 @@
 
 <script setup>
 import {ref, watch, onMounted} from 'vue';
-import {Search} from '@element-plus/icons-vue';
+import {Search, Check, Plus} from '@element-plus/icons-vue';
 import {usersApi} from '@/api/users.js';
 import {ElMessage} from 'element-plus';
 
@@ -157,42 +162,72 @@ const closeModal = () => {
 </script>
 
 <style scoped>
-.user-search-dialog :deep(.el-dialog) {
-  margin: 0 auto;
-}
-
 .user-search-dialog :deep(.el-dialog__body) {
-  padding: 20px;
+  padding: 24px;
 }
 
 .search-container {
-  margin-bottom: 20px;
-  min-height: 40vh;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  height: 60vh;
+  min-height: 300px;
+  max-height: 60vh;
+}
+
+/* Modern Search Input */
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px; /* mb-4 - gap between title and input */
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  z-index: 1;
+  color: #94a3b8; /* text-slate-400 */
+  font-size: 18px;
+  pointer-events: none;
 }
 
 .search-input {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: white;
+  width: 100%;
 }
 
+.search-input :deep(.el-input__wrapper) {
+  padding-left: 40px !important; /* pl-10 - Space for icon, ensure it doesn't overlap */
+  padding-right: 12px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border: 1px solid #cbd5e1; /* border-slate-300 */
+  border-radius: 8px; /* rounded-lg */
+  box-shadow: none;
+  transition: all 0.2s ease;
+}
+
+.search-input :deep(.el-input__wrapper.is-focus) {
+  border-color: #2563eb; /* focus:border-blue-500 */
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); /* focus:ring-2 focus:ring-blue-500 */
+}
+
+.search-input :deep(.el-input__inner) {
+  color: #1e293b; /* text-slate-800 */
+  font-size: 16px;
+}
+
+/* Search Results */
 .search-results {
   flex: 1;
-  margin-top: 20px;
-  border: 1px solid #EBEEF5;
-  border-radius: 4px;
-  display: flex;
-  flex-direction: column;
+  border: 1px solid #e2e8f0; /* border border-slate-200 */
+  border-radius: 8px; /* rounded-lg */
   overflow: hidden;
+  background: white;
+  min-height: 200px;
+  max-height: 50vh;
 }
 
 .results-scrollbar {
-  flex: 1;
   height: 100%;
 }
 
@@ -201,19 +236,19 @@ const closeModal = () => {
 }
 
 .results-scrollbar :deep(.el-scrollbar__view) {
-  height: 100%;
+  padding: 0;
 }
 
+/* User Item - Clean Card Style */
 .user-item {
-  padding: 16px;
+  padding: 12px 16px; /* p-3 */
   cursor: pointer;
-  transition: all 0.3s;
-  border-bottom: 1px solid #EBEEF5;
-  position: relative;
-}
-
-.user-item.selected {
-  background-color: #ECF5FF;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f1f5f9; /* border-b border-slate-100 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
 }
 
 .user-item:last-child {
@@ -221,90 +256,122 @@ const closeModal = () => {
 }
 
 .user-item:hover {
-  background-color: #F5F7FA;
+  background: #f8fafc; /* hover:bg-slate-50 */
 }
 
-.user-item:active {
-  background-color: #E4E7ED;
+.user-item.selected {
+  background: #eff6ff; /* bg-blue-50 */
+  border-left: 3px solid #2563eb; /* border-l-3 border-blue-600 */
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+  flex: 1;
 }
 
 .user-name {
-  font-weight: 500;
-  color: #303133;
+  font-weight: 600; /* font-bold */
+  color: #1e293b; /* text-slate-800 */
   font-size: 16px;
 }
 
 .user-details {
   font-size: 14px;
-  color: #909399;
+  color: #64748b; /* text-slate-500 */
+}
+
+.check-icon {
+  color: #2563eb; /* text-blue-600 */
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.plus-icon {
+  color: #94a3b8; /* text-slate-400 */
+  font-size: 18px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.user-item:hover .plus-icon {
+  opacity: 1;
 }
 
 .no-results, .search-hint {
   text-align: center;
-  padding: 20px;
-  color: #909399;
+  padding: 40px 20px;
+  color: #64748b; /* text-slate-500 */
   font-size: 14px;
 }
 
+/* Dialog Footer */
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding: 10px 0;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.dialog-primary-btn {
+  background: #2563eb; /* bg-blue-600 */
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.dialog-primary-btn:hover:not(:disabled) {
+  background: #1d4ed8; /* hover:bg-blue-700 */
+}
+
+.dialog-primary-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dialog-secondary-btn {
+  background: transparent;
+  color: #475569; /* text-slate-600 */
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.dialog-secondary-btn:hover {
+  background: #f1f5f9; /* hover:bg-slate-100 */
+  border-color: #cbd5e1;
 }
 
 @media (max-width: 768px) {
   .user-search-dialog :deep(.el-dialog) {
-    width: 60% !important;
+    width: 95% !important;
     max-width: 100%;
-    margin: 0;
-    border-radius: 0;
-  }
-
-  .user-search-dialog :deep(.el-dialog__header) {
-    padding: 16px;
-    margin-right: 0;
-    border-bottom: 1px solid #EBEEF5;
+    margin: 16px auto;
+    border-radius: 12px;
   }
 
   .user-search-dialog :deep(.el-dialog__body) {
     padding: 16px;
   }
 
-  .user-search-dialog :deep(.el-dialog__footer) {
-    padding: 16px;
-    border-top: 1px solid #EBEEF5;
-  }
-
   .search-container {
-    height: calc(100vh - 180px);
+    max-height: calc(100vh - 200px);
   }
 
-  .results-scrollbar :deep(.el-scrollbar__wrap) {
-    height: 100%;
-    -webkit-overflow-scrolling: touch;
+  .search-results {
+    max-height: calc(100vh - 300px);
   }
 
   .user-item {
-    padding: 14px;
-  }
-
-  .dialog-footer {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .footer-button {
-    width: 100%;
-    margin-left: 0 !important;
+    padding: 12px;
   }
 
   .user-name {
@@ -315,26 +382,17 @@ const closeModal = () => {
     font-size: 13px;
   }
 
-  .user-item {
-    -webkit-tap-highlight-color: transparent;
+  .dialog-footer {
+    flex-direction: column;
+    gap: 8px;
   }
 
-  .search-results :deep(.el-scrollbar__wrap) {
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-@media (max-width: 320px) {
-  .user-search-dialog :deep(.el-dialog__title) {
-    font-size: 16px;
+  .dialog-footer .el-button {
+    width: 100%;
   }
 
-  .user-name {
-    font-size: 14px;
-  }
-
-  .user-details {
-    font-size: 12px;
+  .plus-icon {
+    opacity: 1; /* Always visible on mobile */
   }
 }
 </style>

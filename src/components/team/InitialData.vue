@@ -1,7 +1,8 @@
 <template>
-  <div class="task-description">
-    <h1 class="task-title">Исходные данные</h1>
-    <div class="task-content">
+  <div class="initial-data-section">
+    <h3 class="card-title">Исходные данные</h3>
+    <div class="task-content-wrapper">
+      <div class="task-content">
       <div class="task-section download-section">
         <h3>Файлы для скачивания:</h3>
         <div class="download-links">
@@ -398,6 +399,7 @@
           <li>стоимость СОГ по месяцам за 2024 г, и планируемая средняя стоимость на 2025 и 2026 г.</li>
         </ul>
       </div>
+      </div>
     </div>
   </div>
 </template>
@@ -438,23 +440,26 @@
   font-size: 1.2em;
 }
 
-.task-description {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.initial-data-section {
+  width: 100%;
 }
 
-.task-title {
-  font-size: 2rem;
-  color: #333333;
-  margin-bottom: 2rem;
+.card-title {
+  font-size: 1.25rem; /* text-xl */
   font-weight: 600;
+  color: #1e293b; /* text-slate-800 */
+  margin: 0 0 20px 0;
+}
+
+.task-content-wrapper {
+  max-width: 56rem; /* max-w-4xl - ограничение ширины для читаемости */
+  margin: 0 auto;
+  width: 100%;
 }
 
 .task-content {
-  color: #333333;
-  line-height: 1.6;
+  color: #334155; /* text-slate-700 */
+  line-height: 1.75; /* leading-relaxed */
 }
 
 .task-section {
@@ -478,6 +483,8 @@
 .table-wrapper {
   overflow-x: auto;
   margin: 1rem 0;
+  width: 100%;
+  max-width: 100%; /* Таблицы могут быть шире контента */
 }
 
 .data-table {
@@ -527,12 +534,8 @@ p {
 }
 
 @media (max-width: 768px) {
-  .task-description {
-    padding: 1rem;
-  }
-
-  .task-title {
-    font-size: 1.5rem;
+  .task-content-wrapper {
+    max-width: 100%;
   }
 
   .task-section h2 {

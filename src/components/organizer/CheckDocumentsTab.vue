@@ -23,19 +23,11 @@
       />
     </div>
 
-    <UserDetailsDialog
-      v-model:visible="userDetailsVisible"
-      :user="selectedUser"
-      :loading="loading"
-      :documents="userDocuments"
-      :documents-loading="documentsLoading"
-      @status-change="handleStatusChange"
-    />
-
+    <!-- Модалка для изменения статуса -->
     <StatusChangeDialog
       v-model:visible="statusDialogVisible"
       v-model:comment="statusComment"
-      :status="pendingStatusChange.status"
+      :status="pendingStatus"
       @confirm="confirmStatusChange"
     />
   </div>
@@ -43,28 +35,29 @@
 
 <script setup>
 import {onMounted, ref} from 'vue'
+import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {usersApi} from '@/api/users'
 import UsersSearch from './UsersSearch.vue'
 import UsersTable from './UsersTable.vue'
-import UserDetailsDialog from './UserDetailsDialog.vue'
 import StatusChangeDialog from './StatusChangeDialog.vue'
 
+const router = useRouter()
+
+const STORAGE_KEY = 'organizer_pending_users_page'
+
 const searchQuery = ref('')
-const currentPage = ref(1)
+const currentPage = ref(parseInt(localStorage.getItem(STORAGE_KEY) || '1', 10))
 const pageSize = ref(10)
 const totalUsers = ref(0)
 const pendingUsers = ref([])
 const loading = ref(false)
 
-const documentsLoading = ref(false)
-const userDocuments = ref([])
-const selectedUser = ref(null)
-
+// Модалка изменения статуса
 const statusDialogVisible = ref(false)
 const statusComment = ref('')
-const pendingStatusChange = ref({ user: null, status: null })
-const userDetailsVisible = ref(false)
+const pendingStatus = ref(null)
+const pendingUser = ref(null)
 
 const loadPendingUsers = async () => {
   try {
@@ -84,38 +77,44 @@ const loadPendingUsers = async () => {
   }
 }
 
-const viewUserDocuments = async (user) => {
-  try {
-    documentsLoading.value = true
-    userDocuments.value = await usersApi.getUserDocuments(user.id)
-  } catch (error) {
-    ElMessage.error('Ошибка при загрузке документов')
-  } finally {
-    documentsLoading.value = false
-  }
+const handleRowClick = (row) => {
+  // Переход на отдельную страницу проверки документов
+  router.push({
+    path: `/organizer/users/${row.id}/documents`,
+    query: {
+      userData: JSON.stringify(row)
+    }
+  })
 }
 
+// Эта функция больше не используется, так как статус меняется на отдельной странице
+// Оставляем для совместимости, если где-то еще используется
 const handleStatusChange = (user, status) => {
-  pendingStatusChange.value = { user, status }
+  pendingUser.value = user
+  pendingStatus.value = status
   statusComment.value = ''
   statusDialogVisible.value = true
 }
 
 const confirmStatusChange = async () => {
+  if (!pendingUser.value) return
+
   try {
-    const { user, status } = pendingStatusChange.value
-    await usersApi.updateUserStatus(user.id, status, statusComment.value)
+    await usersApi.updateUserStatus(pendingUser.value.id, pendingStatus.value, statusComment.value)
     ElMessage.success('Статус пользователя успешно обновлен')
     statusDialogVisible.value = false
-    userDetailsVisible.value = false
+    // Обновляем список пользователей
     await loadPendingUsers()
   } catch (error) {
-    ElMessage.error('Ошибка при обновлении статуса')
+    console.error('Error updating user status:', error)
+    const errorMessage = error?.detail || error?.message || 'Ошибка при обновлении статуса'
+    ElMessage.error(errorMessage)
   }
 }
 
 const handleSearch = () => {
   currentPage.value = 1
+  localStorage.setItem(STORAGE_KEY, '1')
   loadPendingUsers()
 }
 
@@ -126,13 +125,8 @@ const handleSizeChange = (val) => {
 
 const handleCurrentChange = (val) => {
   currentPage.value = val
+  localStorage.setItem(STORAGE_KEY, val.toString())
   loadPendingUsers()
-}
-
-const handleRowClick = (row) => {
-  selectedUser.value = row
-  userDetailsVisible.value = true
-  viewUserDocuments(row)
 }
 
 onMounted(() => {

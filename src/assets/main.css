@@ -56,6 +56,13 @@
   font-weight: normal;
 }
 
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
 body {
   min-height: 100vh;
   color: var(--color-text);
@@ -81,4 +88,152 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   Clean Corporate Dashboard - Global Dialog Styles
+   ============================================ */
+
+/* Dialog Wrapper - Vertical Centering (only for dialogs) */
+.el-overlay-dialog {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Dialog Container */
+.el-dialog {
+  border-radius: 12px !important; /* rounded-xl */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important; /* shadow-xl */
+  border: 1px solid #e2e8f0 !important; /* border-slate-200 */
+  overflow: hidden;
+  margin: 0 !important; /* Убираем дефолтные отступы */
+  position: relative !important;
+  top: 0 !important; /* Убираем позиционирование сверху */
+}
+
+/* Dialog Header */
+.el-dialog__header {
+  padding: 24px 24px 16px 24px !important; /* p-6 pb-4 */
+  border-bottom: 1px solid #e2e8f0 !important; /* border-slate-200 */
+  background: white !important;
+}
+
+.el-dialog__title {
+  font-size: 1.25rem !important; /* text-xl */
+  font-weight: 600 !important; /* font-semibold */
+  color: #0f172a !important; /* text-slate-900 */
+}
+
+.el-dialog__headerbtn {
+  top: 20px !important;
+  right: 20px !important;
+  width: 32px !important;
+  height: 32px !important;
+}
+
+.el-dialog__close {
+  color: #64748b !important; /* text-slate-500 */
+  font-size: 18px !important;
+}
+
+.el-dialog__close:hover {
+  color: #475569 !important; /* hover:text-slate-600 */
+}
+
+/* Dialog Body */
+.el-dialog__body {
+  padding: 24px !important; /* p-6 */
+  background: white !important;
+}
+
+/* Dialog Footer */
+.el-dialog__footer {
+  padding: 16px 24px 24px 24px !important; /* py-4 px-6 */
+  border-top: 1px solid #e2e8f0 !important; /* border-slate-200 */
+  background: white !important;
+}
+
+/* Form styles in dialogs */
+.el-dialog .el-form-item__label {
+  display: block;
+  font-size: 0.875rem !important; /* text-sm */
+  font-weight: 500 !important; /* font-medium */
+  color: #334155 !important; /* text-slate-700 */
+  margin-bottom: 6px !important; /* mb-1.5 */
+  padding: 0 !important;
+}
+
+.el-dialog .el-form-item {
+  margin-bottom: 20px !important;
+}
+
+.el-dialog .el-input__wrapper {
+  padding: 8px 12px !important; /* px-3 py-2 */
+  border: 1px solid #cbd5e1 !important; /* border-slate-300 */
+  border-radius: 8px !important; /* rounded-lg */
+  transition: all 0.2s ease;
+  box-shadow: none !important;
+}
+
+.el-dialog .el-input__wrapper:hover {
+  border-color: #94a3b8 !important; /* hover:border-slate-400 */
+}
+
+.el-dialog .el-input.is-focus .el-input__wrapper {
+  border-color: #2563eb !important; /* focus:border-blue-500 */
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important; /* focus:ring-2 */
+}
+
+/* Buttons in dialogs */
+.el-dialog .el-button {
+  border-radius: 8px !important; /* rounded-lg */
+  font-weight: 500 !important; /* font-medium */
+  padding: 10px 16px !important; /* py-2.5 px-4 */
+  transition: all 0.2s ease;
+}
+
+.el-dialog .el-button--primary {
+  background: #2563eb !important; /* bg-blue-600 */
+  border-color: #2563eb !important;
+  color: white !important;
+}
+
+.el-dialog .el-button--primary:hover {
+  background: #1d4ed8 !important; /* hover:bg-blue-700 */
+  border-color: #1d4ed8 !important;
+}
+
+.el-dialog .el-button:not(.el-button--primary) {
+  background: white !important;
+  border-color: #cbd5e1 !important; /* border-slate-300 */
+  color: #475569 !important; /* text-slate-600 */
+}
+
+.el-dialog .el-button:not(.el-button--primary):hover {
+  background: #f8fafc !important; /* hover:bg-slate-50 */
+  border-color: #94a3b8 !important; /* hover:border-slate-400 */
+  color: #334155 !important; /* hover:text-slate-700 */
+}
+
+/* Mobile responsive - Fullscreen modals */
+@media (max-width: 768px) {
+  .el-dialog {
+    width: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    max-height: 100vh !important;
+    height: 100vh !important;
+    max-width: 100% !important;
+  }
+
+  .el-dialog__wrapper {
+    padding: 0 !important;
+  }
+
+  .el-dialog__header,
+  .el-dialog__body,
+  .el-dialog__footer {
+    padding: 20px !important;
+  }
 }

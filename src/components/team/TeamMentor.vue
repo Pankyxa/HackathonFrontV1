@@ -12,15 +12,25 @@
     </div>
 
     <div v-if="mentor" class="mentor-card">
+      <div class="mentor-avatar">
+        <el-avatar
+            :size="48"
+            :src="getMentorAvatarUrl(mentor.user)"
+        >
+          <el-icon><User /></el-icon>
+        </el-avatar>
+        <!-- Status Dot for all statuses -->
+        <span
+            v-if="mentor.user.current_status?.name"
+            class="status-dot"
+            :class="getStatusDotClass(mentor.user.current_status.name)"
+        ></span>
+      </div>
       <div class="mentor-info">
         <div class="mentor-name">{{ mentor.user.full_name }}</div>
-        <div class="mentor-details">
-          <div class="mentor-role">Наставник команды</div>
-          <div class="mentor-job">{{ mentor.user.mentor_info.job_title }} в {{ mentor.user.mentor_info.job }}</div>
-          <div class="mentor-status" :class="getMentorStatusClass(mentor.user.current_status.name)">
-            <span class="status-icon"></span>
-            <span class="status-text">{{ getMentorStatusText(mentor.user.current_status.name) }}</span>
-          </div>
+        <div class="mentor-role">Наставник команды</div>
+        <div class="mentor-job" v-if="mentor.user.mentor_info?.job_title || mentor.user.mentor_info?.job">
+          {{ mentor.user.mentor_info?.job_title }}<span v-if="mentor.user.mentor_info?.job_title && mentor.user.mentor_info?.job"> в </span>{{ mentor.user.mentor_info?.job }}
         </div>
       </div>
       <div class="mentor-actions" v-if="isTeamLeader && stageStore.isRegistration">
@@ -40,10 +50,16 @@
 
 <script setup>
 import {computed} from "vue";
+import {User} from '@element-plus/icons-vue';
 
 import {useStageStore} from "@/stores/stage.js";
 
 const stageStore = useStageStore();
+
+const getMentorAvatarUrl = (user) => {
+  if (!user?.id) return null;
+  return `${import.meta.env.VITE_API_URL}/users/${user.id}/avatar`;
+};
 
 const props = defineProps({
   members: {
@@ -64,206 +80,207 @@ const mentor = computed(() => {
   return props.members.find(member => member.role === 'mentor')
 })
 
-const getMentorStatusText = (status) => {
-  const statusMap = {
-    'pending': 'В ожидании проверки документов',
-    'need_update': 'Требуется обновить личные данные',
-    'approved': 'Подтвержден'
-  }
-  return statusMap[status.toLowerCase()] || status
-}
-
-const getMentorStatusClass = (status) => {
+const getStatusDotClass = (status) => {
   const statusLower = status.toLowerCase()
-  return {
-    'status-pending': statusLower === 'pending',
-    'status-need-update': statusLower === 'need_update',
-    'status-approved': statusLower === 'approved'
+  if (statusLower === 'approved') {
+    return 'status-confirmed'
   }
+  if (statusLower === 'pending') {
+    return 'status-pending'
+  }
+  if (statusLower === 'need_update') {
+    return 'status-need-update'
+  }
+  return 'status-confirmed' // По умолчанию зеленый
 }
 </script>
 
 <style scoped>
 .team-mentor-section {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #dcdfe6;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  width: 100%;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px;
 }
 
 .section-title {
-  font-size: 1.5rem;
-  color: #333;
-  font-weight: 500;
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 600;
+  color: #1e293b; /* text-slate-800 */
+  margin: 0;
 }
 
 .add-mentor-btn {
-  padding: 8px 20px;
+  padding: 8px 16px;
   background: white;
-  color: #5B51D8;
-  border: 2px solid #5B51D8;
-  border-radius: 20px;
+  color: #2563eb; /* text-blue-600 */
+  border: 1px solid #2563eb; /* border-blue-600 */
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   font-weight: 500;
+  font-size: 0.875rem; /* text-sm */
 }
 
 .add-mentor-btn:hover {
-  background: rgba(91, 81, 216, 0.1);
+  background: #eff6ff; /* bg-blue-50 */
 }
 
+/* Mentor Card */
 .mentor-card {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 1.5rem;
-  background: white;
-  border: 1px solid #dcdfe6;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: white; /* bg-white */
+  border: 1px solid #e2e8f0; /* border-slate-200 - обычная граница */
+  border-radius: 8px; /* rounded-lg */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* shadow-sm */
+  transition: all 0.2s ease;
 }
 
 .mentor-card:hover {
-  border-color: #5B51D8;
-  box-shadow: 0 2px 8px rgba(91, 81, 216, 0.1);
+  border-color: #93c5fd; /* hover:border-blue-300 */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
 }
 
-.mentor-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.mentor-avatar {
+  position: relative;
+  flex-shrink: 0;
 }
 
-.mentor-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.mentor-name {
-  font-size: 1.1rem;
-  color: #333;
-  font-weight: 500;
-}
-
-.mentor-role {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.mentor-job {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.mentor-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  width: fit-content;
-}
-
-.mentor-status .status-icon {
-  width: 6px;
-  height: 6px;
+/* Status Dot for all statuses */
+.status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  display: inline-block;
+  border: 2px solid white;
+}
+
+.status-confirmed {
+  background: #10b981; /* bg-green-500 */
 }
 
 .status-pending {
-  background: rgba(33, 150, 243, 0.1);
-  color: #2196F3;
-}
-
-.status-pending .status-icon {
-  background: #2196F3;
+  background: #2196F3; /* blue */
 }
 
 .status-need-update {
-  background: rgba(244, 67, 54, 0.1);
-  color: #F44336;
+  background: #F44336; /* red */
 }
 
-.status-need-update .status-icon {
-  background: #F44336;
+.mentor-info {
+  flex: 1;
+  min-width: 0; /* Для правильного обрезания текста */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.status-approved {
-  background: rgba(76, 175, 80, 0.1);
-  color: #4CAF50;
+.mentor-name {
+  font-size: 1rem; /* text-base */
+  font-weight: 600;
+  color: #1e293b; /* text-slate-800 */
+  line-height: 1.4;
+  margin-bottom: 4px;
 }
 
-.status-approved .status-icon {
-  background: #4CAF50;
+.mentor-role {
+  font-size: 0.875rem; /* text-sm */
+  color: #64748b; /* text-slate-500 */
+  line-height: 1.4;
+}
+
+.mentor-job {
+  font-size: 0.875rem; /* text-sm */
+  color: #64748b; /* text-slate-500 */
+  line-height: 1.4;
+  font-style: italic;
 }
 
 .mentor-actions {
-  display: flex;
-  gap: 0.5rem;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .remove-btn {
-  padding: 6px 16px;
+  padding: 6px 12px;
   background: white;
-  color: #f56c6c;
-  border: 1px solid #f56c6c;
-  border-radius: 20px;
+  color: #ef4444; /* text-red-500 */
+  border: 1px solid #ef4444; /* border-red-500 */
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500;
 }
 
 .remove-btn:hover {
-  background: #fef0f0;
+  background: #fef2f2; /* bg-red-50 */
 }
 
 .no-mentor {
-  padding: 2rem;
+  padding: 24px;
   text-align: center;
-  background: #f8f9fa;
+  background: #f8fafc; /* bg-slate-50 */
   border-radius: 8px;
-  border: 1px dashed #dcdfe6;
+  border: 1px dashed #cbd5e1; /* border-slate-300 */
 }
 
 .no-mentor-text {
-  color: #606266;
+  color: #64748b; /* text-slate-500 */
   font-size: 1rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
+  font-weight: 500;
 }
 
 .no-mentor-description {
-  color: #909399;
-  font-size: 0.9rem;
+  color: #94a3b8; /* text-slate-400 */
+  font-size: 0.875rem; /* text-sm */
 }
 
 @media (max-width: 768px) {
   .section-header {
     flex-direction: column;
-    gap: 1rem;
+    gap: 12px;
     align-items: flex-start;
   }
-
-  .mentor-details {
-    gap: 0.25rem;
-  }
-
+  
   .mentor-card {
-    flex-direction: column;
-    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 12px;
   }
-
+  
   .mentor-actions {
     width: 100%;
     justify-content: flex-end;
+    margin-top: 8px;
+    margin-left: 0;
+  }
+  
+  .mentor-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .mentor-name {
+    font-size: 0.875rem; /* text-sm */
+  }
+  
+  .mentor-role,
+  .mentor-job {
+    font-size: 0.75rem; /* text-xs */
   }
 }
 </style>

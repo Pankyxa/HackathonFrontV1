@@ -15,6 +15,7 @@ import NotFoundPage from "@/views/NotFoundPage.vue";
 import {useStageStore} from "@/stores/stage.js";
 import JudgePage from "@/views/JudgePage.vue";
 import EmailVerificationPage from "@/views/EmailVerificationPage.vue";
+import ResetPasswordPage from "@/views/ResetPasswordPage.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,6 +37,14 @@ const router = createRouter({
             path: '/auth/verify-email/:token',
             name: 'EmailVerification',
             component: EmailVerificationPage,
+            meta: {
+                requiresGuest: true
+            }
+        },
+        {
+            path: '/auth/reset-password/:token',
+            name: 'ResetPassword',
+            component: ResetPasswordPage,
             meta: {
                 requiresGuest: true
             }
@@ -129,6 +138,33 @@ const router = createRouter({
             meta: {
                 requiresAuth: true,
                 requiresJudge: true
+            }
+        },
+        {
+            path: '/judge/teams/:teamId/evaluate',
+            name: 'JudgeEvaluation',
+            component: () => import('@/views/JudgeEvaluationPage.vue'),
+            meta: {
+                requiresAuth: true,
+                requiresJudge: true
+            }
+        },
+        {
+            path: '/organizer/users/:userId/status/:status',
+            name: 'StatusChange',
+            component: () => import('@/views/StatusChangePage.vue'),
+            meta: {
+                requiresAuth: true,
+                requiresOrganizer: true
+            }
+        },
+        {
+            path: '/organizer/users/:userId/documents',
+            name: 'UserDocuments',
+            component: () => import('@/views/UserDocumentsPage.vue'),
+            meta: {
+                requiresAuth: true,
+                requiresOrganizer: true
             }
         },
         {

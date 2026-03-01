@@ -58,8 +58,9 @@
         Моя команда
       </el-menu-item>
 
-      <el-menu-item index="3" @click="handleItemClick('profile')">
+      <el-menu-item index="3" @click="handleItemClick('profile')" class="profile-menu-item">
         Личный кабинет
+        <span v-if="hasInvites" class="notification-badge"></span>
       </el-menu-item>
       <el-menu-item index="4" @click="handleItemClick('logout')">
         Выход
@@ -72,10 +73,12 @@
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.js';
 import { useStageStore } from '@/stores/stage.js';
+import { useTeamInvites } from '@/composables/useTeamInvites.js';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const stageStore = useStageStore();
+const { hasInvites } = useTeamInvites();
 
 const props = defineProps({
   isAuthenticated: {
@@ -128,5 +131,26 @@ const handleItemClick = (action) => {
 <style scoped>
 .menu-items-wrapper {
   display: contents;
+}
+
+.profile-menu-item {
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  background-color: #f56565;
+  border-radius: 50%;
+  border: 2px solid #1e40af;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);
+  z-index: 10;
+}
+
+:deep(.el-menu-item) {
+  position: relative;
 }
 </style>

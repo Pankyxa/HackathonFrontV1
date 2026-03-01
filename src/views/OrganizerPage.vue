@@ -37,19 +37,23 @@ const activeTab = ref(stageStore.isRegistration ? 'check-documents' : 'jury-scor
 <style scoped>
 .organizer-page {
   width: 100%;
-  padding: 105px 20px 20px;
-  height: 100vh;
+  padding: 96px 20px 20px; /* pt-24 для отступа под хедер */
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: #f8fafc; /* bg-slate-50 */
 }
 
 .tabs-container {
   background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 12px; /* rounded-xl */
+  padding: 24px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   flex: 1;
   display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 :deep(.el-tabs) {

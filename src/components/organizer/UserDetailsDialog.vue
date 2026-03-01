@@ -2,7 +2,7 @@
   <el-dialog
       v-model="dialogVisible"
       title="Проверка документов пользователя"
-      class="user-details-dialog"
+      class="user-details-dialog clean-corporate-modal"
       :width="isMobile ? '100%' : '80%'"
       :fullscreen="isMobile"
   >
@@ -33,7 +33,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed } from 'vue'
 import UserInfo from './UserInfo.vue'
 import DocumentsSection from './DocumentsSection.vue'
 
@@ -53,43 +53,6 @@ const dialogVisible = computed({
 })
 
 const isMobile = computed(() => window.innerWidth <= 768)
-
-const addDialogStyles = () => {
-  const style = document.createElement('style')
-  style.id = 'user-details-dialog-styles'
-  style.innerHTML = `
-    .user-details-dialog .el-dialog {
-      width: 80vh !important;
-    }
-    .user-details-dialog .el-dialog__body {
-      padding: 20px;
-      height: 70vh;
-      overflow: hidden;
-    }
-    @media (max-width: 768px) {
-      .user-details-dialog .el-dialog__body {
-        height: calc(100vh - 66px) !important;
-        padding: 16px;
-      }
-    }
-  `
-  document.head.appendChild(style)
-}
-
-const removeDialogStyles = () => {
-  const style = document.getElementById('user-details-dialog-styles')
-  if (style) {
-    style.remove()
-  }
-}
-
-onMounted(() => {
-  addDialogStyles()
-})
-
-onUnmounted(() => {
-  removeDialogStyles()
-})
 </script>
 
 <style scoped>
@@ -129,13 +92,30 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
+  .user-details-content {
+    padding-bottom: 100px; /* Отступ снизу для фиксированных кнопок */
+  }
+  
   .actions-section {
     flex-direction: column;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    padding: 12px 16px;
+    margin: 0;
+    border-top: 1px solid #e4e7ed;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    gap: 8px;
   }
 
   .actions-section .el-button {
     width: 100%;
-    margin: 0 0 0 10px;
+    height: 44px;
+    font-size: 15px;
+    margin: 0;
   }
 }
 </style>

@@ -26,10 +26,11 @@
 <style scoped>
 .main-header {
   height: auto;
-  margin: 5px;
-  background: linear-gradient(to right, #0fa4e9, #4338ca);
-  border-radius: 20px;
+  margin: 0;
+  background: linear-gradient(90deg, #1e40af 0%, #1e3a8a 50%, #1e40af 100%); /* Глубокий синий градиент как в Header */
+  border-radius: 0;
   color: white;
+  width: 100%;
 }
 
 div {
@@ -90,18 +91,51 @@ img {
   width: 150px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
+  .main-header {
+    padding: 16px 0; /* py-4 - еще более компактный */
+  }
+
   .el-row {
     flex-direction: column;
     align-items: center;
+    gap: 12px; /* gap-3 - уменьшен gap для компактности */
+    padding-top: 0;
+    padding-bottom: 0;
+    text-align: center; /* text-center */
   }
 
   .contacts {
     text-align: center;
+    order: 3;
   }
 
   .docs-section {
     order: 2;
+    text-align: center;
+  }
+
+  div {
+    padding: 4px 16px; /* Еще более компактный padding */
+  }
+
+  h2 {
+    font-size: 16px; /* Уменьшен размер заголовка */
+    margin-bottom: 4px;
+  }
+
+  .docs-link {
+    font-size: 12px;
+    margin: 2px 8px;
+  }
+
+  .mail {
+    font-size: 12px;
+    margin: 2px 8px;
+  }
+
+  img {
+    width: 90px; /* Еще более компактный размер логотипа */
   }
 }
 </style>

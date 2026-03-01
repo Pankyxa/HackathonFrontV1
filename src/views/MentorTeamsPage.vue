@@ -44,8 +44,10 @@ onMounted(async () => {
 
 <style scoped>
 .mentor-teams-container {
-  margin: 105px 20px 20px;
-  min-height: calc(100vh - 120px);
+  margin: 64px 0 0 0;
+  padding: 32px 20px 20px; /* pt-24 для отступа под хедер */
+  min-height: calc(100vh - 64px);
+  background-color: #f8fafc; /* bg-slate-50 */
 }
 
 h1 {

@@ -123,19 +123,16 @@ export const usersApi = {
     },
 
     async updateCurrentUser(userData) {
-        const response = await api.put(`/users/me`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify(userData)
-        })
-
-        if (!response.ok) {
-            throw new Error('Failed to update user data')
+        try {
+            const response = await api.put(`/users/me`, userData, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
         }
-
-        return await response.json()
     },
 
     async updateUserDocuments(file, documentType) {
@@ -153,6 +150,15 @@ export const usersApi = {
                     'Content-Type': 'multipart/form-data',
                 },
             });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async submitForReview() {
+        try {
+            const response = await api.post('/users/me/submit-for-review');
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

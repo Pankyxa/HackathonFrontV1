@@ -175,9 +175,9 @@ export const teamsApi = {
         }
     },
 
-    async leaveTeam() {
+    async leaveTeam(teamId) {
         try {
-            const response = await api.post(`/teams/leave`);
+            const response = await api.post(`/teams/leave?team_id=${teamId}`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -233,26 +233,27 @@ export const teamsApi = {
         }
     },
 
-    async uploadTeamSolution(teamId, file, onProgress = null) {
-        const formData = new FormData()
-        formData.append('solution_file', file)
-
-        const response = await api.post(`/teams/${teamId}/solution`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            },
-            timeout: 30 * 60 * 1000,
-            maxContentLength: 500 * 1024 * 1024, // 500MB
-            maxBodyLength: 500 * 1024 * 1024,    // 500MB
-            onUploadProgress: (progressEvent) => {
-                if (onProgress) {
-                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-                    onProgress(percentCompleted)
-                }
-            }
-        })
-        return response.data
-    },
+    // ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена, решения теперь через GitHub
+    // async uploadTeamSolution(teamId, file, onProgress = null) {
+    //     const formData = new FormData()
+    //     formData.append('solution_file', file)
+    //
+    //     const response = await api.post(`/teams/${teamId}/solution`, formData, {
+    //         headers: {
+    //             'Content-Type': 'multipart/form-data'
+    //         },
+    //         timeout: 30 * 60 * 1000,
+    //         maxContentLength: 500 * 1024 * 1024, // 500MB
+    //         maxBodyLength: 500 * 1024 * 1024,    // 500MB
+    //         onUploadProgress: (progressEvent) => {
+    //             if (onProgress) {
+    //                 const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+    //                 onProgress(percentCompleted)
+    //             }
+    //         }
+    //     })
+    //     return response.data
+    // },
 
     async uploadTeamDeployment(teamId, file) {
         const formData = new FormData()
@@ -266,17 +267,18 @@ export const teamsApi = {
         return response.data
     },
 
-    async getTeamSolution(teamId) {
-        try {
-            const response = await api.get(`/teams/${teamId}/solution`)
-            return response.data
-        } catch (error) {
-            if (error.response?.status === 404) {
-                return null
-            }
-            throw error
-        }
-    },
+    // ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена, решения теперь через GitHub
+    // async getTeamSolution(teamId) {
+    //     try {
+    //         const response = await api.get(`/teams/${teamId}/solution`)
+    //         return response.data
+    //     } catch (error) {
+    //         if (error.response?.status === 404) {
+    //             return null
+    //         }
+    //         throw error
+    //     }
+    // },
 
     async getTeamDeployment(teamId) {
         try {
@@ -290,33 +292,34 @@ export const teamsApi = {
         }
     },
 
-    async downloadTeamSolution(teamId) {
-        try {
-            const teamInfo = await this.getTeam(teamId);
-            const teamName = teamInfo.team_name.replace(/[^a-zA-Z0-9]/g, '_');
-
-            const response = await api.get(`/teams/${teamId}/solution`, {
-                responseType: 'blob',
-            })
-
-            const filename = `${teamName}_solution.zip`
-            const url = window.URL.createObjectURL(new Blob([response.data]))
-            const link = document.createElement('a')
-            link.href = url
-            link.setAttribute('download', filename)
-            document.body.appendChild(link)
-            link.click()
-            link.remove()
-            window.URL.revokeObjectURL(url)
-
-            return response.data
-        } catch (error) {
-            if (error.response?.status === 404) {
-                throw new Error('Файл не найден')
-            }
-            throw error
-        }
-    },
+    // ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена, решения теперь через GitHub
+    // async downloadTeamSolution(teamId) {
+    //     try {
+    //         const teamInfo = await this.getTeam(teamId);
+    //         const teamName = teamInfo.team_name.replace(/[^a-zA-Z0-9]/g, '_');
+    //
+    //         const response = await api.get(`/teams/${teamId}/solution`, {
+    //             responseType: 'blob',
+    //         })
+    //
+    //         const filename = `${teamName}_solution.zip`
+    //         const url = window.URL.createObjectURL(new Blob([response.data]))
+    //         const link = document.createElement('a')
+    //         link.href = url
+    //         link.setAttribute('download', filename)
+    //         document.body.appendChild(link)
+    //         link.click()
+    //         link.remove()
+    //         window.URL.revokeObjectURL(url)
+    //
+    //         return response.data
+    //     } catch (error) {
+    //         if (error.response?.status === 404) {
+    //             throw new Error('Файл не найден')
+    //         }
+    //         throw error
+    //     }
+    // },
 
     async downloadTeamDeployment(teamId) {
         try {
@@ -468,6 +471,45 @@ export const teamsApi = {
             const response = await api.get('/evaluations/public-results');
             const sortedTeams = response.data.sort((a, b) => b.total_score - a.total_score);
             return sortedTeams;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async getFinalists() {
+        try {
+            const response = await api.get('/teams/public/finalists');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async getPublicTeamInfo(teamId, eventId = null) {
+        try {
+            const url = eventId
+                ? `/teams/public/${teamId}/info?event_id=${eventId}`
+                : `/teams/public/${teamId}/info`;
+            const response = await api.get(url);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async getJudgeTeamInfo(teamId) {
+        try {
+            const response = await api.get(`/teams/judge/${teamId}/info`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    
+    async getActiveTeamsCount() {
+        try {
+            const response = await api.get('/teams/public/active-count');
+            return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
         }

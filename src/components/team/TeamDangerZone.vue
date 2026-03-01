@@ -1,30 +1,34 @@
 <template>
   <div class="danger-zone">
-    <h3>Опасная зона</h3>
-
     <div class="danger-card">
       <template v-if="isTeamLeader">
-        <p class="warning-text">
-          Удаление команды приведет к безвозвратному удалению всех данных команды. Это действие нельзя отменить.
+        <h3 class="danger-title">Удалить команду</h3>
+        <p class="danger-description">
+          Удаление команды приведет к безвозвратному удалению всех данных. Это действие нельзя отменить.
         </p>
-        <button
-            class="delete-btn"
-            @click="$emit('delete')"
-        >
-          Удалить команду
-        </button>
+        <div class="danger-actions">
+          <button
+              class="danger-button"
+              @click="$emit('delete')"
+          >
+            Удалить команду
+          </button>
+        </div>
       </template>
 
       <template v-else-if="isTeamMember || isTeamMentor">
-        <p class="warning-text">
+        <h3 class="danger-title">Покинуть команду</h3>
+        <p class="danger-description">
           При выходе из команды вы потеряете доступ к её материалам и не сможете вернуться без нового приглашения.
         </p>
-        <button
-            class="leave-btn"
-            @click="$emit('leave')"
-        >
-          Покинуть команду
-        </button>
+        <div class="danger-actions">
+          <button
+              class="danger-button"
+              @click="$emit('leave')"
+          >
+            Покинуть команду
+          </button>
+        </div>
       </template>
     </div>
   </div>
@@ -51,73 +55,82 @@ defineEmits(['delete', 'leave'])
 
 <style scoped>
 .danger-zone {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #dcdfe6;
-}
-
-.danger-zone h3 {
-  color: #ef4444;
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-  font-weight: 500;
+  margin-top: 32px; /* mt-8 */
 }
 
 .danger-card {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 12px;
-  padding: 1.5rem;
+  background: white; /* bg-white */
+  border: 1px solid #fecaca; /* border border-red-200 */
+  border-radius: 12px; /* rounded-xl */
+  padding: 24px; /* p-6 */
+  margin-top: 32px; /* mt-8 */
 }
 
-.warning-text {
-  color: #ef4444;
-  margin-bottom: 1rem;
-  font-size: 0.95rem;
+.danger-title {
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 600; /* font-semibold */
+  color: #b91c1c; /* text-red-700 */
+  margin: 0 0 4px 0; /* mb-1 */
+}
+
+.danger-description {
+  font-size: 0.875rem; /* text-sm */
+  color: #475569; /* text-slate-600 */
+  margin: 4px 0 16px 0; /* mt-1 mb-4 */
   line-height: 1.5;
 }
 
-.delete-btn,
-.leave-btn {
-  background: #ef4444;
-  color: white;
-  border: none;
-  padding: 0.5rem 1.5rem;
-  border-radius: 20px;
+.danger-actions {
+  display: flex;
+  justify-content: flex-end; /* Align to right */
+  gap: 12px;
+}
+
+.danger-button {
+  background: white; /* bg-white */
+  border: 1px solid #fecaca; /* border border-red-200 */
+  color: #dc2626; /* text-red-600 */
+  padding: 8px 16px; /* px-4 py-2 */
+  border-radius: 8px; /* rounded-lg */
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
-  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.delete-btn:hover,
-.leave-btn:hover {
-  background: #dc2626;
+.danger-button:hover {
+  background: #fef2f2; /* hover:bg-red-50 */
+  border-color: #fca5a5; /* hover:border-red-300 */
 }
 
-.delete-btn:active,
-.leave-btn:active {
+.danger-button:active {
   transform: translateY(1px);
 }
 
 @media (max-width: 768px) {
   .danger-zone {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
+    margin-top: 24px;
   }
 
   .danger-card {
-    padding: 1rem;
+    padding: 20px;
   }
 
-  .warning-text {
-    font-size: 0.9rem;
+  .danger-title {
+    font-size: 1rem;
   }
 
-  .delete-btn,
-  .leave-btn {
+  .danger-description {
+    font-size: 0.8125rem;
+  }
+
+  .danger-actions {
+    justify-content: stretch;
+  }
+
+  .danger-button {
     width: 100%;
-    padding: 0.75rem;
+    padding: 10px 16px;
   }
 }
 </style>

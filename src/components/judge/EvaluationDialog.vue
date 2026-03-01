@@ -416,9 +416,14 @@ const submitEvaluation = async () => {
   .team-header {
     display: none;
   }
+  
+  @media (min-width: 769px) {
     :deep(.el-dialog__body) {
-    padding-top: 0;
+      padding-top: 0;
+      max-height: 70vh;
+      overflow-y: auto;
     }
+  }
 
   .mobile-tabs {
     display: block;
@@ -454,29 +459,61 @@ const submitEvaluation = async () => {
     background: white;
   }
 
-  :deep(.el-dialog) {
-    margin: 0 !important;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
+  @media (min-width: 769px) {
+    :deep(.el-dialog) {
+      margin: 0 !important;
+      display: flex;
+      flex-direction: column;
+      max-height: 80vh;
+    }
+
+    :deep(.el-dialog__header) {
+      padding: 16px;
+      margin: 0;
+      border-bottom: 1px solid #dcdfe6;
+      flex-shrink: 0;
+    }
+
+    :deep(.el-dialog__body) {
+      padding: 16px;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 70vh;
+    }
+
+    :deep(.el-dialog__footer) {
+      padding: 16px;
+      border-top: 1px solid #dcdfe6;
+      margin-top: auto;
+      flex-shrink: 0;
+    }
   }
 
-  :deep(.el-dialog__header) {
-    padding: 16px;
-    margin: 0;
-    border-bottom: 1px solid #dcdfe6;
-  }
+  @media (max-width: 768px) {
+    :deep(.el-dialog) {
+      margin: 0 !important;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
 
-  :deep(.el-dialog__body) {
-    padding: 16px;
-    flex: 1;
-    overflow: hidden;
-  }
+    :deep(.el-dialog__header) {
+      padding: 16px;
+      margin: 0;
+      border-bottom: 1px solid #dcdfe6;
+    }
 
-  :deep(.el-dialog__footer) {
-    padding: 16px;
-    border-top: 1px solid #dcdfe6;
-    margin-top: auto;
+    :deep(.el-dialog__body) {
+      padding: 16px;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    :deep(.el-dialog__footer) {
+      padding: 16px;
+      border-top: 1px solid #dcdfe6;
+      margin-top: auto;
+    }
   }
 
   .form-group {

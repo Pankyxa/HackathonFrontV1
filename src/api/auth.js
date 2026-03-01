@@ -100,6 +100,27 @@ export const authApi = {
         }
     },
 
+    async forgotPassword(email) {
+        try {
+            const formData = new FormData();
+            formData.append('email', email);
+            const response = await api.post('/auth/forgot-password', formData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async resetPassword(token, newPassword) {
+        try {
+            const formData = new FormData();
+            formData.append('new_password', newPassword);
+            const response = await api.post(`/auth/reset-password/${token}`, formData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 
     // Функция выхода
     logout() {

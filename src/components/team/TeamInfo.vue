@@ -1,30 +1,40 @@
 <template>
   <div class="team-info" v-if="!loading">
-    <TeamHeader
-        :team-data="teamData"
-        :team-logo="teamLogo"
-        :is-team-leader="isTeamLeader"
-        :statusText="statusText"
-        :status-class="statusClass"
-        @edit="showEditModal = true"
-        @edit-logo="handleLogoSelect"
-        @update:team-info="handleTeamInfoUpdate"
-    />
+    <!-- Card 1: Team Header -->
+    <div class="team-header-card-wrapper">
+      <TeamHeader
+          :team-data="teamData"
+          :team-logo="teamLogo"
+          :is-team-leader="isTeamLeader"
+          :statusText="statusText"
+          :status-class="statusClass"
+          @edit="showEditModal = true"
+          @edit-logo="handleLogoSelect"
+          @update:team-info="handleTeamInfoUpdate"
+      />
+    </div>
 
-    <TeamMembers
-        :members="teamMembers"
-        :is-team-leader="isTeamLeader"
-        :current-user-id="currentUserId"
-        @add-member="showUserSearch"
-        @remove-member="confirmRemoveMember"
-    />
+    <!-- Card 2: Members & Mentor -->
+    <div class="members-mentor-card">
+      <h3 class="card-title">Участники команды</h3>
+      
+      <TeamMembers
+          :members="teamMembers"
+          :is-team-leader="isTeamLeader"
+          :current-user-id="currentUserId"
+          @add-member="showUserSearch"
+          @remove-member="confirmRemoveMember"
+      />
 
-    <TeamMentor
-        :members="teamMembers"
-        :is-team-leader="isTeamLeader"
-        @add-mentor="showMentorSearch"
-        @remove-mentor="confirmRemoveMentor"
-    />
+      <div class="mentor-section-wrapper">
+        <TeamMentor
+            :members="teamMembers"
+            :is-team-leader="isTeamLeader"
+            @add-mentor="showMentorSearch"
+            @remove-mentor="confirmRemoveMentor"
+        />
+      </div>
+    </div>
 
     <TeamDangerZone
         v-if="!authStore.isAdmin && stageStore.isRegistration"
@@ -462,7 +472,7 @@ const deleteTeam = async () => {
 const leaveTeam = async () => {
   try {
     leaving.value = true
-    await teamsApi.leaveTeam()
+    await teamsApi.leaveTeam(teamData.value.id)
 
     ElMessage({
       message: 'Вы успешно покинули команду',
@@ -534,6 +544,40 @@ onMounted(() => {
 
 <style scoped>
 .team-info {
-  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* gap-6 */
+  width: 100%;
+}
+
+/* Card 1: Team Header */
+.team-header-card-wrapper {
+  background: white; /* bg-white */
+  border-radius: 12px; /* rounded-xl */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* shadow-sm */
+  border: 1px solid #e2e8f0; /* border border-slate-200 */
+  padding: 24px; /* p-6 */
+}
+
+/* Card 2: Members & Mentor */
+.members-mentor-card {
+  background: white; /* bg-white */
+  border-radius: 12px; /* rounded-xl */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* shadow-sm */
+  border: 1px solid #e2e8f0; /* border border-slate-200 */
+  padding: 24px; /* p-6 */
+}
+
+.card-title {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 600;
+  color: #1e293b; /* text-slate-800 */
+  margin: 0 0 20px 0;
+}
+
+.mentor-section-wrapper {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
 }
 </style>

@@ -1,11 +1,9 @@
 <template>
-  <el-container class="layout-container">
-    <el-main>
-      <GlobalLoader />
-      <CountdownTimer />
-      <RouterView />
-    </el-main>
-  </el-container>
+  <div class="app-wrapper">
+    <GlobalLoader />
+    <CountdownTimer />
+    <RouterView />
+  </div>
 </template>
 
 <script setup>
@@ -25,17 +23,15 @@ onMounted(() => {
 </script>
 
 <style>
-.layout-container {
+.app-wrapper {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  width: 100%;
 }
 
-.el-main {
-  flex: 1;
-  padding: 0;
-  background-color: #ffffff;
-  /* Удаляем padding-top, так как таймер теперь не влияет на поток документа */
+/* Глобальные стили для заголовков */
+h1, h2, h3 {
+  color: #111827; /* text-gray-900 */
+  font-weight: 600;
 }
 
 a {
@@ -45,13 +41,5 @@ a {
 
 :root {
   --el-color-primary: #409EFF;
-}
-
-.layout-container {
-  min-height: 100vh;
-}
-
-.el-main {
-  flex: 1 0 auto;
 }
 </style>

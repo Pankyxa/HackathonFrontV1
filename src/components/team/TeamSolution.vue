@@ -1,28 +1,30 @@
 <template>
   <div class="solution-section">
-    <h3 class="section-title">Решение команды</h3>
     <div v-loading="loading" class="solution-container">
       <div v-if="authStore.isMember" class="important-notice">
         <h4>Важно!</h4>
         <p class="warning-text">Решения, загруженные после дедлайна, не будут приняты к оценке!</p>
       </div>
 
-      <div class="solution-block">
-        <div v-if="authStore.isMember" class="solution-type-selector">
+      <div class="solution-card">
+        <h3 class="card-title">Решение команды</h3>
+        <div class="solution-block">
+        <!-- ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена, решения теперь через GitHub -->
+        <!-- <div v-if="authStore.isMember" class="solution-type-selector">
           <h4>Способ предоставления решения</h4>
           <el-radio-group v-model="solutionType" class="solution-type-group">
             <el-radio label="file">Загрузить ZIP архив</el-radio>
             <el-radio label="link">Указать ссылку на репозиторий</el-radio>
           </el-radio-group>
-        </div>
+        </div> -->
         <div v-if="authStore.isMentor" class="solution-type-selector">
           <h4>Предоставленное решение</h4>
         </div>
 
-        <div v-if="solutionType === 'link'" class="solution-link-block">
+        <div class="solution-link-block">
           <div class="file-item">
             <div class="file-info">
-              <h4>Ссылка на решение</h4>
+              <h4>Ссылка на решение (GitHub)</h4>
               <p class="file-description">
                 Укажите ссылку на ваш GitHub репозиторий или облачное хранилище с решением
               </p>
@@ -62,7 +64,8 @@
           </div>
         </div>
 
-        <div v-if="solutionType === 'file'" class="file-item">
+        <!-- ЗАКОММЕНТИРОВАНО: Загрузка ZIP файлов решений отключена -->
+        <!-- <div v-if="solutionType === 'file'" class="file-item">
           <div class="file-info">
             <h4>ZIP архив с решением</h4>
             <p class="file-description">
@@ -108,11 +111,13 @@
                 class="upload-progress"
             />
           </div>
+        </div> -->
         </div>
       </div>
 
-      <div class="deployment-block">
-        <h4>Описание развертывания</h4>
+      <div class="deployment-card" v-if="authStore.isMember">
+        <h3 class="card-title">Инструкция по развертыванию</h3>
+        <div class="deployment-block">
         <div class="file-item">
           <div class="file-info">
             <p class="file-description">
@@ -153,6 +158,7 @@
             </el-upload>
           </div>
         </div>
+        </div>
       </div>
     </div>
   </div>
@@ -161,7 +167,9 @@
 <script setup>
 import {ref, onMounted, computed} from 'vue'
 import {ElMessage} from 'element-plus'
-import {Download, Upload, Link} from '@element-plus/icons-vue'
+import {Download, Link} from '@element-plus/icons-vue'
+// ЗАКОММЕНТИРОВАНО: Upload больше не используется
+// import {Upload} from '@element-plus/icons-vue'
 import {teamsApi} from '@/api/teams'
 import {useAuthStore} from "@/stores/auth.js"
 import {useStageStore} from "@/stores/stage.js";
@@ -177,38 +185,42 @@ const props = defineProps({
 })
 
 const loading = ref(false)
-const solutionFile = ref(null)
+// ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена
+// const solutionFile = ref(null)
 const deploymentFile = ref(null)
-const uploadingSolution = ref(false)
-const uploadProgress = ref(0)
-const solutionType = ref('file')
+// const uploadingSolution = ref(false)
+// const uploadProgress = ref(0)
+// const solutionType = ref('file')
 const solutionLink = ref('')
 
 const canEdit = computed(() => {
   return authStore.isMember && (stageStore.isTaskDistribution || stageStore.isSolutionSubmission)
 })
 
-const progressFormat = (percentage) => {
-  if (percentage === 100) {
-    return 'Обработка...'
-  }
-  return `${percentage}%`
-}
+// ЗАКОММЕНТИРОВАНО: progressFormat больше не используется
+// const progressFormat = (percentage) => {
+//   if (percentage === 100) {
+//     return 'Обработка...'
+//   }
+//   return `${percentage}%`
+// }
 
 const loadFiles = async () => {
   try {
     loading.value = true
     const team = await teamsApi.getTeam(props.teamId)
+    solutionLink.value = team.solution_link || ''
 
     try {
-      const solution = await teamsApi.getTeamSolution(props.teamId)
+      // ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена
+      // const solution = await teamsApi.getTeamSolution(props.teamId)
       const deployment = await teamsApi.getTeamDeployment(props.teamId)
-      solutionFile.value = solution
+      // solutionFile.value = solution
       deploymentFile.value = deployment
 
-      if (solution) {
-        solutionType.value = 'file'
-      }
+      // if (solution) {
+      //   solutionType.value = 'file'
+      // }
     } catch (error) {
       if (error.response?.status !== 404) {
         throw error
@@ -240,11 +252,12 @@ const saveSolutionLink = async () => {
 const downloadFile = async (type) => {
   try {
     loading.value = true
-    if (type === 'solution') {
-      await teamsApi.downloadTeamSolution(props.teamId)
-    } else {
+    // ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена
+    // if (type === 'solution') {
+    //   await teamsApi.downloadTeamSolution(props.teamId)
+    // } else {
       await teamsApi.downloadTeamDeployment(props.teamId)
-    }
+    // }
   } catch (error) {
     console.error(`Error downloading ${type}:`, error)
     ElMessage.error(error.message || `Ошибка при скачивании файла`)
@@ -257,16 +270,18 @@ const handleFileChange = async (file, type) => {
   try {
     if (!file) return
 
-    const maxSize = type === 'solution' ? 500 * 1024 * 1024 : 50 * 1024 * 1024
+    // ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена
+    // const maxSize = type === 'solution' ? 500 * 1024 * 1024 : 50 * 1024 * 1024
+    const maxSize = 50 * 1024 * 1024
     if (file.raw.size > maxSize) {
       ElMessage.error(`Размер файла не должен превышать ${maxSize / (1024 * 1024)}MB`)
       return
     }
 
-    if (type === 'solution' && !file.raw.name.toLowerCase().endsWith('.zip')) {
-      ElMessage.error('Решение должно быть в формате ZIP')
-      return
-    }
+    // if (type === 'solution' && !file.raw.name.toLowerCase().endsWith('.zip')) {
+    //   ElMessage.error('Решение должно быть в формате ZIP')
+    //   return
+    // }
     if (type === 'deployment' &&
         !file.raw.name.toLowerCase().endsWith('.txt') &&
         !file.raw.name.toLowerCase().endsWith('.md')) {
@@ -274,29 +289,30 @@ const handleFileChange = async (file, type) => {
       return
     }
 
-    if (type === 'solution') {
-      uploadingSolution.value = true
-      uploadProgress.value = 0
-
-      await teamsApi.uploadTeamSolution(props.teamId, file.raw, (progress) => {
-        uploadProgress.value = progress
-      })
-
-      ElMessage.success('Решение успешно загружено')
-    } else {
+    // ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена
+    // if (type === 'solution') {
+    //   uploadingSolution.value = true
+    //   uploadProgress.value = 0
+    //
+    //   await teamsApi.uploadTeamSolution(props.teamId, file.raw, (progress) => {
+    //     uploadProgress.value = progress
+    //   })
+    //
+    //   ElMessage.success('Решение успешно загружено')
+    // } else {
       await teamsApi.uploadTeamDeployment(props.teamId, file.raw)
       ElMessage.success('Описание развертывания успешно загружено')
-    }
+    // }
 
     await loadFiles()
   } catch (error) {
     console.error('Error uploading file:', error)
     ElMessage.error('Ошибка при загрузке файла')
   } finally {
-    if (type === 'solution') {
-      uploadingSolution.value = false
-      uploadProgress.value = 0
-    }
+    // if (type === 'solution') {
+    //   uploadingSolution.value = false
+    //   uploadProgress.value = 0
+    // }
   }
 }
 
@@ -307,28 +323,41 @@ onMounted(() => {
 
 <style scoped>
 .solution-section {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 20px;
-  color: #333333;
-}
-
-.section-title {
-  color: #333333;
-  margin: 0 0 16px 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* gap-6 */
 }
 
 .solution-container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 24px; /* gap-6 */
+}
+
+/* Card Styles */
+.solution-card,
+.deployment-card {
+  background: white; /* bg-white */
+  border-radius: 12px; /* rounded-xl */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* shadow-sm */
+  border: 1px solid #e2e8f0; /* border border-slate-200 */
+  padding: 24px; /* p-6 */
+}
+
+.card-title {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 600;
+  color: #1e293b; /* text-slate-800 */
+  margin: 0 0 20px 0;
 }
 
 .important-notice {
   background: #fff3f3;
   border: 1px solid #ffa4a4;
-  border-radius: 4px;
+  border-radius: 8px;
   padding: 16px;
+  margin-bottom: 0; /* Убираем margin, так как gap в контейнере */
 }
 
 .important-notice h4 {
@@ -336,14 +365,12 @@ onMounted(() => {
   margin: 0 0 8px 0;
 }
 
-.solution-block, .deployment-block {
-  background: white;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 20px;
+.solution-block,
+.deployment-block {
+  width: 100%;
 }
 
-.solution-block h4, .deployment-block h4 {
+.solution-block h4 {
   margin: 0 0 16px 0;
   color: #333333;
   font-size: 1.1em;

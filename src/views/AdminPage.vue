@@ -25,6 +25,10 @@
       <el-tab-pane label="Уведомления" name="notifications">
         <NotificationsTab/>
       </el-tab-pane>
+
+      <el-tab-pane label="События" name="events">
+        <EventsTab/>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -36,6 +40,7 @@ import UsersTab from "@/components/admin/UsersTab.vue"
 import TeamsTab from "@/components/admin/TeamsTab.vue"
 import StagesManagementTab from "@/components/admin/StagesManagementTab.vue"
 import NotificationsTab from "@/components/admin/NotificationsTab.vue"
+import EventsTab from "@/components/admin/EventsTab.vue"
 import JuryScoresTab from "@/components/organizer/JudgeScoresTab.vue"
 import UnevaluatedTeamsTab from "@/components/judge/UnevaluatedTeamsTab.vue";
 
@@ -45,19 +50,23 @@ const activeTab = ref('users')
 <style scoped>
 .admin-page {
   width: 100%;
-  padding: 105px 20px 15px;
-  height: 100vh;
+  padding: 96px 20px 20px; /* pt-24 для отступа под хедер */
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: #f8fafc; /* bg-slate-50 */
 }
 
 .tabs-container {
   background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 12px; /* rounded-xl */
+  padding: 24px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   flex: 1;
   display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 :deep(.el-tabs) {

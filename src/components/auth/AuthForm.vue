@@ -1,5 +1,6 @@
 <template>
   <el-form
+      :key="formKey"
       :model="formModel"
       :rules="rules"
       ref="formRef"
@@ -14,11 +15,10 @@
           :key="field.name"
           :label="field.label"
           :prop="field.name"
-          :error="fieldErrors[field.name]"
       >
         <template v-if="field.type === 'file'">
           <div class="file-upload-container">
-            <div class="file-upload-header">
+            <div class="file-upload-header" v-if="field.tooltip || field.downloadTemplate">
               <el-tooltip
                   v-if="field.tooltip"
                   :content="field.tooltip"
@@ -43,15 +43,16 @@
                 Скачать шаблон
               </el-button>
             </div>
-            <el-upload
-                class="upload-field"
-                action="#"
-                :auto-upload="false"
-                :on-change="(file) => handleFileChange(file, field.name)"
-                :on-remove="() => handleFileRemove(field.name)"
-            >
-              <el-button type="primary">Выбрать файл</el-button>
-            </el-upload>
+            <input
+                type="file"
+                :id="`file-input-${field.name}`"
+                class="file-input"
+                accept="application/pdf"
+                @change="(e) => handleFileInputChange(e, field.name)"
+            />
+            <div v-if="formModel[field.name]" class="file-name-display">
+              {{ typeof formModel[field.name] === 'object' && formModel[field.name]?.name ? formModel[field.name].name : 'Файл выбран' }}
+            </div>
           </div>
         </template>
         <template v-else-if="field.type === 'checkbox'">
@@ -87,6 +88,7 @@
             placeholder="+7 (___) ___-__-__"
             :class="`input-${field.name}`"
             @input="handleInput"
+            @keyup.enter="handleSubmit"
         ></el-input>
         <el-input
             v-else-if="field.name === 'code_speciality'"
@@ -96,6 +98,7 @@
             placeholder="__.__.__ "
             :class="`input-${field.name}`"
             @input="handleInput"
+            @keyup.enter="handleSubmit"
         ></el-input>
         <el-input
             v-else
@@ -104,6 +107,7 @@
             :placeholder="field.placeholder"
             :class="`input-${field.name}`"
             @input="handleInput"
+            @keyup.enter="handleSubmit"
         ></el-input>
       </el-form-item>
     </div>
@@ -129,7 +133,7 @@
 </template>
 
 <script setup>
-import {ref, watch} from 'vue';
+import {ref, watch, nextTick} from 'vue';
 import {InfoFilled, Download} from '@element-plus/icons-vue';
 import {useStageStore} from "@/stores/stage.js";
 
@@ -174,6 +178,7 @@ const formModel = ref({});
 const rules = ref({});
 const fieldErrors = ref({});
 const formRef = ref();
+const formKey = ref(0);
 
 watch(() => props.fields, (newFields) => {
   const newModel = {};
@@ -181,16 +186,27 @@ watch(() => props.fields, (newFields) => {
   const newErrors = {};
 
   newFields.forEach(field => {
-    newModel[field.name] = '';
+    // Initialize ALL fields as empty
+    if (field.type === 'file') {
+      newModel[field.name] = null;
+    } else if (field.type === 'checkbox') {
+      newModel[field.name] = false;
+    } else {
+      newModel[field.name] = '';
+    }
     newErrors[field.name] = '';
     if (field.rules) {
       newRules[field.name] = field.rules;
     }
   });
 
+  // Update model, rules, and errors
   formModel.value = newModel;
   rules.value = newRules;
   fieldErrors.value = newErrors;
+  
+  // Force form recreation by changing key - this completely resets all validation states
+  formKey.value += 1;
 }, {immediate: true});
 
 watch(formModel, (newValue) => {
@@ -205,8 +221,28 @@ const handleFileChange = (file, fieldName) => {
   handleInput();
 };
 
+const handleFileInputChange = (event, fieldName) => {
+  const file = event.target.files?.[0];
+  if (file) {
+    formModel.value[fieldName] = file;
+    handleInput();
+    // Trigger validation
+    if (formRef.value) {
+      formRef.value.validateField(fieldName);
+    }
+  } else {
+    formModel.value[fieldName] = null;
+    handleInput();
+  }
+};
+
 const handleFileRemove = (fieldName) => {
   formModel.value[fieldName] = null;
+  // Clear the file input
+  const fileInput = document.getElementById(`file-input-${fieldName}`);
+  if (fileInput) {
+    fileInput.value = '';
+  }
   handleInput();
 };
 
@@ -232,6 +268,12 @@ const handleSubmit = async () => {
 const handleSecondaryAction = () => {
   emit('secondaryAction');
 };
+
+defineExpose({
+  formRef,
+  fieldErrors,
+  formModel
+});
 </script>
 
 <style>

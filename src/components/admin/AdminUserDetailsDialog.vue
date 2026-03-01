@@ -25,6 +25,21 @@
         </div>
       </div>
 
+      <div class="judge-event-section" v-if="authStore.isAdmin && isJudge && activeEvent">
+        <h3>Привязка к событию</h3>
+        <div class="event-info">
+          <p class="event-name">
+            <strong>Активное событие:</strong> {{ activeEvent.name }}
+          </p>
+          <el-switch
+            v-model="isJudgeAttachedToEvent"
+            active-text="Привязан к событию"
+            inactive-text="Не привязан к событию"
+            @change="handleJudgeEventAttachment"
+          />
+        </div>
+      </div>
+
       <DocumentsSection
           :loading="documentsLoading"
           :documents="documents"
@@ -49,6 +64,7 @@ import { ElMessage } from 'element-plus'
 import UserInfo from '../organizer/UserInfo.vue'
 import DocumentsSection from '../organizer/DocumentsSection.vue'
 import { usersApi } from '@/api/users'
+import { eventsApi } from '@/api/events'
 
 import { useAuthStore } from "@/stores/auth.js"
 
@@ -73,6 +89,8 @@ const isMobile = computed(() => window.innerWidth <= 768)
 
 const selectedRoles = ref([])
 const savingRoles = ref(false)
+const activeEvent = ref(null)
+const isJudgeAttachedToEvent = ref(false)
 
 const availableRoles = [
   { name: 'admin', description: 'Администратор' },
@@ -82,17 +100,51 @@ const availableRoles = [
   { name: 'judge', description: 'Жюри' },
 ]
 
-watch(() => props.user, (newUser) => {
+watch(() => props.user, async (newUser) => {
   if (newUser && newUser.roles) {
     selectedRoles.value = newUser.roles.map(role => role.name)
   } else {
     selectedRoles.value = []
+  }
+  // Загружаем информацию о привязке к событию, если пользователь - жюри
+  if (newUser && selectedRoles.value.includes('judge')) {
+    if (!activeEvent.value) {
+      await loadActiveEvent()
+    }
+    if (activeEvent.value) {
+      await checkJudgeEventAttachment()
+    }
+  } else {
+    isJudgeAttachedToEvent.value = false
+  }
+}, { immediate: true })
+
+// Отслеживаем изменения selectedRoles для загрузки информации о событии (только для отображения)
+watch(selectedRoles, async (newRoles) => {
+  if (newRoles.includes('judge') && props.user) {
+    if (!activeEvent.value) {
+      await loadActiveEvent()
+    }
+    if (activeEvent.value) {
+      await checkJudgeEventAttachment()
+    }
+  }
+}, { immediate: false })
+
+watch(() => props.visible, (newVal) => {
+  if (newVal && !activeEvent.value) {
+    loadActiveEvent()
   }
 }, { immediate: true })
 
 const isRoleSelected = (roleName) => {
   return selectedRoles.value.includes(roleName)
 }
+
+const isJudge = computed(() => {
+  // Проверяем выбранные роли (включая те, что еще не сохранены)
+  return selectedRoles.value.includes('judge')
+})
 
 const handleRolesChange = (value) => {
   selectedRoles.value = value
@@ -103,16 +155,70 @@ const saveRoles = async () => {
 
   try {
     savingRoles.value = true
+    
+    // Сохраняем роли
     await usersApi.updateUserRoles(props.user.id, selectedRoles.value)
-    ElMessage.success('Роли пользователя успешно обновлены')
+    
+    // Если пользователь имеет роль жюри, обрабатываем привязку к событию
+    if (selectedRoles.value.includes('judge') && activeEvent.value) {
+      const shouldBeAttached = isJudgeAttachedToEvent.value
+      const currentJudges = await eventsApi.getEventJudges(activeEvent.value.id)
+      const isCurrentlyAttached = currentJudges.judges.some(j => j.id === props.user.id)
+      
+      // Привязываем или отвязываем только если состояние изменилось
+      if (shouldBeAttached && !isCurrentlyAttached) {
+        await eventsApi.addJudgeToEvent(activeEvent.value.id, props.user.id)
+      } else if (!shouldBeAttached && isCurrentlyAttached) {
+        await eventsApi.removeJudgeFromEvent(activeEvent.value.id, props.user.id)
+      }
+    } else if (!selectedRoles.value.includes('judge') && activeEvent.value) {
+      // Если роль жюри была снята, отвязываем от события
+      const currentJudges = await eventsApi.getEventJudges(activeEvent.value.id)
+      const isCurrentlyAttached = currentJudges.judges.some(j => j.id === props.user.id)
+      if (isCurrentlyAttached) {
+        await eventsApi.removeJudgeFromEvent(activeEvent.value.id, props.user.id)
+      }
+    }
+    
+    ElMessage.success('Изменения успешно сохранены')
     emit('roles-updated')
   } catch (error) {
-    ElMessage.error('Ошибка при обновлении ролей пользователя')
-    console.error('Error updating user roles:', error)
+    ElMessage.error(error.detail || error.message || 'Ошибка при сохранении изменений')
+    console.error('Error saving changes:', error)
   } finally {
     savingRoles.value = false
     dialogVisible.value = false
   }
+}
+
+const loadActiveEvent = async () => {
+  try {
+    activeEvent.value = await eventsApi.getActiveEvent()
+    if (isJudge.value && props.user) {
+      await checkJudgeEventAttachment()
+    }
+  } catch (error) {
+    console.error('Error loading active event:', error)
+    activeEvent.value = null
+  }
+}
+
+const checkJudgeEventAttachment = async () => {
+  if (!activeEvent.value || !props.user) return
+  
+  try {
+    const response = await eventsApi.getEventJudges(activeEvent.value.id)
+    const judgeIds = response.judges.map(j => j.id)
+    isJudgeAttachedToEvent.value = judgeIds.includes(props.user.id)
+  } catch (error) {
+    console.error('Error checking judge attachment:', error)
+    isJudgeAttachedToEvent.value = false
+  }
+}
+
+const handleJudgeEventAttachment = (attached) => {
+  // Просто обновляем локальное состояние, сохранение произойдет при нажатии "Сохранить изменения"
+  isJudgeAttachedToEvent.value = attached
 }
 
 const addDialogStyles = () => {
@@ -194,6 +300,34 @@ onUnmounted(() => {
 .roles-container .el-checkbox {
   margin-right: 24px;
   margin-bottom: 12px;
+}
+
+.judge-event-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.judge-event-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.event-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.event-name {
+  margin: 0;
+  font-size: 14px;
+  color: #606266;
+}
+
+.event-name strong {
+  color: #303133;
 }
 
 .actions-section {

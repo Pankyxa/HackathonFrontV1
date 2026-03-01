@@ -1,5 +1,12 @@
 <template>
   <div class="teams-tab">
+    <div class="filter-container">
+      <el-radio-group v-model="selectedStageGroup" @change="handleStageGroupChange">
+        <el-radio-button label="remote">Заочный этап</el-radio-button>
+        <el-radio-button label="on_site">Очный этап</el-radio-button>
+        <el-radio-button :label="null">Текущий этап</el-radio-button>
+      </el-radio-group>
+    </div>
     <div class="table-container">
       <el-table
           v-loading="loading"
@@ -7,7 +14,7 @@
           :key="tableKey"
           style="width: 100%"
           :height="tableHeight"
-          @row-click="openEvaluationDialog"
+          @row-click="openEvaluationPage"
       >
         <el-table-column prop="team_name" label="Название команды" min-width="200">
           <template #default="{ row }">
@@ -52,29 +59,22 @@
       </el-table>
     </div>
 
-    <EvaluationDialog
-        v-if="selectedTeam"
-        v-model:visible="dialogVisible"
-        :team="selectedTeam"
-        :initial-evaluation="selectedTeam"
-        :is-edit="true"
-        @evaluation-submitted="handleEvaluationSubmitted"
-    />
   </div>
 </template>
 
 <script setup>
 import {ref, computed, onMounted} from 'vue'
-import EvaluationDialog from './EvaluationDialog.vue'
+import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {evaluationsApi} from '@/api/evaluations'
+import {invalidateEvaluationCache} from '@/utils/cache'
 
+const router = useRouter()
 const loading = ref(false)
 const teams = ref([])
-const dialogVisible = ref(false)
-const selectedTeam = ref(null)
-const tableHeight = 'calc(100vh - 250px)'
+const tableHeight = 'calc(100vh - 300px)'
 const tableKey = ref(0)
+const selectedStageGroup = ref(null) // null = текущий этап, 'remote' = заочный, 'on_site' = очный
 
 const emit = defineEmits(['evaluation-updated'])
 
@@ -107,7 +107,7 @@ const getCriterionShortLabel = (n) => {
 const loadTeams = async () => {
   try {
     loading.value = true
-    const evaluations = await evaluationsApi.getMyEvaluations()
+    const evaluations = await evaluationsApi.getMyEvaluations(selectedStageGroup.value)
     teams.value = evaluations
     tableKey.value += 1
   } catch (error) {
@@ -121,15 +121,12 @@ const loadTeams = async () => {
   }
 }
 
-const openEvaluationDialog = (team) => {
-  selectedTeam.value = team
-  dialogVisible.value = true
+const handleStageGroupChange = () => {
+  loadTeams()
 }
 
-const handleEvaluationSubmitted = async () => {
-  dialogVisible.value = false
-  await loadTeams()
-  emit('evaluation-updated')
+const openEvaluationPage = (team) => {
+  router.push(`/judge/teams/${team.team_id}/evaluate`)
 }
 
 defineExpose({
@@ -146,6 +143,13 @@ onMounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.filter-container {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f5f7fa;
+  border-radius: 8px;
 }
 
 .table-container {

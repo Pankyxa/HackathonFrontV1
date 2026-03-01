@@ -103,8 +103,19 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-cancel" @click="$emit('close')">Отмена</button>
-        <button class="btn-save" @click="submitForm">Сохранить</button>
+        <div v-if="isNeedUpdate" class="footer-hint">
+          <el-alert
+              type="info"
+              :closable="false"
+              show-icon
+          >
+            После сохранения данных нажмите "Отправить на проверку" на странице профиля
+          </el-alert>
+        </div>
+        <div class="footer-buttons">
+          <button class="btn-cancel" @click="$emit('close')">Отмена</button>
+          <button class="btn-save" @click="submitForm">Сохранить</button>
+        </div>
       </div>
     </div>
   </div>
@@ -137,6 +148,10 @@ const hasParticipantRole = computed(() => {
 
 const hasMentorRole = computed(() => {
   return props.userData?.roles?.some(role => role.name === 'mentor')
+})
+
+const isNeedUpdate = computed(() => {
+  return props.userData?.current_status?.name === 'need_update'
 })
 
 const courseOptions = [
@@ -272,6 +287,16 @@ const submitForm = async () => {
 .modal-footer {
   padding: 16px 24px;
   border-top: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-hint {
+  margin-bottom: 8px;
+}
+
+.footer-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 12px;

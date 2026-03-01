@@ -1,7 +1,6 @@
 <template>
   <div class="team-members-section">
     <div class="section-header">
-      <h2 class="section-title">Участники команды</h2>
       <div class="header-right">
         <span class="member-count">{{ filteredMembers.length }}/5 участников</span>
         <button
@@ -14,17 +13,25 @@
         </button>
       </div>
     </div>
-    <div class="members-list">
+    <div class="members-grid">
       <div v-for="member in filteredMembers" :key="member.id" class="member-card">
+        <div class="member-avatar">
+          <el-avatar
+              :size="48"
+              :src="getUserAvatarUrl(member.user)"
+          >
+            <el-icon><User /></el-icon>
+          </el-avatar>
+          <!-- Status Dot for all statuses -->
+          <span
+              v-if="member.user.current_status?.name"
+              class="status-dot"
+              :class="getStatusDotClass(member.user.current_status.name)"
+          ></span>
+        </div>
         <div class="member-info">
           <div class="member-name">{{ member.user.full_name }}</div>
-          <div class="member-details">
-            <div class="member-role">{{ getRoleName(member.role) }}</div>
-            <div class="member-status" :class="getMemberStatusClass(member.user.current_status.name)">
-              <span class="status-icon"></span>
-              <span class="status-text">{{ getMemberStatusText(member.user.current_status.name) }}</span>
-            </div>
-          </div>
+          <div class="member-role">{{ getRoleName(member.role) }}</div>
         </div>
         <div class="member-actions" v-if="isTeamLeader && member.user.id !== currentUserId && stageStore.isRegistration">
           <button class="remove-btn" @click="$emit('remove-member', member)">
@@ -38,10 +45,16 @@
 
 <script setup>
 import {computed} from "vue";
+import {User} from '@element-plus/icons-vue';
 
 import {useStageStore} from "@/stores/stage.js";
 
 const stageStore = useStageStore();
+
+const getUserAvatarUrl = (user) => {
+  if (!user?.id) return null;
+  return `${import.meta.env.VITE_API_URL}/users/${user.id}/avatar`;
+};
 
 const props = defineProps({
   members: {
@@ -82,27 +95,20 @@ const getRoleName = (role) => {
   return roles[upperRole] || role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()
 }
 
-const getMemberStatusText = (status) => {
-  if (!stageStore.isRegistration && status !== "approved") {
-    return 'need_update'
-  }
-  const statusMap = {
-    'pending': 'В ожидании проверки документов',
-    'need_update': 'Требуется обновить личные данные',
-    'approved': 'Подтвержден'
-  }
-  return statusMap[status] || status
-}
-
-const getMemberStatusClass = (status) => {
+const getStatusDotClass = (status) => {
   if (!stageStore.isRegistration && status !== "approved") {
     return 'status-need-update'
   }
-  return {
-    'status-pending': status === 'pending',
-    'status-need-update': status === 'need_update',
-    'status-approved': status === 'approved'
+  if (status === 'approved') {
+    return 'status-confirmed'
   }
+  if (status === 'pending') {
+    return 'status-pending'
+  }
+  if (status === 'need_update') {
+    return 'status-need-update'
+  }
+  return 'status-confirmed' // По умолчанию зеленый
 }
 
 const showUserSearch = () => {
@@ -120,22 +126,23 @@ const showUserSearch = () => {
 
 <style scoped>
 .team-members-section {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #dcdfe6;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px;
 }
 
 .section-title {
-  font-size: 1.5rem;
-  color: #333;
-  font-weight: 500;
+  font-size: 1.25rem; /* text-xl */
+  color: #1e293b; /* text-slate-800 */
+  font-weight: 600;
+  margin: 0;
 }
 
 .header-right {
@@ -145,154 +152,153 @@ const showUserSearch = () => {
 }
 
 .member-count {
-  color: #606266;
-  font-size: 0.9rem;
+  color: #64748b; /* text-slate-500 */
+  font-size: 0.875rem; /* text-sm */
 }
 
 .add-member-btn {
-  padding: 8px 20px;
+  padding: 8px 16px;
   background: white;
-  color: #5B51D8;
-  border: 2px solid #5B51D8;
-  border-radius: 20px;
+  color: #2563eb; /* text-blue-600 */
+  border: 1px solid #2563eb; /* border-blue-600 */
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   font-weight: 500;
+  font-size: 0.875rem; /* text-sm */
 }
 
 .add-member-btn:hover {
-  background: rgba(91, 81, 216, 0.1);
+  background: #eff6ff; /* bg-blue-50 */
 }
 
 .add-member-btn:disabled {
-  opacity: 0.7;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.members-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+/* Grid Layout */
+.members-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* grid-cols-1 */
+  gap: 16px; /* gap-4 */
 }
 
+@media (min-width: 768px) {
+  .members-grid {
+    grid-template-columns: repeat(2, 1fr); /* md:grid-cols-2 */
+  }
+}
+
+/* Member Card */
 .member-card {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 1rem;
-  background: white;
-  border: 1px solid #dcdfe6;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: white; /* bg-white */
+  border: 1px solid #e2e8f0; /* border-slate-200 */
+  border-radius: 8px; /* rounded-lg */
+  transition: all 0.2s ease;
+  position: relative;
 }
 
 .member-card:hover {
-  border-color: #5B51D8;
-  box-shadow: 0 2px 8px rgba(91, 81, 216, 0.1);
+  border-color: #cbd5e1; /* border-slate-300 */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
 }
 
-.member-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+.member-avatar {
+  position: relative;
+  flex-shrink: 0;
 }
 
-.member-details {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 0.25rem;
-}
-
-.member-name {
-  font-size: 1.1rem;
-  color: #333;
-  font-weight: 500;
-}
-
-.member-role {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.member-status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-}
-
-.member-status .status-icon {
-  width: 6px;
-  height: 6px;
+/* Status Dot for all statuses */
+.status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  display: inline-block;
+  border: 2px solid white;
+}
+
+.status-confirmed {
+  background: #10b981; /* bg-green-500 */
 }
 
 .status-pending {
-  background: rgba(33, 150, 243, 0.1);
-  color: #2196F3;
-}
-
-.status-pending .status-icon {
-  background: #2196F3;
+  background: #2196F3; /* blue */
 }
 
 .status-need-update {
-  background: rgba(244, 67, 54, 0.1);
-  color: #F44336;
+  background: #F44336; /* red */
 }
 
-.status-need-update .status-icon {
-  background: #F44336;
+.member-info {
+  flex: 1;
+  min-width: 0; /* Для правильного обрезания текста */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.status-approved {
-  background: rgba(76, 175, 80, 0.1);
-  color: #4CAF50;
+.member-name {
+  font-size: 1rem; /* text-base */
+  color: #1e293b; /* text-slate-800 */
+  font-weight: 600;
+  line-height: 1.4;
 }
 
-.status-approved .status-icon {
-  background: #4CAF50;
+.member-role {
+  font-size: 0.875rem; /* text-sm */
+  color: #64748b; /* text-slate-500 */
+  line-height: 1.4;
 }
 
 .member-actions {
-  display: flex;
-  gap: 0.5rem;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .remove-btn {
-  padding: 6px 16px;
+  padding: 6px 12px;
   background: white;
-  color: #f56c6c;
-  border: 1px solid #f56c6c;
-  border-radius: 20px;
+  color: #ef4444; /* text-red-500 */
+  border: 1px solid #ef4444; /* border-red-500 */
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500;
 }
 
 .remove-btn:hover {
-  background: #fef0f0;
+  background: #fef2f2; /* bg-red-50 */
 }
 
 @media (max-width: 768px) {
   .section-header {
     flex-direction: column;
-    gap: 1rem;
+    gap: 12px;
     align-items: flex-start;
   }
-
-  .member-details {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+  
+  .members-grid {
+    grid-template-columns: 1fr;
   }
-
-  .member-status {
-    font-size: 0.75rem;
+  
+  .member-card {
+    padding: 12px;
+  }
+  
+  .member-name {
+    font-size: 0.875rem; /* text-sm */
+  }
+  
+  .member-role {
+    font-size: 0.75rem; /* text-xs */
   }
 }
 </style>

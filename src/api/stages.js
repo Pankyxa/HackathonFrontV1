@@ -15,6 +15,15 @@ api.interceptors.request.use((config) => {
 });
 
 export const stagesApi = {
+  async getPublicStages() {
+    try {
+      const response = await api.get('/stages/public');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
   async getCurrentStage() {
     try {
       const response = await api.get('/stages/current');
@@ -54,6 +63,33 @@ export const stagesApi = {
   async getStagesHistory() {
     try {
       const response = await api.get('/stages/history');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  async createStage(stageData) {
+    try {
+      const response = await api.post('/stages', stageData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  async updateStage(stageId, stageData) {
+    try {
+      const response = await api.put(`/stages/${stageId}`, stageData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  async deleteStage(stageId) {
+    try {
+      const response = await api.delete(`/stages/${stageId}`);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;

@@ -40,12 +40,18 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { teamsApi } from '@/api/teams'
 import { useAuthStore } from '@/stores/auth'
+import { useStageStore } from '@/stores/stage'
+import { useTeamInvites } from '@/composables/useTeamInvites.js'
 
 const emit = defineEmits(['changeTab'])
+const router = useRouter()
 const authStore = useAuthStore()
+const stageStore = useStageStore()
+const { checkInvites } = useTeamInvites()
 const invites = ref([])
 const loading = ref(false)
 const isProcessing = ref(false)
@@ -70,16 +76,39 @@ const loadInvites = async () => {
 const acceptInvite = async (inviteId) => {
   try {
     isProcessing.value = true
+    
+    // Находим приглашение, чтобы получить team_id для редиректа
+    const invite = invites.value.find(inv => inv.member.id === inviteId)
+    const teamId = invite?.team?.id
+    
     await teamsApi.acceptInvite(inviteId)
 
     await authStore.initializeAuth()
 
-    await loadInvites()
+    // Обновляем информацию об этапе, так как он мог измениться (регистрация закрыта)
+    try {
+      await stageStore.updateStageInfo()
+    } catch (stageError) {
+      console.warn('Не удалось обновить информацию об этапе:', stageError)
+      // Не блокируем редирект, если обновление этапа не удалось
+    }
 
     ElMessage.success('Приглашение принято')
 
-    if (authStore.isMember && !authStore.isMentor) {
-      emit('changeTab', 'profile')
+    // Небольшая задержка перед редиректом, чтобы дать время бэкенду обработать изменения
+    await new Promise(resolve => setTimeout(resolve, 300))
+
+    // Определяем, куда редиректить в зависимости от роли пользователя
+    if (authStore.isMentor) {
+      // Для ментора редиректим на список команд или конкретную команду
+      if (teamId) {
+        router.push(`/mentor/teams/${teamId}`)
+      } else {
+        router.push('/mentor/teams')
+      }
+    } else {
+      // Для обычного участника редиректим на страницу команды
+      router.push('/team')
     }
   } catch (error) {
     console.error('Error accepting invite:', error)
@@ -94,6 +123,7 @@ const declineInvite = async (inviteId) => {
     isProcessing.value = true
     await teamsApi.declineInvite(inviteId)
     await loadInvites()
+    await checkInvites() // Обновляем индикатор
     ElMessage.success('Приглашение отклонено')
   } catch (error) {
     console.error('Error declining invite:', error)
@@ -130,13 +160,14 @@ h2 {
 }
 
 .invite-card {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .invite-info {
@@ -216,9 +247,10 @@ h2 {
 .no-invites {
   text-align: center;
   padding: 2rem;
-  background: #f8f9fa;
-  border-radius: 8px;
+  background: white;
+  border-radius: 12px;
   color: #333333;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 768px) {

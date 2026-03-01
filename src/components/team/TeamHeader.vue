@@ -1,18 +1,26 @@
 <template>
-  <div class="team-header">
-    <div class="logo-container">
-      <div class="logo-wrapper">
-        <img
-            v-if="teamLogo"
-            :src="teamLogo"
-            alt="Team Logo"
-            class="team-logo"
-        />
-        <div v-else class="logo-placeholder">
-          <span>Нет логотипа</span>
+  <div class="team-header-card">
+    <!-- Status Badge - Top Right -->
+    <div :class="['team-status-badge', statusClass]">
+      <span class="status-icon"></span>
+      <span class="status-text">{{ statusText }}</span>
+    </div>
+    
+    <!-- Main Content: Logo, Name, Motto -->
+    <div class="team-header-content">
+      <!-- Logo (Left) -->
+      <div class="team-logo-section">
+        <div class="logo-wrapper">
+          <img
+              v-if="teamLogo"
+              :src="teamLogo"
+              alt="Team Logo"
+              class="team-logo"
+          />
+          <div v-else class="logo-placeholder">
+            <span>Нет логотипа</span>
+          </div>
         </div>
-      </div>
-      <div class="logo-actions">
         <input
             type="file"
             ref="fileInput"
@@ -28,23 +36,17 @@
           Изменить логотип
         </button>
       </div>
+      
+      <!-- Name and Motto (Center) -->
+      <div class="team-info-section">
+        <h2 class="team-name">{{ teamData.team_name }}</h2>
+        <p class="team-motto">{{ teamData.team_motto }}</p>
+      </div>
     </div>
-    <div class="team-details">
-      <div class="team-header-info">
-        <div class="info-group">
-          <label>Название команды</label>
-          <div class="info-value">{{ teamData.team_name }}</div>
-        </div>
-        <div :class="['team-status', statusClass]">
-          <span class="status-icon"></span>
-          <span class="status-text">{{ statusText }}</span>
-        </div>
-      </div>
-      <div class="info-group">
-        <label>Девиз команды</label>
-        <div class="info-value">{{ teamData.team_motto }}</div>
-      </div>
-      <button class="edit-btn" v-if="isTeamLeader && stageStore.isRegistration" @click="$emit('edit')">
+    
+    <!-- Edit Button -->
+    <div class="team-actions" v-if="isTeamLeader && stageStore.isRegistration">
+      <button class="edit-btn" @click="$emit('edit')">
         Редактировать информацию
       </button>
     </div>
@@ -104,142 +106,23 @@ const handleFileSelect = (event) => {
 </script>
 
 <style scoped>
-.team-info {
-  max-width: 800px;
-}
-
-.team-header {
-  display: flex;
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-
-.logo-container {
-  width: 200px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.logo-wrapper {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  overflow: hidden;
+.team-header-card {
   position: relative;
+  width: 100%;
 }
 
-.team-logo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-.logo-placeholder {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
+/* Status Badge - Top Right */
+.team-status-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: var(--color-background-soft);
-  color: var(--color-text-light);
-  border: 2px dashed var(--color-border);
-}
-
-.logo-actions {
-  margin-top: 1rem;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.change-logo-btn {
-  padding: 8px 16px;
-  background: #FFFFFF;
-  color: #5B51D8;
-  border: 2px solid #5B51D8;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 15px;
-  font-weight: 500;
-  min-width: 120px;
-  text-align: center;
-}
-
-.change-logo-btn:hover {
-  background: rgba(91, 81, 216, 0.1);
-}
-
-.change-logo-btn:active {
-  transform: translateY(1px);
-}
-
-.team-info-section,
-.team-details {
-  flex: 1;
-}
-
-.info-group {
-  margin-bottom: 1.5rem;
-}
-
-.info-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #333;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.info-value {
-  font-size: 1.1rem;
-  color: #333;
-  padding: 0.5rem 0;
-}
-
-.edit-btn {
-  margin-top: 1rem;
-  padding: 8px 20px;
-  background: white;
-  color: #5B51D8;
-  border: 2px solid #5B51D8;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
-}
-
-.edit-btn:hover {
-  background: rgba(91, 81, 216, 0.1);
-}
-
-.edit-btn:active {
-  transform: translateY(1px);
-}
-
-.team-header-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1.5rem;
-}
-
-.team-header-info .info-group {
-  margin-bottom: 0;
-}
-
-.team-status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  gap: 6px;
   padding: 6px 12px;
   border-radius: 16px;
-  font-size: 0.9rem;
-  height: fit-content;
-  margin-top: 24px;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500;
 }
 
 .status-icon {
@@ -285,35 +168,145 @@ const handleFileSelect = (event) => {
   background: #4CAF50;
 }
 
+/* Main Content: Logo, Name, Motto */
+.team-header-content {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding-right: 120px; /* Отступ для статуса справа */
+}
+
+.team-logo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.logo-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.team-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.logo-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9; /* bg-slate-100 */
+  color: #64748b; /* text-slate-500 */
+  border: 2px dashed #cbd5e1; /* border-slate-300 */
+  font-size: 0.75rem; /* text-xs */
+  text-align: center;
+  padding: 8px;
+}
+
+.change-logo-btn {
+  padding: 6px 12px;
+  background: white;
+  color: #2563eb; /* text-blue-600 */
+  border: 1px solid #2563eb; /* border-blue-600 */
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.change-logo-btn:hover {
+  background: #eff6ff; /* bg-blue-50 */
+}
+
+.team-info-section {
+  flex: 1;
+  min-width: 0; /* Для правильного обрезания текста */
+}
+
+.team-name {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 600;
+  color: #1e293b; /* text-slate-800 */
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.team-motto {
+  font-size: 1rem; /* text-base */
+  color: #64748b; /* text-slate-500 */
+  margin: 0;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.team-actions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0; /* border-slate-200 */
+}
+
+.edit-btn {
+  padding: 8px 16px;
+  background: white;
+  color: #2563eb; /* text-blue-600 */
+  border: 1px solid #2563eb; /* border-blue-600 */
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.875rem; /* text-sm */
+}
+
+.edit-btn:hover {
+  background: #eff6ff; /* bg-blue-50 */
+}
+
 @media (max-width: 768px) {
-  .team-header {
-    flex-direction: column;
-    align-items: center;
+  .team-header-card {
+    padding: 16px;
   }
-
-  .team-details {
+  
+  .team-status-badge {
+    position: static;
+    margin-bottom: 12px;
+    align-self: flex-start;
+  }
+  
+  .team-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-right: 0;
+    gap: 16px;
+  }
+  
+  .team-logo-section {
+    align-items: flex-start;
+  }
+  
+  .team-info-section {
     width: 100%;
-    text-align: center;
   }
-
-  .info-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  
+  .team-name {
+    font-size: 1.25rem; /* text-xl */
   }
-
-  .info-value {
-    text-align: center;
-  }
-
-  .team-header-info {
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .team-status {
-    margin-top: 0;
+  
+  .team-motto {
+    font-size: 0.875rem; /* text-sm */
   }
 }
 </style>

@@ -2,40 +2,58 @@
   <div class="profile-data">
     <div class="header-actions">
       <div v-if="showStatusMessage" class="status-message">
-        <el-alert
-            type="warning"
-            :closable="false"
-            show-icon
-        >
-          <p>Требуется обновление данных</p>
-          <p v-if="latestStatusComment" class="status-comment">
-            Комментарий: {{ latestStatusComment }}
-          </p>
-        </el-alert>
+        <div class="status-alert">
+          <div class="alert-icon">
+            <el-icon><Warning /></el-icon>
+          </div>
+          <div class="alert-content">
+            <p class="alert-title">Требуется обновление данных</p>
+            <p v-if="latestStatusComment" class="status-comment">
+              <strong>Комментарий:</strong> {{ latestStatusComment }}
+            </p>
+            <p class="status-hint">
+              Вы можете редактировать данные и документы, затем нажмите "Отправить на проверку"
+            </p>
+          </div>
+        </div>
       </div>
       <div class="header-content">
-        <h2>Мои данные</h2>
-        <div class="header-right">
-          <span v-if="userData?.current_status" class="status-badge" :class="statusClass">
-          <span class="status-icon"></span>
-          {{
-              !stageStore.isRegistration && userData.current_status.name !== 'approved' ?
+        <div class="title-section">
+          <div class="title-with-badge">
+            <h2>Мои данные</h2>
+            <span v-if="userData?.current_status" class="status-badge" :class="statusClass">
+              <span class="status-icon"></span>
+              {{
+                !stageStore.isRegistration && userData.current_status.name !== 'approved' ?
                   "Регистрация закрыта, вы не можете учавствовать в хакатоне" :
                   userData.current_status.description
-            }}
-        </span>
-          <button
-              v-if="canEdit"
-              class="btn-edit"
-              @click="showEditModal = true"
-          >
-            Редактировать
-          </button>
+              }}
+            </span>
+          </div>
+          <p class="subtitle">Управление личной информацией и документами</p>
+        </div>
+        <div class="header-right">
+          <div v-if="canEdit" class="action-buttons">
+            <button
+                class="btn-edit"
+                @click="showEditModal = true"
+            >
+              Редактировать данные
+            </button>
+            <button
+                class="btn-submit"
+                @click="handleSubmitForReview"
+                :loading="isSubmitting"
+            >
+              Отправить на проверку
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="info-section" v-if="userData">
+    <!-- Card 1: My Data -->
+    <div class="data-card" v-if="userData">
       <div class="info-grid">
         <div class="info-item">
           <label>ФИО:</label>
@@ -94,12 +112,15 @@
       </div>
     </div>
 
-    <UserDocuments
-        v-if="userData && (hasMentorRole || hasParticipantRole)"
-        :can-edit="canEdit"
-        :user-data="userData"
-        @update="handleDocumentsUpdate"
-    />
+    <!-- Card 2: My Documents -->
+    <div class="documents-card" v-if="userData && (hasMentorRole || hasParticipantRole)">
+      <h3 class="card-title">Мои документы</h3>
+      <UserDocuments
+          :can-edit="canEdit"
+          :user-data="userData"
+          @update="handleDocumentsUpdate"
+      />
+    </div>
 
     <EditProfileDialog
         v-if="showEditModal"
@@ -113,6 +134,9 @@
 <script setup>
 import {ref, computed, onMounted} from 'vue'
 import {authApi} from "@/api/auth.js"
+import {usersApi} from "@/api/users.js"
+import {ElMessage} from 'element-plus'
+import {Warning} from '@element-plus/icons-vue'
 import EditProfileDialog from './EditProfileDialog.vue'
 import UserDocuments from './UserDocuments.vue'
 import {useStageStore} from "@/stores/stage.js"
@@ -121,6 +145,7 @@ const stageStore = useStageStore()
 
 const userData = ref(null)
 const showEditModal = ref(false)
+const isSubmitting = ref(false)
 
 const canEdit = computed(() => {
   return userData.value?.current_status.name === 'need_update'
@@ -174,17 +199,56 @@ const formatRoles = (roles) => {
   return roles.map(role => role.description).join(', ')
 }
 
-const handleUpdate = (updatedData) => {
+const handleUpdate = async (updatedData) => {
   userData.value = updatedData
   showEditModal.value = false
-  canEdit.value = false
-  showStatusMessage.value = false
+  // Не меняем статус автоматически - пользователь должен отправить на проверку вручную
+  // Обновляем данные пользователя из API
+  try {
+    const userInfo = await authApi.getCurrentUser()
+    if (userInfo) {
+      userData.value = userInfo
+    }
+  } catch (error) {
+    console.error('Error refreshing user data:', error)
+  }
 }
 
-const handleDocumentsUpdate = (updatedData) => {
+const handleDocumentsUpdate = async (updatedData) => {
   userData.value = updatedData
-  canEdit.value = false
-  showStatusMessage.value = false
+  // Не меняем статус автоматически - пользователь должен отправить на проверку вручную
+  // Обновляем данные пользователя из API
+  try {
+    const userInfo = await authApi.getCurrentUser()
+    if (userInfo) {
+      userData.value = userInfo
+    }
+  } catch (error) {
+    console.error('Error refreshing user data:', error)
+  }
+}
+
+const handleSubmitForReview = async () => {
+  if (!canEdit.value) return
+
+  isSubmitting.value = true
+  try {
+    const updatedUser = await usersApi.submitForReview()
+    userData.value = updatedUser
+    ElMessage.success('Данные отправлены на проверку')
+    
+    // Обновляем данные пользователя из API
+    const userInfo = await authApi.getCurrentUser()
+    if (userInfo) {
+      userData.value = userInfo
+    }
+  } catch (error) {
+    console.error('Error submitting for review:', error)
+    const errorMessage = error?.detail || error?.message || 'Ошибка при отправке на проверку'
+    ElMessage.error(errorMessage)
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 onMounted(async () => {
@@ -201,8 +265,10 @@ onMounted(async () => {
 
 <style scoped>
 .profile-data {
-  max-width: 1000px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* gap-6 */
+  width: 100%;
 }
 
 .header-content {
@@ -230,10 +296,32 @@ h2 {
   color: #333333;
 }
 
-.info-section {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 20px;
+/* Card Styles */
+.data-card,
+.documents-card {
+  background: white; /* bg-white */
+  border-radius: 12px; /* rounded-xl */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* shadow-sm */
+  border: 1px solid #e2e8f0; /* border border-slate-200 */
+  padding: 24px; /* p-6 */
+}
+
+.data-card {
+  margin-bottom: 24px; /* mb-6 */
+}
+
+.card-title {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 600;
+  color: #1e293b; /* text-slate-800 */
+  margin: 0 0 20px 0;
+}
+
+.title-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .info-grid {
@@ -258,6 +346,12 @@ h2 {
   color: #333333;
 }
 
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 .btn-edit {
   padding: 8px 16px;
   border-radius: 4px;
@@ -273,12 +367,101 @@ h2 {
   background: #66b1ff;
 }
 
+.btn-submit {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  background: #67C23A;
+  color: white;
+  transition: all 0.3s;
+}
+
+.btn-submit:hover {
+  background: #85ce61;
+}
+
+.btn-submit:disabled {
+  background: #a0c888;
+  cursor: not-allowed;
+}
+
 .status-message {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.status-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 20px;
+  background: white; /* bg-white */
+  border: 1px solid #fbbf24; /* border-yellow-400 */
+  border-left: 4px solid #f59e0b; /* border-l-4 border-yellow-500 */
+  border-radius: 8px; /* rounded-lg */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* shadow-sm */
+}
+
+.alert-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: #f59e0b; /* text-yellow-500 */
+}
+
+.alert-icon .el-icon {
+  font-size: 20px;
+}
+
+.alert-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.alert-title {
+  font-size: 0.9375rem; /* text-sm */
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #1e293b; /* text-slate-800 */
 }
 
 .status-comment {
-  margin-top: 8px;
+  margin: 8px 0;
+  font-size: 0.875rem; /* text-sm */
+  color: #64748b; /* text-slate-500 */
+  line-height: 1.5;
+}
+
+.status-comment strong {
+  color: #1e293b; /* text-slate-800 */
+  font-weight: 600;
+}
+
+.status-hint {
+  margin: 8px 0 0 0;
+  font-size: 0.875rem; /* text-sm */
+  color: #64748b; /* text-slate-500 */
+  line-height: 1.5;
+}
+
+.title-section {
+  margin-bottom: 8px;
+}
+
+.title-section h2 {
+  margin: 0 0 4px 0;
+  color: #303133;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 0;
+  color: #909399;
   font-size: 14px;
 }
 
@@ -329,6 +512,21 @@ h2 {
 @media (max-width: 768px) {
   .info-grid {
     grid-template-columns: 1fr;
+  }
+  
+  /* Компактные карточки на мобилке */
+  .data-card {
+    padding: 16px; /* Уменьшаем padding на мобилке */
+  }
+  
+  .documents-card {
+    padding: 12px 0; /* Только вертикальный padding, горизонтальный убираем */
+  }
+  
+  .card-title {
+    font-size: 1.125rem; /* text-lg */
+    margin-bottom: 12px; /* Уменьшаем отступ снизу */
+    padding: 0 12px; /* Добавляем padding только для заголовка */
   }
 }
 </style>

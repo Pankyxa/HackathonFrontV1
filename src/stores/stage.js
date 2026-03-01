@@ -15,8 +15,31 @@ export const useStageStore = defineStore('stage', () => {
   const isSolutionSubmission = computed(() => currentStage.value?.type === 'solution_submission')
   const isSolutionReview = computed(() => currentStage.value?.type === 'solution_review')
   const isOnlineDefense = computed(() => currentStage.value?.type === 'online_defense')
+  const isOnSiteDefense = computed(() => currentStage.value?.type === 'on_site_defense')
   const isResultsPublication = computed(() => currentStage.value?.type === 'results_publication')
   const isAwardCeremony = computed(() => currentStage.value?.type === 'award_ceremony')
+  
+  // Проверка этапов для финалистов
+  const isFinalistsSelection = computed(() => currentStage.value?.type === 'finalists_selection')
+  const isOnSiteStage = computed(() => {
+    const stageType = currentStage.value?.type
+    return stageType === 'on_site_task_distribution' || 
+           stageType === 'on_site_solution_submission' || 
+           stageType === 'on_site_defense'
+  })
+  
+  // Показывать финалистов на этапах после определения финалистов и до публикации результатов
+  // НЕ показываем, если уже показываем победителей
+  const shouldShowFinalists = computed(() => {
+    const showWinners = isResultsPublication.value || isAwardCeremony.value
+    if (showWinners) return false
+    return isFinalistsSelection.value || isOnSiteStage.value
+  })
+  
+  // Показывать победителей только на этапе публикации результатов и церемонии награждения
+  const shouldShowWinners = computed(() => {
+    return isResultsPublication.value || isAwardCeremony.value
+  })
 
   // Дополнительные полезные вычисляемые свойства
   const stageName = computed(() => currentStage.value?.name || 'Этап не определен')
@@ -76,8 +99,14 @@ export const useStageStore = defineStore('stage', () => {
     isSolutionSubmission,
     isSolutionReview,
     isOnlineDefense,
+    isOnSiteDefense,
     isResultsPublication,
     isAwardCeremony,
+    // Финалисты
+    isFinalistsSelection,
+    isOnSiteStage,
+    shouldShowFinalists,
+    shouldShowWinners,
     // Дополнительные свойства
     stageName,
     stageOrder,
