@@ -184,12 +184,12 @@ const participantFields = [
     name: 'code_speciality',
     label: 'Код спец.',
     type: 'text',
-    placeholder: '__.__.__ ',
+    placeholder: '__.__.__ или _._._',
     rules: [
       {required: true, message: 'Пожалуйста, введите код специальности', trigger: 'blur'},
       {
-        pattern: /^\d{2}\.\d{2}\.\d{2}$/,
-        message: 'Формат: XX.XX.XX, где X - цифры',
+        pattern: /^(\d{1,2}\.){2}\d{1,2}$/,
+        message: 'Формат: XX.XX.XX или X.X.X (для аспирантов), где X - цифры',
         trigger: 'blur'
       }
     ]

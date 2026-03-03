@@ -93,11 +93,9 @@
         <el-input
             v-else-if="field.name === 'code_speciality'"
             v-model="formModel[field.name]"
-            v-mask="'##.##.##'"
-            :mask-placeholder="{ '#': '_' }"
-            placeholder="__.__.__ "
+            :placeholder="field.placeholder || '__.__.__ или _._._'"
             :class="`input-${field.name}`"
-            @input="handleInput"
+            @input="handleSpecialityCodeInput"
             @keyup.enter="handleSubmit"
         ></el-input>
         <el-input
@@ -162,17 +160,6 @@ const props = defineProps({
   }
 });
 
-const validateSpecialityCode = (rule, value, callback) => {
-  const regex = /^\d{2}\.\d{2}\.\d{2}$/;
-  if (!value) {
-    callback(new Error('Пожалуйста, введите код специальности'));
-  } else if (!regex.test(value)) {
-    callback(new Error('Формат: XX.XX.XX, где X - цифры'));
-  } else {
-    callback();
-  }
-};
-
 const emit = defineEmits(['submit', 'secondaryAction', 'update:model-value', 'download-terms', 'download-consent']);
 const formModel = ref({});
 const rules = ref({});
@@ -214,6 +201,15 @@ watch(formModel, (newValue) => {
 }, {deep: true});
 const handleInput = () => {
   emit('update:model-value', formModel.value);
+};
+
+const handleSpecialityCodeInput = (value) => {
+  // Оставляем только цифры и точки
+  const filtered = String(value || '').replace(/[^\d.]/g, '');
+  if (formModel.value.code_speciality !== filtered) {
+    formModel.value.code_speciality = filtered;
+    handleInput();
+  }
 };
 
 const handleFileChange = (file, fieldName) => {
