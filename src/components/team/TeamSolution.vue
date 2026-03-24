@@ -1,163 +1,87 @@
 <template>
   <div class="solution-section">
     <div v-loading="loading" class="solution-container">
+      <!-- Notice -->
       <div v-if="authStore.isMember" class="important-notice">
         <h4>Важно!</h4>
         <p class="warning-text">Решения, загруженные после дедлайна, не будут приняты к оценке!</p>
       </div>
 
+      <CountdownTimer v-if="authStore.isMember" inline />
+
+      <!-- GitHub Link Card -->
       <div class="solution-card">
-        <h3 class="card-title">Решение команды</h3>
-        <div class="solution-block">
-        <!-- ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена, решения теперь через GitHub -->
-        <!-- <div v-if="authStore.isMember" class="solution-type-selector">
-          <h4>Способ предоставления решения</h4>
-          <el-radio-group v-model="solutionType" class="solution-type-group">
-            <el-radio label="file">Загрузить ZIP архив</el-radio>
-            <el-radio label="link">Указать ссылку на репозиторий</el-radio>
-          </el-radio-group>
-        </div> -->
-        <div v-if="authStore.isMentor" class="solution-type-selector">
-          <h4>Предоставленное решение</h4>
-        </div>
+        <h3 class="card-title">Ссылка на решение</h3>
+        
+        <div class="solution-content">
+          <p class="solution-description">
+            Укажите ссылку на ваш GitHub репозиторий с решением. 
+            Убедитесь, что репозиторий приватный и вы добавили организаторов в collaborators.
+          </p>
 
-        <div class="solution-link-block">
-          <div class="file-item">
-            <div class="file-info">
-              <h4>Ссылка на решение (GitHub)</h4>
-              <p class="file-description">
-                Укажите ссылку на ваш GitHub репозиторий или облачное хранилище с решением
-              </p>
-            </div>
-            <div class="file-actions">
-              <template v-if="canEdit">
-                <el-input
-                    v-model="solutionLink"
-                    placeholder="https://github.com/username/repo"
-                    class="solution-link-input"
-                >
-                  <template #append>
-                    <el-button
-                        type="primary"
-                        @click="saveSolutionLink"
-                        :disabled="!solutionLink"
-                    >
-                      Сохранить
-                    </el-button>
-                  </template>
-                </el-input>
-              </template>
-              <template v-if="!canEdit && solutionLink">
-                <el-link
-                    type="primary"
-                    :href="solutionLink"
-                    target="_blank"
-                    class="solution-link"
-                >
-                  <el-icon>
-                    <Link/>
-                  </el-icon>
-                  {{ solutionLink }}
-                </el-link>
-              </template>
-            </div>
-          </div>
-        </div>
-
-        <!-- ЗАКОММЕНТИРОВАНО: Загрузка ZIP файлов решений отключена -->
-        <!-- <div v-if="solutionType === 'file'" class="file-item">
-          <div class="file-info">
-            <h4>ZIP архив с решением</h4>
-            <p class="file-description">
-              Архив должен содержать все файлы вашего решения до 500мб
-            </p>
-          </div>
-          <div class="file-actions">
-            <el-button
-                v-if="solutionFile"
-                type="primary"
-                link
-                @click="downloadFile('solution')"
+          <!-- Input field -->
+          <div v-if="canEdit" class="input-block">
+            <el-input
+              v-model="solutionLink"
+              placeholder="https://github.com/username/repo"
+              class="solution-link-input"
             >
-              <el-icon>
-                <Download/>
-              </el-icon>
-              Скачать
-            </el-button>
-            <el-upload
-                class="upload-btn"
-                action="#"
-                :auto-upload="false"
-                :show-file-list="false"
-                accept=".zip"
-                :on-change="(file) => handleFileChange(file, 'solution')"
-            >
-              <el-button
+              <template #append>
+                <el-button
                   type="primary"
-                  v-if="canEdit"
-                  :loading="uploadingSolution"
-                  link
-              >
-                <el-icon>
-                  <Upload/>
-                </el-icon>
-                {{ solutionFile ? 'Обновить' : 'Загрузить' }}
-              </el-button>
-            </el-upload>
-            <el-progress
-                v-if="uploadingSolution"
-                :percentage="uploadProgress"
-                :format="progressFormat"
-                class="upload-progress"
-            />
+                  @click="saveSolutionLink"
+                  :disabled="!solutionLink.trim()"
+                >
+                  Сохранить
+                </el-button>
+              </template>
+            </el-input>
           </div>
-        </div> -->
+
+          <!-- Display saved link -->
+          <div v-else-if="solutionLink" class="saved-link-block">
+            <div class="saved-label">Сохраненная ссылка:</div>
+            <el-link
+              type="primary"
+              :href="solutionLink"
+              target="_blank"
+              class="solution-link"
+            >
+              <el-icon><Link /></el-icon>
+              {{ solutionLink }}
+            </el-link>
+          </div>
+
+          <div v-else class="no-link-message">
+            Ссылка на решение еще не добавлена
+          </div>
         </div>
       </div>
 
-      <div class="deployment-card" v-if="authStore.isMember">
-        <h3 class="card-title">Инструкция по развертыванию</h3>
-        <div class="deployment-block">
-        <div class="file-item">
+      <!-- Instructions Card -->
+      <div class="instructions-card">
+        <h3 class="card-title">Инструкция по отправке решения</h3>
+        
+        <div class="download-attachment-card">
+          <el-icon class="file-icon"><Document /></el-icon>
           <div class="file-info">
-            <p class="file-description">
-              Текстовый файл с инструкцией по развертыванию решения (TXT или MD).
-              Обязательно должен содержать все необходимые шаги для запуска вашего решения.
-            </p>
+            <div class="file-name">Инструкция_по_отправке_решения.html</div>
+            <div class="file-type">HTML страница</div>
           </div>
-          <div class="file-actions">
-            <el-button
-                v-if="deploymentFile"
-                type="primary"
-                link
-                @click="downloadFile('deployment')"
-            >
-              <el-icon>
-                <Download/>
-              </el-icon>
-              Скачать
-            </el-button>
-            <el-upload
-                class="upload-btn"
-                action="#"
-                :auto-upload="false"
-                :show-file-list="false"
-                accept=".txt,.md"
-                :on-change="(file) => handleFileChange(file, 'deployment')"
-            >
-              <el-button
-                  type="primary"
-                  v-if="canEdit"
-                  link
-              >
-                <el-icon>
-                  <Upload/>
-                </el-icon>
-                {{ deploymentFile ? 'Обновить' : 'Загрузить' }}
-              </el-button>
-            </el-upload>
-          </div>
+          <a href="/files/Инструкция_по_отправке_решения.html" target="_blank" class="download-action">
+            Открыть
+          </a>
         </div>
+
+        <div class="instructions-content">
+          <h4>Требования к решению:</h4>
+          <ul>
+            <li>Решение должно быть размещено в приватном GitHub репозитории</li>
+            <li>В репозитории должен быть README.md с описанием проекта</li>
+            <li>Код должен быть документирован</li>
+            <li>Должна быть инструкция по запуску</li>
+            <li>Все зависимости должны быть указаны в requirements.txt или аналоге</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -165,14 +89,13 @@
 </template>
 
 <script setup>
-import {ref, onMounted, computed} from 'vue'
-import {ElMessage} from 'element-plus'
-import {Download, Link} from '@element-plus/icons-vue'
-// ЗАКОММЕНТИРОВАНО: Upload больше не используется
-// import {Upload} from '@element-plus/icons-vue'
-import {teamsApi} from '@/api/teams'
-import {useAuthStore} from "@/stores/auth.js"
-import {useStageStore} from "@/stores/stage.js";
+import { ref, onMounted, computed } from 'vue'
+import { ElMessage } from 'element-plus'
+import { Link, Document } from '@element-plus/icons-vue'
+import { teamsApi } from '@/api/teams'
+import { useAuthStore } from "@/stores/auth.js"
+import { useStageStore } from "@/stores/stage.js";
+import CountdownTimer from '@/components/CountdownTimer.vue'
 
 const authStore = useAuthStore()
 const stageStore = useStageStore()
@@ -185,179 +108,126 @@ const props = defineProps({
 })
 
 const loading = ref(false)
-// ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена
-// const solutionFile = ref(null)
-const deploymentFile = ref(null)
-// const uploadingSolution = ref(false)
-// const uploadProgress = ref(0)
-// const solutionType = ref('file')
 const solutionLink = ref('')
 
+const extractErrorMessage = (error) => {
+  if (!error) {
+    return 'Ошибка при сохранении ссылки'
+  }
+
+  if (typeof error === 'string') {
+    return error
+  }
+
+  if (error.detail) {
+    if (typeof error.detail === 'string') {
+      return error.detail
+    }
+
+    if (Array.isArray(error.detail)) {
+      return error.detail
+        .map((item) => item?.msg || item?.message)
+        .filter(Boolean)
+        .join(', ')
+    }
+  }
+
+  if (error.message) {
+    return error.message
+  }
+
+  return 'Ошибка при сохранении ссылки'
+}
+
+// Расширенная проверка - включает новые типы этапов
 const canEdit = computed(() => {
-  return authStore.isMember && (stageStore.isTaskDistribution || stageStore.isSolutionSubmission)
+  if (!authStore.isMember) return false
+  
+  const stageType = stageStore.currentStage?.type
+  if (!stageType) return false
+  
+  // Разрешенные этапы для редактирования
+  const allowedStages = [
+    'task_distribution',
+    'solution_submission',
+    'remote_task_distribution',
+    'remote_solution_submission',
+    'on_site_task_distribution',
+    'on_site_solution_submission'
+  ]
+  
+  return allowedStages.includes(stageType)
 })
 
-// ЗАКОММЕНТИРОВАНО: progressFormat больше не используется
-// const progressFormat = (percentage) => {
-//   if (percentage === 100) {
-//     return 'Обработка...'
-//   }
-//   return `${percentage}%`
-// }
-
-const loadFiles = async () => {
+const loadData = async () => {
   try {
     loading.value = true
     const team = await teamsApi.getTeam(props.teamId)
     solutionLink.value = team.solution_link || ''
-
-    try {
-      // ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена
-      // const solution = await teamsApi.getTeamSolution(props.teamId)
-      const deployment = await teamsApi.getTeamDeployment(props.teamId)
-      // solutionFile.value = solution
-      deploymentFile.value = deployment
-
-      // if (solution) {
-      //   solutionType.value = 'file'
-      // }
-    } catch (error) {
-      if (error.response?.status !== 404) {
-        throw error
-      }
-    }
   } catch (error) {
-    console.error('Error loading files:', error)
-    if (error.response?.status !== 404) {
-      ElMessage.error('Ошибка при загрузке файлов')
-    }
+    console.error('Error loading team data:', error)
+    ElMessage.error('Ошибка при загрузке данных')
   } finally {
     loading.value = false
   }
 }
 
 const saveSolutionLink = async () => {
+  const trimmedLink = solutionLink.value.trim()
+  if (!trimmedLink) return
+  
   try {
     loading.value = true
-    await teamsApi.updateSolutionLink(props.teamId, solutionLink.value)
+    const response = await teamsApi.updateSolutionLink(props.teamId, trimmedLink)
+    solutionLink.value = response.solution_link || trimmedLink
     ElMessage.success('Ссылка на решение успешно сохранена')
   } catch (error) {
     console.error('Error saving solution link:', error)
-    ElMessage.error('Ошибка при сохранении ссылки')
+    ElMessage.error(extractErrorMessage(error))
   } finally {
     loading.value = false
-  }
-}
-
-const downloadFile = async (type) => {
-  try {
-    loading.value = true
-    // ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена
-    // if (type === 'solution') {
-    //   await teamsApi.downloadTeamSolution(props.teamId)
-    // } else {
-      await teamsApi.downloadTeamDeployment(props.teamId)
-    // }
-  } catch (error) {
-    console.error(`Error downloading ${type}:`, error)
-    ElMessage.error(error.message || `Ошибка при скачивании файла`)
-  } finally {
-    loading.value = false
-  }
-}
-
-const handleFileChange = async (file, type) => {
-  try {
-    if (!file) return
-
-    // ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена
-    // const maxSize = type === 'solution' ? 500 * 1024 * 1024 : 50 * 1024 * 1024
-    const maxSize = 50 * 1024 * 1024
-    if (file.raw.size > maxSize) {
-      ElMessage.error(`Размер файла не должен превышать ${maxSize / (1024 * 1024)}MB`)
-      return
-    }
-
-    // if (type === 'solution' && !file.raw.name.toLowerCase().endsWith('.zip')) {
-    //   ElMessage.error('Решение должно быть в формате ZIP')
-    //   return
-    // }
-    if (type === 'deployment' &&
-        !file.raw.name.toLowerCase().endsWith('.txt') &&
-        !file.raw.name.toLowerCase().endsWith('.md')) {
-      ElMessage.error('Описание должно быть в формате TXT или MD')
-      return
-    }
-
-    // ЗАКОММЕНТИРОВАНО: Загрузка файлов решений отключена
-    // if (type === 'solution') {
-    //   uploadingSolution.value = true
-    //   uploadProgress.value = 0
-    //
-    //   await teamsApi.uploadTeamSolution(props.teamId, file.raw, (progress) => {
-    //     uploadProgress.value = progress
-    //   })
-    //
-    //   ElMessage.success('Решение успешно загружено')
-    // } else {
-      await teamsApi.uploadTeamDeployment(props.teamId, file.raw)
-      ElMessage.success('Описание развертывания успешно загружено')
-    // }
-
-    await loadFiles()
-  } catch (error) {
-    console.error('Error uploading file:', error)
-    ElMessage.error('Ошибка при загрузке файла')
-  } finally {
-    // if (type === 'solution') {
-    //   uploadingSolution.value = false
-    //   uploadProgress.value = 0
-    // }
   }
 }
 
 onMounted(() => {
-  loadFiles()
+  loadData()
 })
 </script>
 
 <style scoped>
 .solution-section {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 24px; /* gap-6 */
 }
 
 .solution-container {
   display: flex;
   flex-direction: column;
-  gap: 24px; /* gap-6 */
+  gap: 24px;
 }
 
-/* Card Styles */
+/* Cards */
 .solution-card,
-.deployment-card {
-  background: white; /* bg-white */
-  border-radius: 12px; /* rounded-xl */
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* shadow-sm */
-  border: 1px solid #e2e8f0; /* border border-slate-200 */
-  padding: 24px; /* p-6 */
+.instructions-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  padding: 24px;
 }
 
 .card-title {
-  font-size: 1.25rem; /* text-xl */
+  font-size: 1.25rem;
   font-weight: 600;
-  color: #1e293b; /* text-slate-800 */
+  color: #1e293b;
   margin: 0 0 20px 0;
 }
 
+/* Notice */
 .important-notice {
   background: #fff3f3;
   border: 1px solid #ffa4a4;
   border-radius: 8px;
   padding: 16px;
-  margin-bottom: 0; /* Убираем margin, так как gap в контейнере */
 }
 
 .important-notice h4 {
@@ -365,65 +235,38 @@ onMounted(() => {
   margin: 0 0 8px 0;
 }
 
-.solution-block,
-.deployment-block {
-  width: 100%;
-}
-
-.solution-block h4 {
-  margin: 0 0 16px 0;
-  color: #333333;
-  font-size: 1.1em;
-}
-
-.solution-type-selector {
-  margin-bottom: 20px;
-}
-
-.solution-type-group {
-  display: flex;
-  gap: 20px;
-}
-
-.file-item {
-  background: #f8f9fa;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
-}
-
-.file-info {
-  flex: 1;
-}
-
-.file-info h4 {
-  margin: 0 0 8px 0;
-  font-size: 1em;
-}
-
-.file-description {
-  margin: 4px 0 0;
-  color: #666666;
-  font-size: 0.9em;
-}
-
 .warning-text {
   color: #f56c6c;
   font-weight: 500;
+  margin: 0;
 }
 
-.file-actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+/* Solution Content */
+.solution-description {
+  color: #64748b;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.input-block {
+  margin-top: 16px;
 }
 
 .solution-link-input {
-  min-width: 300px;
+  width: 100%;
+}
+
+.saved-link-block {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f1f5f9;
+  border-radius: 8px;
+}
+
+.saved-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 8px;
 }
 
 .solution-link {
@@ -433,45 +276,112 @@ onMounted(() => {
   word-break: break-all;
 }
 
-.solution-link .el-icon {
-  font-size: 16px;
+.no-link-message {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  color: #64748b;
+  text-align: center;
 }
 
-:deep(.el-button--link) {
-  display: inline-flex;
+/* Instructions Card */
+.download-attachment-card {
+  display: flex;
   align-items: center;
-  gap: 4px;
-  color: #333333;
+  gap: 16px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  transition: background-color 0.2s ease;
 }
 
-.upload-progress {
-  margin-top: 10px;
-  width: 200px;
+.download-attachment-card:hover {
+  background: #e2e8f0;
+}
+
+.file-icon {
+  font-size: 32px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1e293b;
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+.file-type {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.download-action {
+  padding: 8px 16px;
+  background: white;
+  color: #2563eb;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.download-action:hover {
+  background: #eff6ff;
+}
+
+/* Instructions Content */
+.instructions-content {
+  color: #334155;
+}
+
+.instructions-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 12px 0;
+}
+
+.instructions-content ul {
+  padding-left: 1.5rem;
+  margin: 0;
+}
+
+.instructions-content li {
+  margin-bottom: 8px;
+  line-height: 1.6;
 }
 
 @media (max-width: 768px) {
-  .file-item {
+  .solution-card,
+  .instructions-card {
+    padding: 16px;
+  }
+  
+  .download-attachment-card {
     flex-direction: column;
+    align-items: flex-start;
     gap: 12px;
   }
-
-  .file-actions {
+  
+  .download-action {
     width: 100%;
-    justify-content: flex-start;
-  }
-
-  .upload-progress {
-    width: 100%;
-  }
-
-  .solution-link-input {
-    width: 100%;
-    min-width: unset;
-  }
-
-  .solution-type-group {
-    flex-direction: column;
-    gap: 12px;
+    text-align: center;
   }
 }
 </style>

@@ -32,3 +32,12 @@ coverage
 .env.development
 .env.test
 .env.production
+
+# Test data files - added manually on server
+public/files/*.xlsx
+public/files/*.xls
+public/files/*.dwg
+public/files/*.dws
+public/files/*.pptx
+public/files/*.ppt
+public/files/Инструкция_по_отправке_решения.html

@@ -29,8 +29,8 @@
       </div>
     </div>
 
-    <div v-if="stageStore.isOnlineDefense">
-      <div v-if="authStore.isAuthenticated" class="consultation-section">
+    <div v-if="stageStore.isOnlineDefense && showOnlineDefenseMaterials">
+      <div v-if="canViewProtectedLinks" class="consultation-section">
         <div class="consultation-container">
           <div class="consultation-content">
             <h2>Торжественное закрытие Хакатона</h2>
@@ -186,32 +186,41 @@
           <div class="event">Доступ к тексту задания в личном кабинете команды</div>
         </div>
         <div class="timeline-item animate-on-scroll">
+          <div class="date">27.03.2026 в 13:00 (МСК)</div>
+          <div class="event">Установочная встреча с участниками Хакатона</div>
+          <div class="note">
+            <a v-if="canViewProtectedLinks" href="https://bigbb2.tyuiu.ru/b/zah-tka-oxi-n4i" target="_blank" class="timeline-link">
+              Подключиться к встрече
+            </a>
+          </div>
+        </div>
+        <div class="timeline-item animate-on-scroll">
           <div class="date">До 27.03.2026 до 23:59 (МСК)</div>
           <div class="event">Регистрация на сайте</div>
           <div class="note">(регистрация может закончиться раньше)</div>
         </div>
         <div class="timeline-item animate-on-scroll">
-          <div class="date">С 01.04.2026 в 00:00 (МСК)</div>
-          <div class="event">Доступ к тестовым данным для решения задачи в личном кабинете команды</div>
-        </div>
-        <div class="timeline-item animate-on-scroll">
           <div class="date">01.04.2026 в 09:00 (МСК)</div>
           <div class="event">Онлайн открытие Хакатона</div>
           <div class="note">
-            <a href="#" target="_blank" class="timeline-link">
+            <a v-if="canViewProtectedLinks" href="#" target="_blank" class="timeline-link">
               Ссылка будет предоставлена
             </a>
           </div>
         </div>
         <div class="timeline-item animate-on-scroll">
-          <div class="date">Через 24 часа, но не позднее 01.04.2026 в 23:59 (МСК)</div>
+          <div class="date">С 01.04.2026 в 09:30 (МСК)</div>
+          <div class="event">Доступ к тестовым данным для решения задачи в личном кабинете команды</div>
+        </div>
+        <div class="timeline-item animate-on-scroll">
+          <div class="date">Через 24 часа, но не позднее 02.04.2026 в 09:30 (МСК)</div>
           <div class="event">Загрузка готовых решений в личном кабинете команды</div>
         </div>
         <div class="timeline-item animate-on-scroll">
           <div class="date">02.04.2026 в 12:00 (МСК)</div>
           <div class="event">Защита проектов</div>
           <div class="note">
-            <a href="#" target="_blank" class="timeline-link">
+            <a v-if="canViewProtectedLinks" href="#" target="_blank" class="timeline-link">
               Ссылка будет предоставлена
             </a>
           </div>
@@ -534,6 +543,27 @@ const animateCounter = (element, target, isDynamic = false) => {
 
 const stageStore = useStageStore();
 const authStore = useAuthStore();
+const showOnlineDefenseMaterials = false;
+
+const canViewProtectedLinks = computed(() => {
+  if (!authStore.isAuthenticated || !authStore.user) {
+    return false;
+  }
+
+  const roleNames = (authStore.user.roles || []).map((role) => role.name?.toLowerCase());
+  const hasPrivilegedRole = roleNames.some((role) =>
+    ['mentor', 'judge', 'admin', 'organizer'].includes(role)
+  );
+
+  if (hasPrivilegedRole) {
+    return true;
+  }
+
+  const isParticipant = roleNames.includes('participant');
+  const isApprovedParticipant = authStore.user.current_status?.name === 'approved';
+
+  return isParticipant && isApprovedParticipant;
+});
 
 const handleScroll = () => {
   const currentScrollPosition = window.scrollY;

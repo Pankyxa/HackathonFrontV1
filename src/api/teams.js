@@ -206,6 +206,47 @@ export const teamsApi = {
         }
     },
 
+    async exportActiveTeams(eventId = null) {
+        try {
+            const params = {}
+
+            if (eventId) {
+                params.event_id = eventId
+            }
+
+            const response = await api.get('/teams/admin/teams/export', {
+                params,
+                responseType: 'blob'
+            })
+
+            return {
+                blob: response.data,
+                contentDisposition: response.headers['content-disposition']
+            }
+        } catch (error) {
+            if (error.response?.data instanceof Blob) {
+                const blobText = await error.response.data.text().catch(() => '')
+
+                try {
+                    const parsed = JSON.parse(blobText)
+                    const parsedMessage = parsed?.detail || parsed?.message
+                    if (parsedMessage) {
+                        throw new Error(parsedMessage)
+                    }
+                } catch {
+                }
+
+                throw new Error(blobText || 'Ошибка при выгрузке активных команд')
+            }
+
+            if (error.response?.data?.detail) {
+                throw new Error(error.response.data.detail)
+            }
+
+            throw new Error(error.message || 'Ошибка при выгрузке активных команд')
+        }
+    },
+
     async getInvites() {
         try {
             const response = await api.get('/teams/invitations');
@@ -460,6 +501,24 @@ export const teamsApi = {
     async sendClosingCeremonyNotification() {
         try {
             const response = await api.post('/teams/notify/closing-ceremony');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async sendKickoffMeetingNotification() {
+        try {
+            const response = await api.post('/teams/notify/kickoff-meeting');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async sendKickoffMeetingExtraNotification() {
+        try {
+            const response = await api.post('/teams/notify/kickoff-meeting-extra');
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

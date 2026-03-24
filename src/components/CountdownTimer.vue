@@ -1,5 +1,9 @@
 <template>
-  <div v-if="showTimer" class="countdown-timer" :class="{ 'time-ending': isTimeEnding }">
+  <div
+    v-if="showTimer"
+    class="countdown-timer"
+    :class="{ 'time-ending': isTimeEnding, 'countdown-timer--inline': inline }"
+  >
     <span class="timer-label">До окончания загрузки решений:</span>
     <span class="timer-value">{{ formattedTime }}</span>
   </div>
@@ -9,15 +13,27 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useStageStore } from '@/stores/stage'
 
+const props = defineProps({
+  inline: {
+    type: Boolean,
+    default: false,
+  },
+})
+
 const stageStore = useStageStore()
 const timeLeft = ref('')
 const timer = ref(null)
 
-// Целевая дата: 10 апреля 2025 года 9:30 по московскому времени
-const targetDate = new Date('2025-04-10T09:30:00+03:00').getTime()
+// Целевая дата: 2 апреля 2026 года 9:30 по московскому времени
+const targetDate = new Date('2026-04-02T09:30:00+03:00').getTime()
 
 const showTimer = computed(() => {
-  return stageStore.isTaskDistribution || stageStore.isSolutionSubmission
+  const stageType = stageStore.currentStage?.type
+
+  return (
+    stageType === 'remote_task_distribution' ||
+    stageType === 'remote_solution_submission'
+  )
 })
 
 const isTimeEnding = computed(() => {
@@ -74,7 +90,16 @@ onBeforeUnmount(() => {
     gap: 4px;
   font-size: 0.9rem;
   min-width: 200px;
-  }
+}
+
+.countdown-timer--inline {
+  position: static;
+  top: auto;
+  right: auto;
+  z-index: auto;
+  width: 100%;
+  min-width: unset;
+}
 
 .timer-label {
   color: #666;

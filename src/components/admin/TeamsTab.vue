@@ -27,6 +27,14 @@
       </el-input>
 
       <TeamsFilter @filter="handleStatusFilter"/>
+
+      <el-button
+        type="primary"
+        :loading="exportLoading"
+        @click="handleExportActiveTeams"
+      >
+        Выгрузить активные команды
+      </el-button>
     </div>
 
     <!-- Десктопная таблица -->
@@ -227,6 +235,7 @@ const selectedStatus = ref('')
 
 const selectedTeam = ref(null)
 const teamDetailsVisible = ref(false)
+const exportLoading = ref(false)
 
 const isMobile = ref(window.innerWidth <= 768)
 
@@ -360,6 +369,41 @@ const handleRowClick = (row) => {
 
 const handleTeamUpdate = () => {
   loadTeams()
+}
+
+const getFileNameFromDisposition = (contentDisposition) => {
+  if (!contentDisposition) {
+    return 'active_teams.xlsx'
+  }
+
+  const utfMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i)
+  if (utfMatch?.[1]) {
+    return decodeURIComponent(utfMatch[1])
+  }
+
+  const match = contentDisposition.match(/filename="?([^";]+)"?/i)
+  return match?.[1] || 'active_teams.xlsx'
+}
+
+const handleExportActiveTeams = async () => {
+  try {
+    exportLoading.value = true
+    const { blob, contentDisposition } = await teamsApi.exportActiveTeams()
+    const fileName = getFileNameFromDisposition(contentDisposition)
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('Выгрузка активных команд успешно сформирована')
+  } catch (error) {
+    ElMessage.error(error?.detail || error?.message || 'Ошибка при выгрузке активных команд')
+  } finally {
+    exportLoading.value = false
+  }
 }
 
 onMounted(() => {

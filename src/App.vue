@@ -1,7 +1,6 @@
 <template>
   <div class="app-wrapper">
     <GlobalLoader />
-    <CountdownTimer />
     <RouterView />
   </div>
 </template>
@@ -11,7 +10,6 @@ import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useStageStore } from "@/stores/stage.js"
 import GlobalLoader from '@/components/GlobalLoader.vue'
-import CountdownTimer from '@/components/CountdownTimer.vue'
 
 const authStore = useAuthStore()
 const stageStore = useStageStore()
