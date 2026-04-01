@@ -18,6 +18,15 @@
         </el-button>
 
         <el-button
+          type="success"
+          :loading="isOpeningLoading"
+          @click="handleSendOpeningNotification"
+          class="notification-button"
+        >
+          Разослать уведомления об открытии хакатона
+        </el-button>
+
+        <el-button
           type="warning"
           :loading="isKickoffMeetingExtraLoading"
           @click="handleSendKickoffMeetingExtraNotification"
@@ -40,6 +49,7 @@ import { ElMessage } from 'element-plus'
 import { teamsApi } from '@/api/teams'
 
 const isKickoffMeetingLoading = ref(false)
+const isOpeningLoading = ref(false)
 const isKickoffMeetingExtraLoading = ref(false)
 const notificationStatus = ref('')
 const statusClass = ref('')
@@ -83,6 +93,27 @@ const handleSendKickoffMeetingExtraNotification = async () => {
     ElMessage.error('Ошибка при отправке уведомления на дополнительную почту')
   } finally {
     isKickoffMeetingExtraLoading.value = false
+  }
+}
+
+const handleSendOpeningNotification = async () => {
+  try {
+    isOpeningLoading.value = true
+    notificationStatus.value = 'Отправка уведомлений об открытии хакатона...'
+    statusClass.value = 'status-info'
+
+    await teamsApi.sendOpeningNotification()
+
+    notificationStatus.value = 'Рассылка уведомлений об открытии хакатона успешно запущена'
+    statusClass.value = 'status-success'
+    ElMessage.success('Рассылка уведомлений об открытии хакатона успешно запущена')
+  } catch (error) {
+    console.error('Error sending opening notifications:', error)
+    notificationStatus.value = `Ошибка при отправке уведомлений об открытии хакатона: ${error.message || 'Неизвестная ошибка'}`
+    statusClass.value = 'status-error'
+    ElMessage.error('Ошибка при отправке уведомлений об открытии хакатона')
+  } finally {
+    isOpeningLoading.value = false
   }
 }
 </script>

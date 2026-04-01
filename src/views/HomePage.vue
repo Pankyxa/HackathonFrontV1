@@ -203,8 +203,8 @@
           <div class="date">01.04.2026 в 09:00 (МСК)</div>
           <div class="event">Онлайн открытие Хакатона</div>
           <div class="note">
-            <a v-if="canViewProtectedLinks" href="#" target="_blank" class="timeline-link">
-              Ссылка будет предоставлена
+            <a v-if="canViewProtectedLinks" href="https://bigbb2.tyuiu.ru/b/zah-tka-oxi-n4i" target="_blank" class="timeline-link">
+              Подключиться к открытию
             </a>
           </div>
         </div>
