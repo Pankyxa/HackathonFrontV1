@@ -2,7 +2,7 @@
   <div v-if="authStore.isAuthenticated" class="defense-schedule">
     <h2>График защиты команд</h2>
     <div class="schedule-info">
-      <p>Защиты будут проходить по ссылке: <a href="https://bigbb2.tyuiu.ru/b/hyc-sjb-5lk-prq" target="_blank" class="defense-link">https://bigbb2.tyuiu.ru/b/hyc-sjb-5lk-prq</a></p>
+      <p>Защиты будут проходить по ссылке: <a href="https://bigbb2.tyuiu.ru/b/zah-tka-oxi-n4i" target="_blank" class="defense-link">https://bigbb2.tyuiu.ru/b/zah-tka-oxi-n4i</a></p>
     </div>
     <div class="schedule-table">
       <table>
@@ -37,10 +37,10 @@ const scheduleData = [
   { time: "10:15", name: "Шнур питания не найден" },
   { time: "10:30", name: "поБЕДА" },
   { time: "10:45", name: "исТок" },
-  { time: "11:30", name: "Энергосила" },
-  { time: "11:45", name: "МПК ТИУ" },
-  { time: "12:00", name: "Шалуны Джоуля" },
-  { time: "12:15", name: "Русы" },
+  { time: "11:00", name: "Перерыв" },
+  { time: "11:30", name: "МПК ТИУ" },
+  { time: "11:45", name: "Шалуны Джоуля" },
+  { time: "12:00", name: "Русы" },
 ];
 </script>
 

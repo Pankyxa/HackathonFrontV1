@@ -38,7 +38,7 @@
               <div class="consultation-date">14:00 (МСК)</div>
               <div class="consultation-details">
                 <p>Просим всех присоединиться для участия в торжественном закрытии Хакатона</p>
-                <a href="https://bigbb2.tyuiu.ru/b/hyc-sjb-5lk-prq"
+                <a href="https://bigbb2.tyuiu.ru/b/zah-tka-oxi-n4i"
                    target="_blank"
                    class="consultation-link">
                   <el-button type="primary" class="join-button">
@@ -66,7 +66,7 @@
             <div class="consultation-details">
               <p>На консультации мы разберем основные моменты задания, ответим на ваши вопросы и обсудим технические
                 детали решения</p>
-              <a href="https://bigbb2.tyuiu.ru/b/hyc-sjb-5lk-prq"
+              <a href="https://bigbb2.tyuiu.ru/b/zah-tka-oxi-n4i"
                  target="_blank"
                  class="consultation-link">
                 <el-button type="primary" class="join-button">
@@ -220,8 +220,8 @@
           <div class="date">02.04.2026 в 12:00 (МСК)</div>
           <div class="event">Защита проектов</div>
           <div class="note">
-            <a v-if="canViewProtectedLinks" href="#" target="_blank" class="timeline-link">
-              Ссылка будет предоставлена
+            <a v-if="canViewProtectedLinks" href="https://bigbb2.tyuiu.ru/b/zah-tka-oxi-n4i" target="_blank" class="timeline-link">
+              Подключиться к защите
             </a>
           </div>
         </div>
