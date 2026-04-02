@@ -36,6 +36,15 @@
         </el-button>
 
         <el-button
+          type="danger"
+          :loading="isFirstStageClosingLoading"
+          @click="handleSendFirstStageClosingNotification"
+          class="notification-button"
+        >
+          Разослать уведомления о закрытии первого этапа
+        </el-button>
+
+        <el-button
           type="warning"
           :loading="isKickoffMeetingExtraLoading"
           @click="handleSendKickoffMeetingExtraNotification"
@@ -60,6 +69,7 @@ import { teamsApi } from '@/api/teams'
 const isKickoffMeetingLoading = ref(false)
 const isOpeningLoading = ref(false)
 const isDefenseScheduleLoading = ref(false)
+const isFirstStageClosingLoading = ref(false)
 const isKickoffMeetingExtraLoading = ref(false)
 const notificationStatus = ref('')
 const statusClass = ref('')
@@ -145,6 +155,27 @@ const handleSendDefenseScheduleNotification = async () => {
     ElMessage.error('Ошибка при отправке уведомлений о графике защит')
   } finally {
     isDefenseScheduleLoading.value = false
+  }
+}
+
+const handleSendFirstStageClosingNotification = async () => {
+  try {
+    isFirstStageClosingLoading.value = true
+    notificationStatus.value = 'Отправка уведомлений о закрытии первого этапа...'
+    statusClass.value = 'status-info'
+
+    await teamsApi.sendClosingCeremonyNotification()
+
+    notificationStatus.value = 'Рассылка уведомлений о закрытии первого этапа успешно запущена'
+    statusClass.value = 'status-success'
+    ElMessage.success('Рассылка уведомлений о закрытии первого этапа успешно запущена')
+  } catch (error) {
+    console.error('Error sending first stage closing notifications:', error)
+    notificationStatus.value = `Ошибка при отправке уведомлений о закрытии первого этапа: ${error.message || 'Неизвестная ошибка'}`
+    statusClass.value = 'status-error'
+    ElMessage.error('Ошибка при отправке уведомлений о закрытии первого этапа')
+  } finally {
+    isFirstStageClosingLoading.value = false
   }
 }
 </script>
