@@ -10,6 +10,10 @@
         <JuryScoresTab/>
       </el-tab-pane>
 
+      <el-tab-pane label="Ввод оценок жюри" name="jury-score-entry">
+        <JudgeScoreEntryTab/>
+      </el-tab-pane>
+
       <el-tab-pane label="Пользователи" name="users">
         <UsersTab/>
       </el-tab-pane>
@@ -26,6 +30,7 @@ import {ref} from 'vue'
 import TheHeader from "@/components/TheHeader.vue"
 import CheckDocumentsTab from "@/components/organizer/CheckDocumentsTab.vue"
 import JuryScoresTab from "@/components/organizer/JudgeScoresTab.vue"
+import JudgeScoreEntryTab from "@/components/organizer/JudgeScoreEntryTab.vue"
 import UsersTab from "@/components/admin/UsersTab.vue"
 import TeamsTab from "@/components/admin/TeamsTab.vue"
 import {useStageStore} from "@/stores/stage.js"

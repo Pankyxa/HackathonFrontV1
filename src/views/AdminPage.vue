@@ -18,6 +18,10 @@
         <JuryScoresTab/>
       </el-tab-pane>
 
+      <el-tab-pane label="Ввод оценок жюри" name="jury-score-entry">
+        <JudgeScoreEntryTab/>
+      </el-tab-pane>
+
       <el-tab-pane label="Этапы" name="stages">
         <StagesManagementTab/>
       </el-tab-pane>
@@ -42,6 +46,7 @@ import StagesManagementTab from "@/components/admin/StagesManagementTab.vue"
 import NotificationsTab from "@/components/admin/NotificationsTab.vue"
 import EventsTab from "@/components/admin/EventsTab.vue"
 import JuryScoresTab from "@/components/organizer/JudgeScoresTab.vue"
+import JudgeScoreEntryTab from "@/components/organizer/JudgeScoreEntryTab.vue"
 import UnevaluatedTeamsTab from "@/components/judge/UnevaluatedTeamsTab.vue";
 
 const activeTab = ref('users')
