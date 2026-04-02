@@ -12,7 +12,7 @@
         :style="{ animationDelay: `${index * 0.1}s` }"
         @click="openTeamDetails(team)"
       >
-        <div class="finalist-rank">{{ index + 1 }}</div>
+        <div class="finalist-rank" aria-hidden="true"></div>
         <el-avatar
           :size="60"
           :src="getTeamLogoUrl(team)"
