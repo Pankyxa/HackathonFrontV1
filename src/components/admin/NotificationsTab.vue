@@ -45,6 +45,15 @@
         </el-button>
 
         <el-button
+          type="primary"
+          :loading="isFirstStageResultsLoading"
+          @click="handleSendFirstStageResultsNotification"
+          class="notification-button"
+        >
+          Разослать уведомления о результатах первого этапа
+        </el-button>
+
+        <el-button
           type="warning"
           :loading="isKickoffMeetingExtraLoading"
           @click="handleSendKickoffMeetingExtraNotification"
@@ -70,6 +79,7 @@ const isKickoffMeetingLoading = ref(false)
 const isOpeningLoading = ref(false)
 const isDefenseScheduleLoading = ref(false)
 const isFirstStageClosingLoading = ref(false)
+const isFirstStageResultsLoading = ref(false)
 const isKickoffMeetingExtraLoading = ref(false)
 const notificationStatus = ref('')
 const statusClass = ref('')
@@ -176,6 +186,27 @@ const handleSendFirstStageClosingNotification = async () => {
     ElMessage.error('Ошибка при отправке уведомлений о закрытии первого этапа')
   } finally {
     isFirstStageClosingLoading.value = false
+  }
+}
+
+const handleSendFirstStageResultsNotification = async () => {
+  try {
+    isFirstStageResultsLoading.value = true
+    notificationStatus.value = 'Отправка уведомлений о результатах первого этапа...'
+    statusClass.value = 'status-info'
+
+    await teamsApi.sendFirstStageResultsNotification()
+
+    notificationStatus.value = 'Рассылка уведомлений о результатах первого этапа успешно запущена'
+    statusClass.value = 'status-success'
+    ElMessage.success('Рассылка уведомлений о результатах первого этапа успешно запущена')
+  } catch (error) {
+    console.error('Error sending first stage results notifications:', error)
+    notificationStatus.value = `Ошибка при отправке уведомлений о результатах первого этапа: ${error.message || 'Неизвестная ошибка'}`
+    statusClass.value = 'status-error'
+    ElMessage.error('Ошибка при отправке уведомлений о результатах первого этапа')
+  } finally {
+    isFirstStageResultsLoading.value = false
   }
 }
 </script>

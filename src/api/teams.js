@@ -507,6 +507,15 @@ export const teamsApi = {
         }
     },
 
+    async sendFirstStageResultsNotification() {
+        try {
+            const response = await api.post('/teams/notify/first-stage-results');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
     async sendKickoffMeetingNotification() {
         try {
             const response = await api.post('/teams/notify/kickoff-meeting');
