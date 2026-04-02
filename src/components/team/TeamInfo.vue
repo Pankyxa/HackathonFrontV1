@@ -14,6 +14,38 @@
       />
     </div>
 
+    <div v-if="showSolutionLink" class="solution-link-card">
+      <h3 class="card-title">GitHub-решение</h3>
+
+      <div class="solution-link-row">
+        <div class="solution-link-meta">
+          <div class="solution-link-icon">
+            <el-icon><Link /></el-icon>
+          </div>
+          <div class="solution-link-content">
+            <p class="solution-link-label">Ссылка на репозиторий команды</p>
+            <a
+              :href="teamSolutionLink"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="solution-link-value"
+            >
+              {{ teamSolutionLink }}
+            </a>
+          </div>
+        </div>
+
+        <a
+          :href="teamSolutionLink"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="solution-link-action"
+        >
+          Открыть GitHub
+        </a>
+      </div>
+    </div>
+
     <!-- Card 2: Members & Mentor -->
     <div class="members-mentor-card">
       <h3 class="card-title">Участники команды</h3>
@@ -116,6 +148,7 @@ import {teamsApi} from '@/api/teams'
 import {useAuthStore} from '@/stores/auth'
 import {useStageStore} from '@/stores/stage'
 import {ElMessage} from 'element-plus'
+import {Link} from '@element-plus/icons-vue'
 import {useRouter} from 'vue-router'
 
 import TeamHeader from './TeamHeader.vue'
@@ -200,6 +233,8 @@ const isTeamMentor = computed(() => {
 })
 const isMobile = computed(() => window.innerWidth <= 768)
 const isMentorView = computed(() => props.viewMode === 'mentor')
+const teamSolutionLink = computed(() => teamData.value?.solution_link?.trim() || '')
+const showSolutionLink = computed(() => props.viewMode === 'admin' && Boolean(teamSolutionLink.value))
 
 const statusText = computed(() => {
   const status = teamData.value?.status_details?.status
@@ -559,6 +594,14 @@ onMounted(() => {
   padding: 24px; /* p-6 */
 }
 
+.solution-link-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+}
+
 /* Card 2: Members & Mentor */
 .members-mentor-card {
   background: white; /* bg-white */
@@ -575,9 +618,100 @@ onMounted(() => {
   margin: 0 0 20px 0;
 }
 
+.solution-link-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.solution-link-meta {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.solution-link-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.solution-link-content {
+  min-width: 0;
+}
+
+.solution-link-label {
+  margin: 0 0 6px 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.solution-link-value {
+  color: #2563eb;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.5;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.solution-link-value:hover {
+  text-decoration: underline;
+}
+
+.solution-link-action {
+  padding: 8px 16px;
+  background: white;
+  color: #2563eb;
+  border: 1px solid #2563eb;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.solution-link-action:hover {
+  background: #eff6ff;
+}
+
 .mentor-section-wrapper {
   margin-top: 32px;
   padding-top: 24px;
   border-top: 1px solid #e2e8f0;
+}
+
+@media (max-width: 768px) {
+  .team-header-card-wrapper,
+  .solution-link-card,
+  .members-mentor-card {
+    padding: 16px;
+  }
+
+  .solution-link-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .solution-link-action {
+    width: 100%;
+    text-align: center;
+  }
 }
 </style>
