@@ -29,18 +29,19 @@ import { useAuthStore } from "@/stores/auth.js";
 const authStore = useAuthStore();
 
 const scheduleData = [
-  { time: "09:00", name: "Двойной удар" },
-  { time: "09:15", name: "WattNot" },
-  { time: "09:30", name: "Заземленные" },
-  { time: "09:45", name: "Команда ЮГУ" },
-  { time: "10:00", name: "ЭнергоТек" },
-  { time: "10:15", name: "Шнур питания не найден" },
-  { time: "10:30", name: "поБЕДА" },
-  { time: "10:45", name: "исТок" },
-  { time: "11:00", name: "Перерыв" },
-  { time: "11:30", name: "МПК ТИУ" },
-  { time: "11:45", name: "Шалуны Джоуля" },
-  { time: "12:00", name: "Русы" },
+  { time: "12:00", name: "WattNot" },
+  { time: "12:15", name: "Энергия Сибири" },
+  { time: "12:30", name: "Импульс" },
+  { time: "12:45", name: "Смертельная фаза" },
+  { time: "13:00", name: "Импортозамещение" },
+  { time: "13:15", name: "Digital Voltage" },
+  { time: "13:30", name: "Акулы энергетики" },
+  { time: "13:45", name: "Багов.net" },
+  { time: "14:00", name: "Исток" },
+  { time: "14:15", name: "Перерыв" },
+  { time: "14:30", name: "МПК ТИУ" },
+  { time: "14:45", name: "НефтеКод" },
+  { time: "15:00", name: "Шалуны Джоуля" },
 ];
 </script>
 

@@ -27,6 +27,15 @@
         </el-button>
 
         <el-button
+          type="info"
+          :loading="isDefenseScheduleLoading"
+          @click="handleSendDefenseScheduleNotification"
+          class="notification-button"
+        >
+          Разослать уведомления о графике защит
+        </el-button>
+
+        <el-button
           type="warning"
           :loading="isKickoffMeetingExtraLoading"
           @click="handleSendKickoffMeetingExtraNotification"
@@ -50,6 +59,7 @@ import { teamsApi } from '@/api/teams'
 
 const isKickoffMeetingLoading = ref(false)
 const isOpeningLoading = ref(false)
+const isDefenseScheduleLoading = ref(false)
 const isKickoffMeetingExtraLoading = ref(false)
 const notificationStatus = ref('')
 const statusClass = ref('')
@@ -114,6 +124,27 @@ const handleSendOpeningNotification = async () => {
     ElMessage.error('Ошибка при отправке уведомлений об открытии хакатона')
   } finally {
     isOpeningLoading.value = false
+  }
+}
+
+const handleSendDefenseScheduleNotification = async () => {
+  try {
+    isDefenseScheduleLoading.value = true
+    notificationStatus.value = 'Отправка уведомлений о графике защит...'
+    statusClass.value = 'status-info'
+
+    await teamsApi.sendDefenseScheduleNotification()
+
+    notificationStatus.value = 'Рассылка уведомлений о графике защит успешно запущена'
+    statusClass.value = 'status-success'
+    ElMessage.success('Рассылка уведомлений о графике защит успешно запущена')
+  } catch (error) {
+    console.error('Error sending defense schedule notifications:', error)
+    notificationStatus.value = `Ошибка при отправке уведомлений о графике защит: ${error.message || 'Неизвестная ошибка'}`
+    statusClass.value = 'status-error'
+    ElMessage.error('Ошибка при отправке уведомлений о графике защит')
+  } finally {
+    isDefenseScheduleLoading.value = false
   }
 }
 </script>

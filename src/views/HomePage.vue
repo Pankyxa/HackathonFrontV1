@@ -29,32 +29,6 @@
       </div>
     </div>
 
-    <div v-if="stageStore.isOnlineDefense && showOnlineDefenseMaterials">
-      <div v-if="canViewProtectedLinks" class="consultation-section">
-        <div class="consultation-container">
-          <div class="consultation-content">
-            <h2>Торжественное закрытие Хакатона</h2>
-            <div class="consultation-info">
-              <div class="consultation-date">14:00 (МСК)</div>
-              <div class="consultation-details">
-                <p>Просим всех присоединиться для участия в торжественном закрытии Хакатона</p>
-                <a href="https://bigbb2.tyuiu.ru/b/zah-tka-oxi-n4i"
-                   target="_blank"
-                   class="consultation-link">
-                  <el-button type="primary" class="join-button">
-                    Присоединиться к закрытию
-                  </el-button>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      <DefenseScheduleTable/>
-    </div>
-
     <!-- Убрал временный блок с информацией -->
     <div v-if="false" class="consultation-section">
       <div class="consultation-container">
@@ -109,6 +83,10 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div v-if="stageStore.isOnlineDefense && showOnlineDefenseMaterials">
+      <DefenseScheduleTable/>
     </div>
 
     <WinnersSection/>
@@ -543,7 +521,7 @@ const animateCounter = (element, target, isDynamic = false) => {
 
 const stageStore = useStageStore();
 const authStore = useAuthStore();
-const showOnlineDefenseMaterials = false;
+const showOnlineDefenseMaterials = true;
 
 const canViewProtectedLinks = computed(() => {
   if (!authStore.isAuthenticated || !authStore.user) {
