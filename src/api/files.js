@@ -14,9 +14,12 @@ api.interceptors.request.use((config) => {
 });
 
 export const filesApi = {
-    async downloadStaticFile(filePath) {
+    async downloadStaticFile(filePath, { onSite = false } = {}) {
         try {
-            const response = await api.get(`/files/static/${filePath}`, {
+            const requestUrl = onSite
+                ? `/files/on-site/${encodeURIComponent(filePath)}`
+                : `/files/static/${filePath}`;
+            const response = await api.get(requestUrl, {
                 responseType: 'blob',
             });
 

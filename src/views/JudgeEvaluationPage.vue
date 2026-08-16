@@ -127,9 +127,11 @@ import { ArrowLeft, User, Link } from '@element-plus/icons-vue'
 import TheHeader from '@/components/TheHeader.vue'
 import { evaluationsApi } from '@/api/evaluations'
 import { teamsApi } from '@/api/teams'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -226,10 +228,14 @@ const submitEvaluation = async () => {
 
   try {
     saving.value = true
-    await evaluationsApi.createEvaluation({
+    const payload = {
       team_id: team.value.team_id,
       ...evaluation.value
-    })
+    }
+    if (authStore.user?.id) {
+      payload.judge_id = authStore.user.id
+    }
+    await evaluationsApi.createEvaluation(payload)
 
     ElMessage({
       message: isEdit.value ? 'Оценка успешно обновлена' : 'Оценка успешно сохранена',

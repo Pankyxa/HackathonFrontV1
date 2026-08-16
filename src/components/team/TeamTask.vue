@@ -1,13 +1,15 @@
 <template>
   <div class="task-description-section">
-    <h3 class="card-title">Описание задания</h3>
+    <h3 class="card-title">{{ isOnSiteTask ? 'Описание задания очного этапа' : 'Описание задания' }}</h3>
 
     <div class="task-content">
+      <div v-if="isOnSiteTask" class="finalists-only-badge">Только для команд-финалистов</div>
+
       <!-- Download Section - Attachment Card -->
       <div class="download-attachment-card">
         <el-icon class="file-icon"><Document /></el-icon>
         <div class="file-info">
-          <div class="file-name">Hackathon_2026_task.pdf</div>
+          <div class="file-name">{{ taskFileName }}</div>
           <div class="file-size">PDF документ</div>
         </div>
         <button @click="downloadTask" class="download-action" :disabled="downloading">
@@ -18,6 +20,42 @@
       <!-- Task Text Content -->
       <div class="task-prose-wrapper">
         <div class="task-prose">
+          <template v-if="isOnSiteTask">
+            <div class="task-section">
+              <h2>Хакатон «Цифровые двойники в энергетике»</h2>
+              <p>
+                <strong>Общее описание задания:</strong> Разработка сервиса оценки технического состояния и риска отказа силового трансформатора
+              </p>
+              <p>
+                Силовые трансформаторы напряжением 35 кВ и выше относятся к основному технологическому оборудованию объектов электроэнергетики и являются критическим элементом технологической цепочки производства, передачи и распределения электрической энергии. Отказ трансформатора может приводить к ограничению электроснабжения потребителей, снижению добычи и подготовки продукции, значительным затратам на аварийное восстановление и длительным срокам поставки оборудования.
+              </p>
+            </div>
+
+            <div class="task-section">
+              <h2>Подход к оценке технического состояния</h2>
+              <p>
+                Современные подходы к управлению активами предполагают переход от планово‑предупредительной модели обслуживания к риску‑ориентированному управлению техническим состоянием. В соответствии с Приказом Минэнерго России №676 (Приложение 1) оценка состояния выполняется на основании результатов испытаний, диагностики, мониторинга, осмотров и эксплуатационной документации.
+              </p>
+              <p>
+                Расчет ИТС выполняется последовательно: оценка параметров, групп параметров, функциональных узлов и оборудования в целом с учетом весовых коэффициентов, критических и ресурсоопределяющих параметров.
+              </p>
+            </div>
+
+            <div class="task-section">
+              <h2>Подход к расчету риска</h2>
+              <p>
+                Современные подходы к управлению производственными активами предполагают принятие решений о техническом обслуживании, ремонте, реконструкции и замене оборудования не только на основании его текущего технического состояния, но и с учетом вероятности отказа и возможных последствий такого отказа. Такой подход позволяет обеспечить оптимальный баланс между надежностью оборудования, затратами на эксплуатацию и уровнем производственных рисков.
+              </p>
+              <p>
+                В соответствии с Приказом Минэнерго России №123 (Приложение 2) расчет риска отказа выполняется на основании результатов оценки технического состояния оборудования и включает последовательное определение вероятности отказа функциональных узлов, оценку последствий отказа и расчет интегрального показателя риска для оборудования в целом.
+              </p>
+              <p>
+                Результаты расчета риска используются для ранжирования оборудования по приоритетности технических воздействий, формирования программ технического обслуживания и ремонта, обоснования инвестиционных решений и выбора оптимальной стратегии управления жизненным циклом оборудования.
+              </p>
+            </div>
+          </template>
+
+          <template v-else>
           <div class="task-section">
           <p>
             Командам необходимо создать цифровую модель для обеспечения надежного бесперебойного электроснабжения объектов бурения на удаленном месторождении с климатическими условиями, приведенными в Таблице 1 Исходных данных, необходимым качеством генерирующего оборудования и количеством электроэнергии в соответствии с Таблицей 2 (Сведения о буровых установках (Далее-БУ)).
@@ -54,6 +92,7 @@
             Для расчета затрат на электроэнергию в программном продукте предусмотреть возможность ввода стоимости топлива.
           </p>
           </div>
+          </template>
         </div>
       </div>
     </div>
@@ -61,16 +100,34 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Document } from '@element-plus/icons-vue';
 import { filesApi } from '@/api/files';
+import { useStageStore } from '@/stores/stage.js';
 
+const props = defineProps({
+  isFinalist: {
+    type: Boolean,
+    default: false
+  }
+});
+
+const stageStore = useStageStore();
 const downloading = ref(false);
+
+const isOnSiteTask = computed(() => stageStore.isOnSiteContentPhase && props.isFinalist);
+const taskFileName = computed(() => (
+  isOnSiteTask.value ? 'Hackathon_2026_onsite_task.pdf' : 'Hackathon_2026_task.pdf'
+));
 
 const downloadTask = async () => {
   downloading.value = true;
   try {
-    await filesApi.downloadStaticFile('Hackathon_2026_task.pdf');
+    if (isOnSiteTask.value) {
+      await filesApi.downloadStaticFile(taskFileName.value, { onSite: true });
+    } else {
+      await filesApi.downloadStaticFile(taskFileName.value);
+    }
   } catch (error) {
     console.error('Ошибка при скачивании файла:', error);
   } finally {
@@ -89,6 +146,19 @@ const downloadTask = async () => {
   font-weight: 600;
   color: #1e293b; /* text-slate-800 */
   margin: 0 0 20px 0;
+}
+
+.finalists-only-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 6px 12px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .task-content {

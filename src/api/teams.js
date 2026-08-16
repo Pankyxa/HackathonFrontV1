@@ -545,7 +545,9 @@ export const teamsApi = {
 
     async getWinners() {
         try {
-            const response = await api.get('/evaluations/public-results');
+            const response = await api.get('/evaluations/public-results', {
+                params: { stage_group: 'on_site' }
+            });
             const sortedTeams = response.data.sort((a, b) => b.total_score - a.total_score);
             return sortedTeams;
         } catch (error) {

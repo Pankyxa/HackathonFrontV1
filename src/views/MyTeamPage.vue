@@ -35,6 +35,7 @@
               :is="currentComponent"
               :view-mode="viewMode"
               :team-id="teamId"
+              :is-finalist="isFinalist"
               @update:teamInfo="handleTeamInfoUpdate"
           ></component>
         </div>
@@ -81,24 +82,34 @@ const teamStatus = computed(() => {
   return teamInfo.value?.status_details?.status
 })
 
+const isFinalist = computed(() => Boolean(teamInfo.value?.is_finalist))
+
 const menuItems = computed(() => {
   const baseItems = [
     {id: 'task', title: 'Задача'},
   ];
 
-  const currentOrder = stageStore.currentStage?.order || 0;
-  const taskDistributionOrder = 3;
-
   const items = [...baseItems];
+  const isActive = teamStatus.value === 'active';
 
-  // Таб "Исходные данные" скрыт, но компонент оставлен для совместимости
-  // if (currentOrder >= registrationClosedOrder && teamStatus.value === 'active') {
-  //   items.push(
-  //       {id: 'initial-data', title: 'Исходные данные'}
-  //   )
-  // }
+  if (stageStore.isOnSiteContentPhase) {
+    if (isFinalist.value) {
+      if (stageStore.shouldShowOnSiteExtraTabs && isActive) {
+        items.push(
+          {id: 'test-data', title: 'Тестовые данные'},
+          {id: 'attach solution', title: 'Решение'}
+        )
+      }
+    } else if (isActive) {
+      items.push(
+        {id: 'test-data', title: 'Тестовые данные'},
+        {id: 'attach solution', title: 'Решение'}
+      )
+    }
+    return items;
+  }
 
-  if (currentOrder >= taskDistributionOrder && teamStatus.value === 'active') {
+  if (stageStore.shouldShowRemoteExtraTabs && isActive) {
     items.push(
       {id: 'test-data', title: 'Тестовые данные'},
       {id: 'attach solution', title: 'Решение'}
@@ -192,6 +203,13 @@ const handleTabChange = (tabId) => {
     resetScroll()
   }, 300)
 }
+
+watch(menuItems, (items) => {
+  const availableIds = ['info', ...items.map((item) => item.id)]
+  if (!availableIds.includes(activeTab.value)) {
+    activeTab.value = 'task'
+  }
+})
 
 onMounted(async () => {
   try {

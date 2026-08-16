@@ -1,23 +1,45 @@
 <template>
   <div class="test-data-section">
-    <h3 class="card-title">Тестовые данные</h3>
+    <h3 class="card-title">{{ isOnSiteData ? 'Тестовые данные очного этапа' : 'Тестовые данные' }}</h3>
     
     <div class="task-content">
+      <div v-if="isOnSiteData" class="finalists-only-badge">Только для команд-финалистов</div>
+
       <!-- File Cards -->
       <div class="files-list">
-        <div class="download-attachment-card" v-for="(file, index) in files" :key="index">
+        <div class="download-attachment-card" v-for="(file, index) in currentFiles" :key="index">
           <el-icon class="file-icon"><Document /></el-icon>
           <div class="file-info">
             <div class="file-name">{{ file.name }}</div>
             <div class="file-type">{{ file.type }}</div>
           </div>
-          <a :href="file.url" download class="download-action">
+          <button
+            v-if="file.onSite"
+            type="button"
+            class="download-action"
+            :disabled="downloadingFile === file.filename"
+            @click="downloadOnSiteFile(file.filename)"
+          >
+            {{ downloadingFile === file.filename ? 'Загрузка...' : 'Скачать' }}
+          </button>
+          <a v-else :href="file.url" download class="download-action">
             Скачать
           </a>
         </div>
       </div>
 
       <div class="task-section">
+        <p v-if="isOnSiteData">
+          В предоставленных файлах содержатся полный текст задания очного этапа и приложения к нему:
+        </p>
+        <ul v-if="isOnSiteData">
+          <li><strong>Текст задания второго тура</strong> — полное описание задания очного этапа</li>
+          <li><strong>Приложение 1</strong> — приказ Минэнерго №676 по оценке технического состояния основного электрооборудования и сетей</li>
+          <li><strong>Приложение 2</strong> — приказ Минэнерго №123 по расчёту вероятности отказа и оценке последствий</li>
+          <li><strong>Приложение 3</strong> — паспортные данные силового трансформатора</li>
+          <li><strong>Приложение 4</strong> — схема подстанции 35/6 кВ с присоединениями</li>
+        </ul>
+        <template v-else>
         <p>
           В предоставленных файлах содержатся тестовые данные для работы над проектом:
         </p>
@@ -27,15 +49,31 @@
           <li><strong>Стоимость топлива</strong> — данные по стоимости топливных ресурсов</li>
           <li><strong>Требования к оформлению презентации</strong> — шаблон и требования для подготовки защиты проекта</li>
         </ul>
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { computed, ref } from 'vue';
 import { Document } from '@element-plus/icons-vue';
+import { filesApi } from '@/api/files';
+import { useStageStore } from '@/stores/stage.js';
 
-const files = [
+const props = defineProps({
+  isFinalist: {
+    type: Boolean,
+    default: false
+  }
+});
+
+const stageStore = useStageStore();
+const downloadingFile = ref('');
+
+const isOnSiteData = computed(() => stageStore.isOnSiteContentPhase && props.isFinalist);
+
+const remoteFiles = [
   {
     name: 'Нагрузка_БУ6000.xlsx',
     type: 'Excel документ',
@@ -57,6 +95,52 @@ const files = [
     url: '/files/Требования_к_оформлению_презентации_Хакатона.pptx'
   }
 ];
+
+const onSiteFiles = [
+  {
+    name: 'Текст_задания_второго_тура.pdf',
+    filename: 'Hackathon_2026_onsite_task_full.pdf',
+    type: 'PDF документ',
+    onSite: true
+  },
+  {
+    name: 'Приложение_1_Приказ_Минэнерго_676.pdf',
+    filename: 'Prilozhenie_1_Prikaz_Minenergo_676.pdf',
+    type: 'PDF документ',
+    onSite: true
+  },
+  {
+    name: 'Приложение_2_Приказ_Минэнерго_123.pdf',
+    filename: 'Prilozhenie_2_Prikaz_Minenergo_123.pdf',
+    type: 'PDF документ',
+    onSite: true
+  },
+  {
+    name: 'Приложение_3_Паспорт_трансформатора.pdf',
+    filename: 'Prilozhenie_3_Pasport_transformatora.pdf',
+    type: 'PDF документ',
+    onSite: true
+  },
+  {
+    name: 'Приложение_4_Схема_ПС_35_6кВ.pdf',
+    filename: 'Prilozhenie_4_Schema_PS_35_6kV.pdf',
+    type: 'PDF документ',
+    onSite: true
+  }
+];
+
+const currentFiles = computed(() => isOnSiteData.value ? onSiteFiles : remoteFiles);
+
+const downloadOnSiteFile = async (filename) => {
+  downloadingFile.value = filename;
+  try {
+    await filesApi.downloadStaticFile(filename, { onSite: true });
+  } catch (error) {
+    console.error('Ошибка при скачивании файла:', error);
+  } finally {
+    downloadingFile.value = '';
+  }
+};
 </script>
 
 <style scoped>
@@ -69,6 +153,19 @@ const files = [
   font-weight: 600;
   color: #1e293b;
   margin: 0 0 20px 0;
+}
+
+.finalists-only-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 6px 12px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .task-content {
@@ -141,6 +238,11 @@ const files = [
 
 .download-action:hover {
   background: #eff6ff;
+}
+
+.download-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .task-section {

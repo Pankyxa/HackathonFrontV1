@@ -100,12 +100,12 @@
               />
               <span class="judge-name">
                 {{ currentJudge ? currentJudge.judge_name : 'Нет жюри' }}
-                <span class="judge-counter" v-if="judges.length > 1">
-                  ({{ currentJudgeIndex + 1 }}/{{ judges.length }})
+                <span class="judge-counter" v-if="displayJudges.length > 1">
+                  ({{ currentJudgeIndex + 1 }}/{{ displayJudges.length }})
                 </span>
               </span>
               <el-button
-                :disabled="currentJudgeIndex >= judges.length - 1"
+                :disabled="currentJudgeIndex >= displayJudges.length - 1"
                 :icon="ArrowRight"
                 circle
                 size="small"
@@ -177,7 +177,7 @@
     <!-- Мобильный вид - карточки -->
     <div class="mobile-view">
       <!-- Переключатель жюри для мобилки -->
-      <div class="mobile-judge-selector" v-if="judges.length > 0">
+      <div class="mobile-judge-selector" v-if="displayJudges.length > 0">
         <div class="judge-selector-header">
           <el-button
             :disabled="currentJudgeIndex === 0"
@@ -190,12 +190,12 @@
             <div class="judge-selector-name">
               {{ currentJudge ? currentJudge.judge_name : 'Нет жюри' }}
             </div>
-            <div class="judge-selector-counter" v-if="judges.length > 1">
-              {{ currentJudgeIndex + 1 }} из {{ judges.length }}
+            <div class="judge-selector-counter" v-if="displayJudges.length > 1">
+              {{ currentJudgeIndex + 1 }} из {{ displayJudges.length }}
             </div>
           </div>
           <el-button
-            :disabled="currentJudgeIndex >= judges.length - 1"
+            :disabled="currentJudgeIndex >= displayJudges.length - 1"
             :icon="ArrowRight"
             circle
             size="small"
@@ -370,23 +370,61 @@ const handleSizeChange = (size) => {
 }
 
 const currentJudge = computed(() => {
-  if (judges.value.length === 0 || currentJudgeIndex.value >= judges.value.length) {
+  if (displayJudges.value.length === 0 || currentJudgeIndex.value >= displayJudges.value.length) {
     return null
   }
-  return judges.value[currentJudgeIndex.value]
+  return displayJudges.value[currentJudgeIndex.value]
 })
 
+const isSameId = (left, right) => {
+  if (left === null || left === undefined || right === null || right === undefined) {
+    return false
+  }
+  return String(left) === String(right)
+}
+
+const hasActualScore = (evaluation) => {
+  return Boolean(evaluation && evaluation.created_at && evaluation.total_score !== null && evaluation.total_score !== undefined)
+}
+
+const displayJudges = computed(() => {
+  const scoredIds = new Set()
+  teams.value.forEach(team => {
+    (team.evaluations || []).forEach(evaluation => {
+      if (hasActualScore(evaluation)) {
+        scoredIds.add(String(evaluation.judge_id))
+      }
+    })
+  })
+
+  return [...judges.value].sort((left, right) => {
+    const leftScored = scoredIds.has(String(left.judge_id)) ? 0 : 1
+    const rightScored = scoredIds.has(String(right.judge_id)) ? 0 : 1
+    if (leftScored !== rightScored) {
+      return leftScored - rightScored
+    }
+    return String(left.judge_name || '').localeCompare(String(right.judge_name || ''), 'ru')
+  })
+})
+
+const findTeamEvaluation = (team, judgeId) => {
+  return (team?.evaluations || []).find(evaluation => isSameId(evaluation.judge_id, judgeId))
+}
+
 const getJudgeEvaluation = (team, judgeId) => {
-  const evaluation = team.evaluations.find(e => e.judge_id === judgeId)
-  if (!evaluation || evaluation.total_score === null) {
+  const evaluation = findTeamEvaluation(team, judgeId)
+  if (!hasActualScore(evaluation)) {
     return { text: 'Нет оценки', hasScore: false }
   }
   return { text: `${evaluation.total_score}/50`, hasScore: true }
 }
 
 const getJudgeCriterion = (team, judgeId, criterionNumber) => {
-  const evaluation = team.evaluations.find(e => e.judge_id === judgeId)
-  return evaluation ? evaluation[`criterion_${criterionNumber}`] : '-'
+  const evaluation = findTeamEvaluation(team, judgeId)
+  if (!hasActualScore(evaluation)) {
+    return '-'
+  }
+  return evaluation[`criterion_${criterionNumber}`]
 }
 
 const getCriterionLabel = (n) => {
@@ -450,7 +488,7 @@ const loadJudges = async () => {
 }
 
 const nextJudge = () => {
-  if (currentJudgeIndex.value < judges.value.length - 1) {
+  if (currentJudgeIndex.value < displayJudges.value.length - 1) {
     currentJudgeIndex.value++
   }
 }

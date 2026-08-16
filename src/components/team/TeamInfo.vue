@@ -17,26 +17,30 @@
     <div v-if="showSolutionLink" class="solution-link-card">
       <h3 class="card-title">GitHub-решение</h3>
 
-      <div class="solution-link-row">
+      <div
+        v-for="link in solutionLinks"
+        :key="link.href"
+        class="solution-link-row"
+      >
         <div class="solution-link-meta">
           <div class="solution-link-icon">
             <el-icon><Link /></el-icon>
           </div>
           <div class="solution-link-content">
-            <p class="solution-link-label">Ссылка на репозиторий команды</p>
+            <p class="solution-link-label">{{ link.label }}</p>
             <a
-              :href="teamSolutionLink"
+              :href="link.href"
               target="_blank"
               rel="noopener noreferrer"
               class="solution-link-value"
             >
-              {{ teamSolutionLink }}
+              {{ link.href }}
             </a>
           </div>
         </div>
 
         <a
-          :href="teamSolutionLink"
+          :href="link.href"
           target="_blank"
           rel="noopener noreferrer"
           class="solution-link-action"
@@ -234,7 +238,18 @@ const isTeamMentor = computed(() => {
 const isMobile = computed(() => window.innerWidth <= 768)
 const isMentorView = computed(() => props.viewMode === 'mentor')
 const teamSolutionLink = computed(() => teamData.value?.solution_link?.trim() || '')
-const showSolutionLink = computed(() => props.viewMode === 'admin' && Boolean(teamSolutionLink.value))
+const onSiteSolutionLink = computed(() => teamData.value?.on_site_solution_link?.trim() || '')
+const solutionLinks = computed(() => {
+  const links = []
+  if (teamSolutionLink.value) {
+    links.push({ label: 'Заочный этап', href: teamSolutionLink.value })
+  }
+  if (onSiteSolutionLink.value) {
+    links.push({ label: 'Очный этап', href: onSiteSolutionLink.value })
+  }
+  return links
+})
+const showSolutionLink = computed(() => props.viewMode === 'admin' && solutionLinks.value.length > 0)
 
 const statusText = computed(() => {
   const status = teamData.value?.status_details?.status
@@ -627,6 +642,10 @@ onMounted(() => {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
+}
+
+.solution-link-row + .solution-link-row {
+  margin-top: 12px;
 }
 
 .solution-link-meta {

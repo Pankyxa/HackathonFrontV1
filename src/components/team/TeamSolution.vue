@@ -11,12 +11,14 @@
 
       <!-- GitHub Link Card -->
       <div class="solution-card">
-        <h3 class="card-title">Ссылка на решение</h3>
+        <h3 class="card-title">{{ isOnSiteSolution ? 'Ссылка на решение очного этапа' : 'Ссылка на решение' }}</h3>
         
         <div class="solution-content">
           <p class="solution-description">
-            Укажите ссылку на ваш GitHub репозиторий с решением. 
+            Укажите ссылку на ваш GitHub репозиторий с решением
+            {{ isOnSiteSolution ? ' очного этапа' : '' }}.
             Убедитесь, что репозиторий приватный и вы добавили организаторов в collaborators.
+            <span v-if="isOnSiteSolution"> Это отдельная ссылка: решение заочного этапа не будет перезаписано.</span>
           </p>
 
           <!-- Input field -->
@@ -104,11 +106,17 @@ const props = defineProps({
   teamId: {
     type: String,
     required: true
+  },
+  isFinalist: {
+    type: Boolean,
+    default: false
   }
 })
 
 const loading = ref(false)
 const solutionLink = ref('')
+
+const isOnSiteSolution = computed(() => stageStore.isOnSiteContentPhase && props.isFinalist)
 
 const extractErrorMessage = (error) => {
   if (!error) {
@@ -145,25 +153,32 @@ const canEdit = computed(() => {
   
   const stageType = stageStore.currentStage?.type
   if (!stageType) return false
-  
-  // Разрешенные этапы для редактирования
-  const allowedStages = [
+
+  const remoteStages = [
     'task_distribution',
     'solution_submission',
     'remote_task_distribution',
     'remote_solution_submission',
+  ]
+  const onSiteStages = [
     'on_site_task_distribution',
     'on_site_solution_submission'
   ]
+
+  if (onSiteStages.includes(stageType)) {
+    return props.isFinalist
+  }
   
-  return allowedStages.includes(stageType)
+  return remoteStages.includes(stageType)
 })
 
 const loadData = async () => {
   try {
     loading.value = true
     const team = await teamsApi.getTeam(props.teamId)
-    solutionLink.value = team.solution_link || ''
+    solutionLink.value = isOnSiteSolution.value
+      ? (team.on_site_solution_link || '')
+      : (team.solution_link || '')
   } catch (error) {
     console.error('Error loading team data:', error)
     ElMessage.error('Ошибка при загрузке данных')
@@ -179,7 +194,9 @@ const saveSolutionLink = async () => {
   try {
     loading.value = true
     const response = await teamsApi.updateSolutionLink(props.teamId, trimmedLink)
-    solutionLink.value = response.solution_link || trimmedLink
+    solutionLink.value = isOnSiteSolution.value
+      ? (response.on_site_solution_link || response.solution_link || trimmedLink)
+      : (response.solution_link || trimmedLink)
     ElMessage.success('Ссылка на решение успешно сохранена')
   } catch (error) {
     console.error('Error saving solution link:', error)

@@ -343,7 +343,9 @@ const loadFinalists = async () => {
     // API теперь возвращает объект с finalists и remaining_teams
     if (response.finalists) {
       finalists.value = response.finalists
-      remainingTeams.value = response.remaining_teams || []
+      remainingTeams.value = stageStore.shouldShowFinalists
+        ? (response.remaining_teams || [])
+        : []
     } else {
       // Fallback для старого формата (массив)
       finalists.value = Array.isArray(response) ? response : []
