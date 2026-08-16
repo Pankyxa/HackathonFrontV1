@@ -98,6 +98,7 @@
               <el-option label="Заочный этап - Прием решений" value="remote_solution_submission" />
               <el-option label="Заочный этап - Проверка решений" value="remote_solution_review" />
               <el-option label="Заочный этап - Онлайн защита" value="online_defense" />
+              <el-option label="Заочный этап - Подготовка к очному этапу" value="remote_on_site_preparation" />
             </el-option-group>
             <el-option-group label="Финалисты">
               <el-option label="Определение финалистов" value="finalists_selection" />
@@ -177,6 +178,7 @@
               <el-option label="Заочный этап - Прием решений" value="remote_solution_submission" />
               <el-option label="Заочный этап - Проверка решений" value="remote_solution_review" />
               <el-option label="Заочный этап - Онлайн защита" value="online_defense" />
+              <el-option label="Заочный этап - Подготовка к очному этапу" value="remote_on_site_preparation" />
             </el-option-group>
             <el-option-group label="Финалисты">
               <el-option label="Определение финалистов" value="finalists_selection" />

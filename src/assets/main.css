@@ -63,6 +63,12 @@ body {
   max-width: 100%;
 }
 
+html.page-scroll-locked,
+body.page-scroll-locked {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
 body {
   min-height: 100vh;
   color: var(--color-text);
@@ -145,6 +151,7 @@ body {
 .el-dialog__body {
   padding: 24px !important; /* p-6 */
   background: white !important;
+  overscroll-behavior: contain;
 }
 
 /* Dialog Footer */

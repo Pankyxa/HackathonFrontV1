@@ -21,19 +21,59 @@ export const useStageStore = defineStore('stage', () => {
   
   // Проверка этапов для финалистов
   const isFinalistsSelection = computed(() => currentStage.value?.type === 'finalists_selection')
+  const isRemoteOnSitePreparation = computed(() => currentStage.value?.type === 'remote_on_site_preparation')
   const isOnSiteStage = computed(() => {
-    const stageType = currentStage.value?.type
-    return stageType === 'on_site_task_distribution' || 
-           stageType === 'on_site_solution_submission' || 
+    const stage = currentStage.value
+    if (!stage) return false
+    if (stage.group === 'on_site') return true
+    const stageType = stage.type
+    return stageType === 'on_site_task_distribution' ||
+           stageType === 'on_site_solution_submission' ||
            stageType === 'on_site_defense'
   })
+
+  // Подготовка к очному и все очные этапы (включая публикацию результатов)
+  const isOnSiteContentPhase = computed(() => {
+    return isRemoteOnSitePreparation.value ||
+           isOnSiteStage.value ||
+           isResultsPublication.value ||
+           isAwardCeremony.value
+  })
+
+  const shouldShowRemoteExtraTabs = computed(() => {
+    const stageType = currentStage.value?.type
+    return [
+      'task_distribution',
+      'solution_submission',
+      'solution_review',
+      'remote_task_distribution',
+      'remote_solution_submission',
+      'online_defense',
+      'finalists_selection',
+    ].includes(stageType)
+  })
+
+  const shouldShowOnSiteExtraTabs = computed(() => {
+    const stageType = currentStage.value?.type
+    return [
+      'on_site_task_distribution',
+      'on_site_solution_submission',
+      'on_site_defense',
+      'results_publication',
+      'award_ceremony',
+    ].includes(stageType)
+  })
   
-  // Показывать финалистов на этапах после определения финалистов и до публикации результатов
-  // НЕ показываем, если уже показываем победителей
+  // Показывать финалистов только на этапе определения финалистов
   const shouldShowFinalists = computed(() => {
-    const showWinners = isResultsPublication.value || isAwardCeremony.value
-    if (showWinners) return false
-    return isFinalistsSelection.value || isOnSiteStage.value
+    if (isResultsPublication.value || isAwardCeremony.value) return false
+    return isFinalistsSelection.value
+  })
+
+  // Подготовка к очному, распределение заданий, прием решений, защита решений
+  const shouldShowOnSiteParticipants = computed(() => {
+    const stageType = currentStage.value?.type
+    return stageType === 'remote_on_site_preparation' || isOnSiteStage.value
   })
   
   // Показывать победителей только на этапе публикации результатов и церемонии награждения
@@ -104,8 +144,13 @@ export const useStageStore = defineStore('stage', () => {
     isAwardCeremony,
     // Финалисты
     isFinalistsSelection,
+    isRemoteOnSitePreparation,
     isOnSiteStage,
+    isOnSiteContentPhase,
+    shouldShowRemoteExtraTabs,
+    shouldShowOnSiteExtraTabs,
     shouldShowFinalists,
+    shouldShowOnSiteParticipants,
     shouldShowWinners,
     // Дополнительные свойства
     stageName,

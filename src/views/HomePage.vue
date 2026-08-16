@@ -61,25 +61,25 @@
           <el-icon>
             <User/>
           </el-icon>
-            <h3 class="counter" data-target="100">0</h3>
-          <p>участников</p>
+            <h3><span class="counter" data-target="100">0</span> участников</h3>
+          <p>20 финалистов</p>
         </div>
           <div class="info-card animate-on-scroll">
           <el-icon>
             <UserFilled/>
           </el-icon>
-            <h3 v-if="stageStore.isRegistration" class="counter" :data-dynamic="true" ref="dynamicCounter">
-              {{ activeTeamsCount }}/20
+            <h3 v-if="stageStore.isRegistration">
+              <span class="counter" :data-dynamic="true" ref="dynamicCounter">{{ activeTeamsCount }}</span>/20 команд
             </h3>
-            <h3 v-else class="counter" data-target="20">20</h3>
-          <p>команд</p>
+            <h3 v-else><span class="counter" data-target="20">20</span> команд</h3>
+          <p>4 в финале</p>
         </div>
           <div class="info-card animate-on-scroll">
           <el-icon>
             <Monitor/>
           </el-icon>
-          <h3>Онлайн</h3>
-          <p>формат участия</p>
+          <h3>Онлайн формат участия</h3>
+          <p>Очный финал</p>
           </div>
         </div>
       </div>
@@ -99,6 +99,7 @@
       :close-on-click-modal="true"
       class="team-details-dialog"
       :fullscreen="isMobile"
+      lock-scroll
     >
       <div v-if="selectedTeam" class="team-details">
         <div class="team-details-header">
@@ -159,47 +160,22 @@
       <div class="timeline-card">
       <h2>Таймлайн</h2>
       <div class="timeline-container">
-        <div class="timeline-item animate-on-scroll">
-          <div class="date">С 02.03.2026 в 00:00 (МСК)</div>
-          <div class="event">Доступ к тексту задания в личном кабинете команды</div>
-        </div>
-        <div class="timeline-item animate-on-scroll">
-          <div class="date">27.03.2026 в 13:00 (МСК)</div>
-          <div class="event">Установочная встреча с участниками Хакатона</div>
-          <div class="note">
-            <a v-if="canViewProtectedLinks" href="https://bigbb2.tyuiu.ru/b/zah-tka-oxi-n4i" target="_blank" class="timeline-link">
-              Подключиться к встрече
-            </a>
-          </div>
-        </div>
-        <div class="timeline-item animate-on-scroll">
-          <div class="date">До 27.03.2026 до 23:59 (МСК)</div>
-          <div class="event">Регистрация на сайте</div>
-          <div class="note">(регистрация может закончиться раньше)</div>
-        </div>
-        <div class="timeline-item animate-on-scroll">
-          <div class="date">01.04.2026 в 09:00 (МСК)</div>
-          <div class="event">Онлайн открытие Хакатона</div>
-          <div class="note">
-            <a v-if="canViewProtectedLinks" href="https://bigbb2.tyuiu.ru/b/zah-tka-oxi-n4i" target="_blank" class="timeline-link">
-              Подключиться к открытию
-            </a>
-          </div>
-        </div>
-        <div class="timeline-item animate-on-scroll">
-          <div class="date">С 01.04.2026 в 09:30 (МСК)</div>
-          <div class="event">Доступ к тестовым данным для решения задачи в личном кабинете команды</div>
-        </div>
-        <div class="timeline-item animate-on-scroll">
-          <div class="date">Через 24 часа, но не позднее 02.04.2026 в 09:30 (МСК)</div>
-          <div class="event">Загрузка готовых решений в личном кабинете команды</div>
-        </div>
-        <div class="timeline-item animate-on-scroll">
-          <div class="date">02.04.2026 в 12:00 (МСК)</div>
-          <div class="event">Защита проектов</div>
-          <div class="note">
-            <a v-if="canViewProtectedLinks" href="https://bigbb2.tyuiu.ru/b/zah-tka-oxi-n4i" target="_blank" class="timeline-link">
-              Подключиться к защите
+        <div
+          v-for="(item, index) in currentTimeline"
+          :key="index"
+          class="timeline-item animate-on-scroll"
+        >
+          <div class="date">{{ item.date }}</div>
+          <div class="event">{{ item.event }}</div>
+          <div class="note" v-if="item.note || item.link">
+            <span v-if="item.note">{{ item.note }}</span>
+            <a
+              v-if="item.link && canViewProtectedLinks"
+              :href="item.link"
+              target="_blank"
+              class="timeline-link"
+            >
+              {{ item.linkText || 'Подключиться' }}
             </a>
           </div>
         </div>
@@ -291,6 +267,16 @@
                 <h4>{{ winner.team }}</h4>
                 <p class="winner-theme">{{ winner.theme }}</p>
                 <p class="winner-score" v-if="winner.score">Балл: {{ Math.round(winner.score) }}</p>
+                <div v-if="winner.vuz_list && winner.vuz_list.length" class="team-vuz-tags">
+                  <el-tag
+                    v-for="(vuz, vuzIndex) in winner.vuz_list"
+                    :key="vuzIndex"
+                    type="info"
+                    size="small"
+                  >
+                    {{ vuz }}
+                  </el-tag>
+                </div>
               </div>
             </div>
             </div>
@@ -312,6 +298,16 @@
                   <h4>{{ finalist.team }}</h4>
                   <p class="finalist-theme" v-if="finalist.theme">{{ finalist.theme }}</p>
                   <p class="finalist-score" v-if="finalist.score">Балл: {{ Math.round(finalist.score) }}</p>
+                  <div v-if="finalist.vuz_list && finalist.vuz_list.length" class="team-vuz-tags">
+                    <el-tag
+                      v-for="(vuz, vuzIndex) in finalist.vuz_list"
+                      :key="vuzIndex"
+                      type="info"
+                      size="small"
+                    >
+                      {{ vuz }}
+                    </el-tag>
+                  </div>
                 </div>
               </div>
             </div>
@@ -337,6 +333,7 @@ import DefenseScheduleTable from "@/components/DefenseScheduleTable.vue";
 import { eventsApi } from '@/api/events';
 import { stagesApi } from '@/api/stages';
 import { teamsApi } from '@/api/teams';
+import { useLockPageScroll } from '@/composables/useLockPageScroll';
 
 const router = useRouter();
 const showAuthModal = ref(false);
@@ -363,6 +360,8 @@ const isCounterAnimated = ref(false);
 // Модальное окно с информацией о команде
 const teamDetailsVisible = ref(false);
 const selectedTeam = ref(null);
+
+useLockPageScroll(teamDetailsVisible);
 
 // Проверка мобильного устройства
 const isMobile = computed(() => window.innerWidth <= 768);
@@ -408,7 +407,8 @@ const getStageIcon = (stageType) => {
     'on_site_defense': Trophy,
     'results_publication': Star,
     'award_ceremony': Medal,
-    'finalists_selection': Star
+    'finalists_selection': Star,
+    'remote_on_site_preparation': Finished
   };
   return iconMap[stageType] || Document;
 };
@@ -541,6 +541,89 @@ const canViewProtectedLinks = computed(() => {
   const isApprovedParticipant = authStore.user.current_status?.name === 'approved';
 
   return isParticipant && isApprovedParticipant;
+});
+
+const MEETING_LINK = 'https://bigbb2.tyuiu.ru/b/zah-tka-oxi-n4i';
+
+const remoteTimeline = [
+  {
+    date: 'С 02.03.2026 в 00:00 (МСК)',
+    event: 'Доступ к тексту задания в личном кабинете команды',
+  },
+  {
+    date: '27.03.2026 в 13:00 (МСК)',
+    event: 'Установочная встреча с участниками Хакатона',
+    link: MEETING_LINK,
+    linkText: 'Подключиться к встрече',
+  },
+  {
+    date: 'До 27.03.2026 до 23:59 (МСК)',
+    event: 'Регистрация на сайте',
+    note: '(регистрация может закончиться раньше)',
+  },
+  {
+    date: '01.04.2026 в 09:00 (МСК)',
+    event: 'Онлайн открытие Хакатона',
+    link: MEETING_LINK,
+    linkText: 'Подключиться к открытию',
+  },
+  {
+    date: 'С 01.04.2026 в 09:30 (МСК)',
+    event: 'Доступ к тестовым данным для решения задачи в личном кабинете команды',
+  },
+  {
+    date: 'Через 24 часа, но не позднее 02.04.2026 в 09:30 (МСК)',
+    event: 'Загрузка готовых решений в личном кабинете команды',
+  },
+  {
+    date: '02.04.2026 в 12:00 (МСК)',
+    event: 'Защита проектов',
+    link: MEETING_LINK,
+    linkText: 'Подключиться к защите',
+  },
+];
+
+const onSiteTimeline = [
+  {
+    date: '17.08.2026 в 14:00 (МСК)',
+    event: 'Онлайн встреча с организаторами и участниками 2 этапа Хакатона',
+    link: MEETING_LINK,
+    linkText: 'Подключиться к встрече',
+  },
+  {
+    date: '25.08.2026 в 13:00 (МСК)',
+    event: 'Онлайн консультация участников 2 этапа Хакатона',
+    link: MEETING_LINK,
+    linkText: 'Подключиться к консультации',
+  },
+  {
+    date: '14.09.2026',
+    event: 'Заезд и заселение участников Хакатона',
+  },
+  {
+    date: '15.09.2026 в 07:00 (МСК)',
+    event: 'Открытие 2 этапа Хакатона. Очно. г. Тюмень',
+  },
+  {
+    date: '16.09.2026 до 07:30 (МСК)',
+    event: 'Загрузка готовых решений через 24 часа в репозиторий',
+  },
+  {
+    date: '16.09.2026 в 12:00 (МСК)',
+    event: 'Защита решений Хакатона. Очно. г. Тюмень',
+  },
+  {
+    date: '17.09.2026 в 12:00 (МСК)',
+    event: 'Награждение победителей Хакатона. Очно. г. Тюмень',
+  },
+];
+
+const showOnSiteTimeline = computed(() => {
+  return stageStore.shouldShowOnSiteParticipants;
+});
+
+const currentTimeline = computed(() => {
+  return showOnSiteTimeline.value ? onSiteTimeline : remoteTimeline;
 });
 
 const handleScroll = () => {
@@ -1444,8 +1527,8 @@ onUnmounted(() => {
   text-align: center;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   flex: 1;
-  min-width: 200px;
-  max-width: 300px;
+  min-width: 220px;
+  max-width: 340px;
   transition: all 0.3s ease;
   cursor: pointer;
 }
@@ -1468,13 +1551,15 @@ onUnmounted(() => {
 
 
 .info-card h3 {
-  font-size: 32px;
-  margin: 10px 0;
+  font-size: 26px;
+  line-height: 1.25;
+  margin: 10px 0 6px;
   color: #333;
 }
 
 .info-card p {
   color: #666;
+  font-size: 16px;
 }
 
 .timeline-section {
@@ -2264,7 +2349,7 @@ onUnmounted(() => {
 
 .winner-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 15px;
   padding: 15px;
   background: #f8f9fa;
@@ -2339,6 +2424,7 @@ onUnmounted(() => {
 
 .winner-info {
   flex: 1;
+  min-width: 0;
 }
 
 .winner-info h4 {
@@ -2356,10 +2442,24 @@ onUnmounted(() => {
 }
 
 .winner-score {
-  margin: 0;
+  margin: 0 0 8px 0;
   color: #00A3FF;
   font-size: 12px;
   font-weight: bold;
+}
+
+.team-vuz-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.team-vuz-tags :deep(.el-tag) {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .winners-title,
@@ -2390,7 +2490,7 @@ onUnmounted(() => {
 
 .finalist-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   padding: 12px;
   background: #f8f9fa;
@@ -2435,6 +2535,7 @@ onUnmounted(() => {
 
 .finalist-info {
   flex: 1;
+  min-width: 0;
 }
 
 .finalist-info h4 {
@@ -2452,7 +2553,7 @@ onUnmounted(() => {
 }
 
 .finalist-score {
-  margin: 0;
+  margin: 0 0 8px 0;
   color: #00A3FF;
   font-size: 12px;
   font-weight: bold;

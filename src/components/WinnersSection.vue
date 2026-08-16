@@ -1,7 +1,7 @@
 <template>
-  <!-- Секция финалистов -->
-  <div class="winners-section finalists-section" v-if="stageStore.shouldShowFinalists && !stageStore.shouldShowWinners">
-    <h2>Финалисты хакатона</h2>
+  <!-- Секция финалистов / участников очного этапа -->
+  <div class="winners-section finalists-section" v-if="showTeamsList && !stageStore.shouldShowWinners">
+    <h2>{{ teamsListTitle }}</h2>
     
     <!-- Топ-4 финалиста -->
     <div class="finalists-list" v-if="topFinalists.length > 0">
@@ -14,7 +14,7 @@
       >
         <div class="finalist-rank" aria-hidden="true"></div>
         <el-avatar
-          :size="60"
+          :size="isMobile ? 44 : 60"
           :src="getTeamLogoUrl(team)"
           :alt="team.team_name"
           class="finalist-avatar"
@@ -22,7 +22,7 @@
         <div class="finalist-info">
           <h3 class="finalist-name">{{ team.team_name }}</h3>
           <p v-if="team.team_motto" class="finalist-motto">{{ team.team_motto }}</p>
-          <p v-if="team.total_score !== undefined" class="finalist-score">
+          <p v-if="showScores && team.total_score !== undefined" class="finalist-score">
             Балл: {{ Math.round(team.total_score) }}
           </p>
           <div v-if="team.vuz_list && team.vuz_list.length > 0" class="finalist-vuz">
@@ -31,20 +31,19 @@
               :key="vuzIndex"
               type="info"
               size="small"
-              style="margin-right: 6px;"
             >
               {{ vuz }}
             </el-tag>
           </div>
         </div>
-        <el-icon class="finalist-arrow">
+        <el-icon v-if="!isMobile" class="finalist-arrow">
           <ArrowRight/>
         </el-icon>
       </div>
     </div>
 
-    <!-- Оставшиеся команды -->
-    <div class="remaining-teams-section" v-if="remainingTeams.length > 0">
+    <!-- Оставшиеся команды — только на этапе определения финалистов -->
+    <div class="remaining-teams-section" v-if="stageStore.shouldShowFinalists && remainingTeams.length > 0">
       <h3 class="remaining-teams-title">Оставшиеся команды</h3>
       <div class="remaining-teams-list">
         <div
@@ -227,6 +226,7 @@
     :close-on-click-modal="true"
     class="team-details-dialog"
     :fullscreen="isMobile"
+    lock-scroll
   >
     <div v-if="selectedTeam" class="team-details">
       <div class="team-details-header">
@@ -264,7 +264,7 @@
           </div>
         </div>
 
-        <div v-if="selectedTeam.total_score !== undefined" class="score-section">
+        <div v-if="showScores && selectedTeam.total_score !== undefined" class="score-section">
           <h4>Итоговый балл:</h4>
           <div class="score-value">{{ formatScore(selectedTeam.total_score) }}</div>
         </div>
@@ -274,11 +274,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed, nextTick } from 'vue'
 import { Trophy, Medal, User, ArrowRight } from '@element-plus/icons-vue'
 import { teamsApi } from '@/api/teams'
 import { useStageStore } from '@/stores/stage'
 import { useAuthStore } from "@/stores/auth.js"
+import { useLockPageScroll } from '@/composables/useLockPageScroll'
 
 const authStore = useAuthStore()
 const stageStore = useStageStore()
@@ -290,6 +291,13 @@ const finalists = ref([]) // Топ-4 финалиста
 const remainingTeams = ref([]) // Оставшиеся команды
 const teamDetailsVisible = ref(false)
 const selectedTeam = ref(null)
+const isMobile = ref(typeof window !== 'undefined' && window.innerWidth <= 768)
+
+const updateIsMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+}
+
+useLockPageScroll(teamDetailsVisible)
 
 // Вычисляемое свойство для остальных команд (с 4-го места)
 const otherTeams = computed(() => {
@@ -300,6 +308,18 @@ const otherTeams = computed(() => {
 const topFinalists = computed(() => {
   return finalists.value.slice(0, 4)
 })
+
+const showTeamsList = computed(() => {
+  return stageStore.shouldShowFinalists || stageStore.shouldShowOnSiteParticipants
+})
+
+const teamsListTitle = computed(() => {
+  return stageStore.shouldShowOnSiteParticipants
+    ? 'Участники очного этапа'
+    : 'Финалисты хакатона'
+})
+
+const showScores = computed(() => !stageStore.shouldShowOnSiteParticipants)
 
 // Функция для форматирования оценки
 const formatScore = (score) => {
@@ -439,11 +459,12 @@ const handlePodiumLeave = (event) => {
 watch(
   [
     () => stageStore.shouldShowFinalists,
+    () => stageStore.shouldShowOnSiteParticipants,
     () => stageStore.shouldShowWinners,
     () => authStore.isAdmin
   ],
-  ([showFinalists, showWinners, isAdmin]) => {
-    if (showFinalists || (isAdmin && !showWinners)) {
+  ([showFinalists, showOnSiteParticipants, showWinners, isAdmin]) => {
+    if (showFinalists || showOnSiteParticipants || (isAdmin && !showWinners)) {
       loadFinalists()
     } else if (showWinners || isAdmin) {
       loadWinners()
@@ -469,11 +490,16 @@ watch(teamDetailsVisible, (isVisible) => {
 })
 
 onMounted(async () => {
-  if (stageStore.shouldShowFinalists || (authStore.isAdmin && !stageStore.shouldShowWinners)) {
+  window.addEventListener('resize', updateIsMobile)
+  if (stageStore.shouldShowFinalists || stageStore.shouldShowOnSiteParticipants || (authStore.isAdmin && !stageStore.shouldShowWinners)) {
     await loadFinalists()
   } else if (stageStore.shouldShowWinners || authStore.isAdmin) {
     await loadWinners()
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateIsMobile)
 })
 </script>
 
@@ -1283,6 +1309,51 @@ onMounted(async () => {
 @media (max-width: 768px) {
   .remaining-teams-list {
     grid-template-columns: 1fr;
+  }
+
+  .finalist-rank {
+    display: none;
+  }
+
+  .finalist-card {
+    gap: 12px;
+    padding: 14px 12px;
+    align-items: flex-start;
+  }
+
+  .finalist-card:hover {
+    transform: none;
+  }
+
+  .finalist-name {
+    font-size: 16px;
+    margin-bottom: 4px;
+    overflow-wrap: anywhere;
+  }
+
+  .finalist-motto {
+    font-size: 12px;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .finalist-vuz {
+    width: 100%;
+  }
+
+  .finalist-vuz :deep(.el-tag) {
+    max-width: 100%;
+    height: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .winners-section.finalists-section {
+    padding: 24px 12px;
+    margin: 0;
   }
 }
 
