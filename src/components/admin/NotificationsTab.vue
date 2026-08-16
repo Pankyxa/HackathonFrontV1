@@ -18,6 +18,15 @@
         </el-button>
 
         <el-button
+          type="primary"
+          :loading="isFinalistsKickoffMeetingLoading"
+          @click="handleSendFinalistsKickoffMeetingNotification"
+          class="notification-button"
+        >
+          Разослать уведомления об установочной встрече финалистов
+        </el-button>
+
+        <el-button
           type="success"
           :loading="isOpeningLoading"
           @click="handleSendOpeningNotification"
@@ -76,6 +85,7 @@ import { ElMessage } from 'element-plus'
 import { teamsApi } from '@/api/teams'
 
 const isKickoffMeetingLoading = ref(false)
+const isFinalistsKickoffMeetingLoading = ref(false)
 const isOpeningLoading = ref(false)
 const isDefenseScheduleLoading = ref(false)
 const isFirstStageClosingLoading = ref(false)
@@ -102,6 +112,27 @@ const handleSendKickoffMeetingNotification = async () => {
     ElMessage.error('Ошибка при отправке уведомлений об установочной встрече')
   } finally {
     isKickoffMeetingLoading.value = false
+  }
+}
+
+const handleSendFinalistsKickoffMeetingNotification = async () => {
+  try {
+    isFinalistsKickoffMeetingLoading.value = true
+    notificationStatus.value = 'Отправка уведомлений об установочной встрече финалистов...'
+    statusClass.value = 'status-info'
+
+    await teamsApi.sendFinalistsKickoffMeetingNotification()
+
+    notificationStatus.value = 'Рассылка уведомлений об установочной встрече финалистов успешно запущена'
+    statusClass.value = 'status-success'
+    ElMessage.success('Рассылка уведомлений об установочной встрече финалистов успешно запущена')
+  } catch (error) {
+    console.error('Error sending finalists kickoff meeting notifications:', error)
+    notificationStatus.value = `Ошибка при отправке уведомлений об установочной встрече финалистов: ${error.message || 'Неизвестная ошибка'}`
+    statusClass.value = 'status-error'
+    ElMessage.error('Ошибка при отправке уведомлений об установочной встрече финалистов')
+  } finally {
+    isFinalistsKickoffMeetingLoading.value = false
   }
 }
 

@@ -525,6 +525,15 @@ export const teamsApi = {
         }
     },
 
+    async sendFinalistsKickoffMeetingNotification() {
+        try {
+            const response = await api.post('/teams/notify/finalists-kickoff-meeting');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
     async sendKickoffMeetingExtraNotification() {
         try {
             const response = await api.post('/teams/notify/kickoff-meeting-extra');
