@@ -3,7 +3,7 @@
     <el-row type="flex" justify="center" :gutter="20">
       <div class="docs-section">
         <h2>Документы</h2>
-        <a href="/files/Положение о хакатоне Цифровые двойники в энергетике.pdf"
+        <a href="/files/polozhenie.pdf"
            target="_blank"
            class="docs-link">Положение о хакатоне</a>
       </div>

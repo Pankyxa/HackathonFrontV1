@@ -85,14 +85,14 @@ const updateFormModel = (newValue) => {
 
 const downloadTerms = () => {
   const link = document.createElement('a');
-  link.href = '/files/Положение о хакатоне Цифровые двойники в энергетике.pdf';
+  link.href = '/files/polozhenie.pdf';
   link.target = '_blank';
   link.click();
 };
 
 const downloadConsent = () => {
   const link = document.createElement('a');
-  link.href = '/files/Шаблон согласия.pdf';
+  link.href = '/files/soglasie.pdf';
   link.target = 'Шаблон согласия.pdf';
   link.click();
 };

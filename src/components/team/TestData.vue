@@ -30,14 +30,10 @@
 
       <div class="task-section">
         <p v-if="isOnSiteData">
-          В предоставленных файлах содержатся полный текст задания очного этапа и приложения к нему:
+          В предоставленных файлах содержится полный текст задания очного этапа.
         </p>
         <ul v-if="isOnSiteData">
           <li><strong>Текст задания второго тура</strong> — полное описание задания очного этапа</li>
-          <li><strong>Приложение 1</strong> — приказ Минэнерго №676 по оценке технического состояния основного электрооборудования и сетей</li>
-          <li><strong>Приложение 2</strong> — приказ Минэнерго №123 по расчёту вероятности отказа и оценке последствий</li>
-          <li><strong>Приложение 3</strong> — паспортные данные силового трансформатора</li>
-          <li><strong>Приложение 4</strong> — схема подстанции 35/6 кВ с присоединениями</li>
         </ul>
         <template v-else>
         <p>
@@ -100,30 +96,6 @@ const onSiteFiles = [
   {
     name: 'Текст_задания_второго_тура.pdf',
     filename: 'Hackathon_2026_onsite_task_full.pdf',
-    type: 'PDF документ',
-    onSite: true
-  },
-  {
-    name: 'Приложение_1_Приказ_Минэнерго_676.pdf',
-    filename: 'Prilozhenie_1_Prikaz_Minenergo_676.pdf',
-    type: 'PDF документ',
-    onSite: true
-  },
-  {
-    name: 'Приложение_2_Приказ_Минэнерго_123.pdf',
-    filename: 'Prilozhenie_2_Prikaz_Minenergo_123.pdf',
-    type: 'PDF документ',
-    onSite: true
-  },
-  {
-    name: 'Приложение_3_Паспорт_трансформатора.pdf',
-    filename: 'Prilozhenie_3_Pasport_transformatora.pdf',
-    type: 'PDF документ',
-    onSite: true
-  },
-  {
-    name: 'Приложение_4_Схема_ПС_35_6кВ.pdf',
-    filename: 'Prilozhenie_4_Schema_PS_35_6kV.pdf',
     type: 'PDF документ',
     onSite: true
   }

@@ -5,16 +5,27 @@
     <div class="task-content">
       <div v-if="isOnSiteTask" class="finalists-only-badge">Только для команд-финалистов</div>
 
-      <!-- Download Section - Attachment Card -->
-      <div class="download-attachment-card">
-        <el-icon class="file-icon"><Document /></el-icon>
-        <div class="file-info">
-          <div class="file-name">{{ taskFileName }}</div>
-          <div class="file-size">PDF документ</div>
+      <!-- Download Section - Attachment Cards -->
+      <div class="files-list">
+        <div
+          class="download-attachment-card"
+          v-for="file in taskFiles"
+          :key="file.filename || file.name"
+        >
+          <el-icon class="file-icon"><Document /></el-icon>
+          <div class="file-info">
+            <div class="file-name">{{ file.name }}</div>
+            <div class="file-size">{{ file.type }}</div>
+          </div>
+          <button
+            type="button"
+            class="download-action"
+            :disabled="downloadingFile === file.filename"
+            @click="downloadTaskFile(file)"
+          >
+            {{ downloadingFile === file.filename ? 'Загрузка...' : 'Скачать' }}
+          </button>
         </div>
-        <button @click="downloadTask" class="download-action" :disabled="downloading">
-          {{ downloading ? 'Загрузка...' : 'Скачать' }}
-        </button>
       </div>
       
       <!-- Task Text Content -->
@@ -113,25 +124,56 @@ const props = defineProps({
 });
 
 const stageStore = useStageStore();
-const downloading = ref(false);
+const downloadingFile = ref('');
 
 const isOnSiteTask = computed(() => stageStore.isOnSiteContentPhase && props.isFinalist);
-const taskFileName = computed(() => (
-  isOnSiteTask.value ? 'Hackathon_2026_onsite_task.pdf' : 'Hackathon_2026_task.pdf'
-));
 
-const downloadTask = async () => {
-  downloading.value = true;
+const onSiteAppendixFiles = [
+  {
+    name: 'Приложение_1_Приказ_Минэнерго_676.pdf',
+    filename: 'Prilozhenie_1_Prikaz_Minenergo_676.pdf',
+    type: 'PDF документ',
+    onSite: true
+  },
+  {
+    name: 'Приложение_2_Приказ_Минэнерго_123.pdf',
+    filename: 'Prilozhenie_2_Prikaz_Minenergo_123.pdf',
+    type: 'PDF документ',
+    onSite: true
+  },
+  {
+    name: 'Приложение_3_Паспорт_трансформатора.pdf',
+    filename: 'Prilozhenie_3_Pasport_transformatora.pdf',
+    type: 'PDF документ',
+    onSite: true
+  },
+  {
+    name: 'Приложение_4_Схема_ПС_35_6кВ.pdf',
+    filename: 'Prilozhenie_4_Schema_PS_35_6kV.pdf',
+    type: 'PDF документ',
+    onSite: true
+  }
+];
+
+const taskFiles = computed(() => {
+  const mainTask = {
+    name: isOnSiteTask.value ? 'Hackathon_2026_onsite_task.pdf' : 'Hackathon_2026_task.pdf',
+    filename: isOnSiteTask.value ? 'Hackathon_2026_onsite_task.pdf' : 'Hackathon_2026_task.pdf',
+    type: 'PDF документ',
+    onSite: isOnSiteTask.value
+  };
+
+  return isOnSiteTask.value ? [mainTask, ...onSiteAppendixFiles] : [mainTask];
+});
+
+const downloadTaskFile = async (file) => {
+  downloadingFile.value = file.filename;
   try {
-    if (isOnSiteTask.value) {
-      await filesApi.downloadStaticFile(taskFileName.value, { onSite: true });
-    } else {
-      await filesApi.downloadStaticFile(taskFileName.value);
-    }
+    await filesApi.downloadStaticFile(file.filename, { onSite: Boolean(file.onSite) });
   } catch (error) {
     console.error('Ошибка при скачивании файла:', error);
   } finally {
-    downloading.value = false;
+    downloadingFile.value = '';
   }
 };
 </script>
@@ -167,7 +209,14 @@ const downloadTask = async () => {
   margin: 0 auto;
 }
 
-/* Download Attachment Card */
+/* Download Attachment Cards */
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
 .download-attachment-card {
   display: flex;
   align-items: center;
@@ -175,7 +224,7 @@ const downloadTask = async () => {
   background: #f1f5f9; /* bg-slate-100 */
   border-radius: 8px; /* rounded-lg */
   padding: 16px; /* p-4 */
-  margin-bottom: 32px;
+  margin-bottom: 0;
   transition: background-color 0.2s ease;
 }
 

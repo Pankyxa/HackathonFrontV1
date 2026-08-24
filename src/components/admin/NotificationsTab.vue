@@ -27,6 +27,15 @@
         </el-button>
 
         <el-button
+          type="primary"
+          :loading="isFinalistsStage2ConsultationLoading"
+          @click="handleSendFinalistsStage2ConsultationNotification"
+          class="notification-button"
+        >
+          Разослать уведомления о консультации 2 этапа (финалистам)
+        </el-button>
+
+        <el-button
           type="success"
           :loading="isOpeningLoading"
           @click="handleSendOpeningNotification"
@@ -86,6 +95,7 @@ import { teamsApi } from '@/api/teams'
 
 const isKickoffMeetingLoading = ref(false)
 const isFinalistsKickoffMeetingLoading = ref(false)
+const isFinalistsStage2ConsultationLoading = ref(false)
 const isOpeningLoading = ref(false)
 const isDefenseScheduleLoading = ref(false)
 const isFirstStageClosingLoading = ref(false)
@@ -133,6 +143,27 @@ const handleSendFinalistsKickoffMeetingNotification = async () => {
     ElMessage.error('Ошибка при отправке уведомлений об установочной встрече финалистов')
   } finally {
     isFinalistsKickoffMeetingLoading.value = false
+  }
+}
+
+const handleSendFinalistsStage2ConsultationNotification = async () => {
+  try {
+    isFinalistsStage2ConsultationLoading.value = true
+    notificationStatus.value = 'Отправка уведомлений о консультации 2 этапа финалистам...'
+    statusClass.value = 'status-info'
+
+    await teamsApi.sendFinalistsStage2ConsultationNotification()
+
+    notificationStatus.value = 'Рассылка уведомлений о консультации 2 этапа финалистам успешно запущена'
+    statusClass.value = 'status-success'
+    ElMessage.success('Рассылка уведомлений о консультации 2 этапа финалистам успешно запущена')
+  } catch (error) {
+    console.error('Error sending finalists stage 2 consultation notifications:', error)
+    notificationStatus.value = `Ошибка при отправке уведомлений о консультации 2 этапа: ${error.message || 'Неизвестная ошибка'}`
+    statusClass.value = 'status-error'
+    ElMessage.error('Ошибка при отправке уведомлений о консультации 2 этапа')
+  } finally {
+    isFinalistsStage2ConsultationLoading.value = false
   }
 }
 

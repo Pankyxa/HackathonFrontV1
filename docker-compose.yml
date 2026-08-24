@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"
+    volumes:
+      - ./public/files:/usr/share/nginx/html/files
     networks:
       - hackathon-network
     restart: unless-stopped
