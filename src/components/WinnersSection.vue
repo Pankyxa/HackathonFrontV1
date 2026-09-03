@@ -3,7 +3,7 @@
   <div class="winners-section finalists-section" v-if="showTeamsList && !stageStore.shouldShowWinners">
     <h2>{{ teamsListTitle }}</h2>
     
-    <!-- Топ-4 финалиста -->
+    <!-- Финалисты -->
     <div class="finalists-list" v-if="topFinalists.length > 0">
       <div
         v-for="(team, index) in topFinalists"
@@ -287,7 +287,7 @@ const firstPlace = ref(null)
 const secondPlace = ref(null)
 const thirdPlace = ref(null)
 const allTeams = ref([])
-const finalists = ref([]) // Топ-4 финалиста
+const finalists = ref([]) // Финалисты
 const remainingTeams = ref([]) // Оставшиеся команды
 const teamDetailsVisible = ref(false)
 const selectedTeam = ref(null)
@@ -304,10 +304,7 @@ const otherTeams = computed(() => {
   return allTeams.value.slice(3)
 })
 
-// Топ-4 финалиста для отображения списком
-const topFinalists = computed(() => {
-  return finalists.value.slice(0, 4)
-})
+const topFinalists = computed(() => finalists.value)
 
 const showTeamsList = computed(() => {
   return stageStore.shouldShowFinalists || stageStore.shouldShowOnSiteParticipants
