@@ -8,6 +8,9 @@
       <UsersFilter
           @filter="handleFilter"
       />
+      <el-button type="primary" class="register-participant-btn" @click="registerDialogVisible = true">
+        Зарегистрировать участника
+      </el-button>
     </div>
 
     <div class="table-wrapper">
@@ -79,6 +82,12 @@
         :documents="userDocuments"
         :documents-loading="documentsLoading"
         @roles-updated="loadUsers"
+        @documents-updated="handleDocumentsUpdated"
+    />
+
+    <AdminRegisterParticipantDialog
+        v-model:visible="registerDialogVisible"
+        @registered="loadUsers"
     />
   </div>
 </template>
@@ -91,6 +100,7 @@ import { usersApi } from '@/api/users'
 import UsersSearch from '../organizer/UsersSearch.vue'
 import UsersTable from '../organizer/UsersTable.vue'
 import AdminUserDetailsDialog from './AdminUserDetailsDialog.vue'
+import AdminRegisterParticipantDialog from './AdminRegisterParticipantDialog.vue'
 import UsersFilter from './UsersFilter.vue'
 
 const STORAGE_KEY = 'admin_users_page'
@@ -108,6 +118,7 @@ const documentsLoading = ref(false)
 const userDocuments = ref([])
 const selectedUser = ref(null)
 const userDetailsVisible = ref(false)
+const registerDialogVisible = ref(false)
 
 const isMobile = ref(window.innerWidth <= 768)
 
@@ -186,6 +197,12 @@ const handleRowClick = (row) => {
   viewUserDocuments(row)
 }
 
+const handleDocumentsUpdated = () => {
+  if (selectedUser.value) {
+    viewUserDocuments(selectedUser.value)
+  }
+}
+
 </script>
 
 <style scoped>
@@ -205,6 +222,12 @@ const handleRowClick = (row) => {
   gap: 16px;
   margin-bottom: 20px;
   flex-shrink: 0;
+  align-items: flex-start;
+}
+
+.register-participant-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .table-wrapper {

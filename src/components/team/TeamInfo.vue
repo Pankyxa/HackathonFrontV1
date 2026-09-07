@@ -57,6 +57,7 @@
       <TeamMembers
           :members="teamMembers"
           :is-team-leader="isTeamLeader"
+          :can-manage-members="canManageMembers"
           :current-user-id="currentUserId"
           @add-member="showUserSearch"
           @remove-member="confirmRemoveMember"
@@ -234,6 +235,13 @@ const isTeamMentor = computed(() => {
   return teamMembers.value.some(
       member => member.user.id === currentUserId.value && member.role.toUpperCase() === 'MENTOR'
   )
+})
+const isAdminView = computed(() => props.viewMode === 'admin' && authStore.isAdmin)
+const canManageMembers = computed(() => {
+  if (isAdminView.value) {
+    return true
+  }
+  return isTeamLeader.value && stageStore.isRegistration
 })
 const isMobile = computed(() => window.innerWidth <= 768)
 const isMentorView = computed(() => props.viewMode === 'mentor')
@@ -416,9 +424,14 @@ const removeMember = async () => {
 
   removing.value = true
   try {
-    await teamsApi.removeTeamMember(teamData.value.id, selectedMember.value.id)
+    if (isAdminView.value) {
+      await teamsApi.adminRemoveTeamMember(teamData.value.id, selectedMember.value.id)
+    } else {
+      await teamsApi.removeTeamMember(teamData.value.id, selectedMember.value.id)
+    }
     teamMembers.value = teamMembers.value.filter(m => m.id !== selectedMember.value.id)
     showConfirmDialog.value = false
+    emit('update:teamInfo', teamData.value)
     ElMessage({
       message: 'Участник успешно удален из команды',
       type: 'success'
@@ -545,17 +558,27 @@ const leaveTeam = async () => {
 
 const handleMemberSelect = async (user) => {
   try {
-    await teamsApi.addTeamMember(teamData.value.id, {
-      user_id: user.id,
-      role: 'member'
-    })
+    if (isAdminView.value) {
+      await teamsApi.adminAddTeamMember(teamData.value.id, {
+        user_id: user.id,
+        role: 'member'
+      })
+    } else {
+      await teamsApi.addTeamMember(teamData.value.id, {
+        user_id: user.id,
+        role: 'member'
+      })
+    }
 
     const membersData = await teamsApi.getTeamMembers(teamData.value.id)
     teamMembers.value = membersData.members
 
     showAddMemberModal.value = false
+    emit('update:teamInfo', teamData.value)
     ElMessage({
-      message: 'Приглашение в команду успешно отправлено',
+      message: isAdminView.value
+          ? 'Участник добавлен в команду'
+          : 'Приглашение в команду успешно отправлено',
       type: 'success'
     })
   } catch (error) {

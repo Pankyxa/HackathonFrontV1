@@ -45,6 +45,31 @@
           :documents="documents"
       />
 
+      <div class="documents-upload-section" v-if="authStore.isAdmin && user">
+        <h3>Прикрепить документы</h3>
+        <p class="documents-upload-hint">PDF, до 5MB. Можно заменить уже загруженный файл.</p>
+        <div class="documents-upload-actions">
+          <el-upload
+              action="#"
+              :auto-upload="false"
+              :show-file-list="false"
+              accept="application/pdf"
+              :on-change="(file) => uploadDocument(file, 'consent')"
+          >
+            <el-button :loading="uploadingType === 'consent'">Загрузить согласие</el-button>
+          </el-upload>
+          <el-upload
+              action="#"
+              :auto-upload="false"
+              :show-file-list="false"
+              accept="application/pdf"
+              :on-change="(file) => uploadDocument(file, 'certificate')"
+          >
+            <el-button :loading="uploadingType === 'certificate'">Загрузить справку</el-button>
+          </el-upload>
+        </div>
+      </div>
+
       <div class="actions-section" v-if="authStore.isAdmin">
         <el-button
             type="primary"
@@ -78,7 +103,9 @@ const props = defineProps({
   documentsLoading: Boolean
 })
 
-const emit = defineEmits(['update:visible', 'roles-updated'])
+const emit = defineEmits(['update:visible', 'roles-updated', 'documents-updated'])
+
+const uploadingType = ref(null)
 
 const dialogVisible = computed({
   get: () => props.visible,
@@ -221,6 +248,31 @@ const handleJudgeEventAttachment = (attached) => {
   isJudgeAttachedToEvent.value = attached
 }
 
+const uploadDocument = async (uploadFile, documentType) => {
+  const file = uploadFile?.raw
+  if (!file || !props.user) return
+
+  if (file.type && file.type !== 'application/pdf') {
+    ElMessage.error('Допустимый формат: PDF')
+    return
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    ElMessage.error('Размер файла не должен превышать 5MB')
+    return
+  }
+
+  uploadingType.value = documentType
+  try {
+    await usersApi.adminUploadUserDocument(props.user.id, file, documentType)
+    ElMessage.success(documentType === 'consent' ? 'Согласие загружено' : 'Справка загружена')
+    emit('documents-updated')
+  } catch (error) {
+    ElMessage.error(error?.detail || error?.message || 'Не удалось загрузить документ')
+  } finally {
+    uploadingType.value = null
+  }
+}
+
 const addDialogStyles = () => {
   const style = document.createElement('style')
   style.id = 'user-details-dialog-styles'
@@ -300,6 +352,30 @@ onUnmounted(() => {
 .roles-container .el-checkbox {
   margin-right: 24px;
   margin-bottom: 12px;
+}
+
+.documents-upload-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.documents-upload-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.documents-upload-hint {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.documents-upload-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .judge-event-section {

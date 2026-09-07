@@ -163,5 +163,42 @@ export const usersApi = {
         } catch (error) {
             throw error.response?.data || error.message;
         }
+    },
+
+    async adminRegisterParticipant(participantData) {
+        try {
+            const formData = new FormData();
+            Object.entries(participantData).forEach(([key, value]) => {
+                if (value !== undefined && value !== null && value !== '') {
+                    formData.append(key, value);
+                }
+            });
+
+            const response = await api.post('/users/admin/register', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async adminUploadUserDocument(userId, file, documentType) {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('document_type', documentType);
+
+            const response = await api.put(`/users/admin/${userId}/documents`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
     }
 };

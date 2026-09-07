@@ -131,6 +131,30 @@ export const teamsApi = {
         }
     },
 
+    async adminAddTeamMember(teamId, userData) {
+        try {
+            const response = await api.post(`/teams/admin/${teamId}/members`, userData);
+            return response.data;
+        } catch (error) {
+            if (error.response?.data?.detail) {
+                throw new Error(error.response.data.detail);
+            }
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async adminRemoveTeamMember(teamId, memberId) {
+        try {
+            const response = await api.delete(`/teams/admin/${teamId}/members/${memberId}`);
+            return response.data;
+        } catch (error) {
+            if (error.response?.data?.detail) {
+                throw new Error(error.response.data.detail);
+            }
+            throw error.response?.data || error.message;
+        }
+    },
+
     async addTeamMentor(teamId, mentorId) {
         try {
             const response = await api.post(`/teams/${teamId}/mentor?mentor_id=${mentorId}`, {}, {

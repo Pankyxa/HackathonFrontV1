@@ -4,7 +4,7 @@
       <div class="header-right">
         <span class="member-count">{{ filteredMembers.length }}/5 участников</span>
         <button
-            v-if="isTeamLeader && stageStore.isRegistration"
+            v-if="canManageMembers"
             class="add-member-btn"
             @click="showUserSearch"
             :disabled="filteredMembers.length >= 5"
@@ -33,7 +33,10 @@
           <div class="member-name">{{ member.user.full_name }}</div>
           <div class="member-role">{{ getRoleName(member.role) }}</div>
         </div>
-        <div class="member-actions" v-if="isTeamLeader && member.user.id !== currentUserId && stageStore.isRegistration">
+        <div
+            class="member-actions"
+            v-if="canManageMembers && member.role.toUpperCase() !== 'TEAMLEAD'"
+        >
           <button class="remove-btn" @click="$emit('remove-member', member)">
             Удалить
           </button>
@@ -62,6 +65,10 @@ const props = defineProps({
     required: true
   },
   isTeamLeader: {
+    type: Boolean,
+    default: false
+  },
+  canManageMembers: {
     type: Boolean,
     default: false
   },
