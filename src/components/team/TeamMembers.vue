@@ -35,9 +35,20 @@
         </div>
         <div
             class="member-actions"
-            v-if="canManageMembers && member.role.toUpperCase() !== 'TEAMLEAD'"
+            v-if="canManageMembers"
         >
-          <button class="remove-btn" @click="$emit('remove-member', member)">
+          <button
+              v-if="member.role.toUpperCase() === 'TEAMLEAD'"
+              class="change-btn"
+              @click="$emit('change-leader')"
+          >
+            Изменить
+          </button>
+          <button
+              v-else
+              class="remove-btn"
+              @click="$emit('remove-member', member)"
+          >
             Удалить
           </button>
         </div>
@@ -78,7 +89,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['add-member', 'remove-member'])
+const emit = defineEmits(['add-member', 'remove-member', 'change-leader'])
 
 const filteredMembers = computed(() => {
   const members = props.members.filter(member =>
@@ -269,16 +280,29 @@ const showUserSearch = () => {
   margin-left: auto;
 }
 
+.change-btn,
 .remove-btn {
   padding: 6px 12px;
   background: white;
-  color: #ef4444; /* text-red-500 */
-  border: 1px solid #ef4444; /* border-red-500 */
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.875rem; /* text-sm */
   font-weight: 500;
+}
+
+.change-btn {
+  color: #2563eb;
+  border: 1px solid #2563eb;
+}
+
+.change-btn:hover {
+  background: #eff6ff;
+}
+
+.remove-btn {
+  color: #ef4444; /* text-red-500 */
+  border: 1px solid #ef4444; /* border-red-500 */
 }
 
 .remove-btn:hover {

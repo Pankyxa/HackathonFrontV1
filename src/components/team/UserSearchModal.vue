@@ -1,7 +1,7 @@
 <template>
   <el-dialog
       v-model="visible"
-      :title="role === 'mentor' ? 'Поиск наставника' : 'Поиск участника'"
+      :title="dialogTitle"
       width="500px"
       :close-on-click-modal="false"
       class="user-search-dialog clean-corporate-modal"
@@ -59,7 +59,7 @@
             :disabled="!selectedUser"
             class="dialog-primary-btn"
         >
-          Добавить участника
+          {{ confirmText }}
         </el-button>
       </div>
     </template>
@@ -67,7 +67,7 @@
 </template>
 
 <script setup>
-import {ref, watch, onMounted} from 'vue';
+import {ref, watch, onMounted, computed} from 'vue';
 import {Search, Check, Plus} from '@element-plus/icons-vue';
 import {usersApi} from '@/api/users.js';
 import {ElMessage} from 'element-plus';
@@ -81,8 +81,21 @@ const props = defineProps({
   role: {
     type: String,
     default: 'member'
+  },
+  title: {
+    type: String,
+    default: ''
+  },
+  confirmText: {
+    type: String,
+    default: 'Добавить участника'
   }
 });
+
+const dialogTitle = computed(() => {
+  if (props.title) return props.title
+  return props.role === 'mentor' ? 'Поиск наставника' : 'Поиск участника'
+})
 
 const emit = defineEmits(['update:modelValue', 'select']);
 

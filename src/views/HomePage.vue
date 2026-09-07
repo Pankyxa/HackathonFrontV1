@@ -62,7 +62,7 @@
             <User/>
           </el-icon>
             <h3><span class="counter" data-target="100">0</span> участников</h3>
-          <p>20 финалистов</p>
+          <p>25 финалистов</p>
         </div>
           <div class="info-card animate-on-scroll">
           <el-icon>
@@ -72,7 +72,7 @@
               <span class="counter" :data-dynamic="true" ref="dynamicCounter">{{ activeTeamsCount }}</span>/20 команд
             </h3>
             <h3 v-else><span class="counter" data-target="20">20</span> команд</h3>
-          <p>4 в финале</p>
+          <p>5 в финале</p>
         </div>
           <div class="info-card animate-on-scroll">
           <el-icon>
@@ -155,6 +155,8 @@
             href="/files/polozhenie.pdf"
             target="_blank" class="terms-link">Положении</a>.</p>
     </div>
+
+    <LogisticsWidget />
 
     <div class="timeline-section" ref="timelineRef">
       <div class="timeline-card">
@@ -327,6 +329,7 @@ import TheHeader from "@/components/TheHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
 import AuthRequiredModal from "@/components/auth/AuthRequiredModal.vue";
 import WinnersSection from "@/components/WinnersSection.vue"
+import LogisticsWidget from "@/components/LogisticsWidget.vue"
 import {useStageStore} from "@/stores/stage.js";
 import {useAuthStore} from "@/stores/auth.js";
 import DefenseScheduleTable from "@/components/DefenseScheduleTable.vue";

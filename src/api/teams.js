@@ -155,6 +155,30 @@ export const teamsApi = {
         }
     },
 
+    async changeTeamLeader(teamId, userId) {
+        try {
+            const response = await api.put(`/teams/${teamId}/leader`, { user_id: userId });
+            return response.data;
+        } catch (error) {
+            if (error.response?.data?.detail) {
+                throw new Error(error.response.data.detail);
+            }
+            throw error.response?.data || error.message;
+        }
+    },
+
+    async adminChangeTeamLeader(teamId, userId) {
+        try {
+            const response = await api.put(`/teams/admin/${teamId}/leader`, { user_id: userId });
+            return response.data;
+        } catch (error) {
+            if (error.response?.data?.detail) {
+                throw new Error(error.response.data.detail);
+            }
+            throw error.response?.data || error.message;
+        }
+    },
+
     async addTeamMentor(teamId, mentorId) {
         try {
             const response = await api.post(`/teams/${teamId}/mentor?mentor_id=${mentorId}`, {}, {

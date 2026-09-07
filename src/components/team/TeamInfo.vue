@@ -61,6 +61,7 @@
           :current-user-id="currentUserId"
           @add-member="showUserSearch"
           @remove-member="confirmRemoveMember"
+          @change-leader="showChangeCaptain = true"
       />
 
       <div class="mentor-section-wrapper">
@@ -104,6 +105,15 @@
         :member="selectedMember"
         :removing="removing"
         @confirm="removeMember"
+    />
+
+    <ChangeCaptainDialog
+        v-if="showChangeCaptain"
+        v-model="showChangeCaptain"
+        :members="teamMembers"
+        :allow-search="isAdminView"
+        :loading="changingLeader"
+        @confirm="changeTeamLeader"
     />
 
     <TeamMentorRemoveDialog
@@ -163,6 +173,7 @@ import TeamDangerZone from './TeamDangerZone.vue'
 import TeamEditDialog from './dialogs/TeamEditDialog.vue'
 import TeamPhotoEditorDialog from './dialogs/PhotoEditorDialog.vue'
 import TeamMemberRemoveDialog from './dialogs/TeamMemberRemoveDialog.vue'
+import ChangeCaptainDialog from './dialogs/ChangeCaptainDialog.vue'
 import TeamMentorRemoveDialog from './dialogs/TeamMentorRemoveDialog.vue'
 import TeamDeleteDialog from './dialogs/TeamDeleteDialog.vue'
 import TeamLeaveDialog from './dialogs/TeamLeaveDialog.vue'
@@ -196,6 +207,7 @@ const loading = ref(false)
 const removing = ref(false)
 const deleting = ref(false)
 const leaving = ref(false)
+const changingLeader = ref(false)
 
 // Dialog visibility state
 const showEditModal = ref(false)
@@ -204,6 +216,7 @@ const showConfirmDialog = ref(false)
 const showMentorConfirmDialog = ref(false)
 const showDeleteConfirm = ref(false)
 const showLeaveConfirm = ref(false)
+const showChangeCaptain = ref(false)
 const showAddMemberModal = ref(false)
 const showMentorSearchModal = ref(false)
 
@@ -417,6 +430,36 @@ const handleLogoChange = async (file) => {
 const confirmRemoveMember = (member) => {
   selectedMember.value = member
   showConfirmDialog.value = true
+}
+
+const changeTeamLeader = async (userId) => {
+  if (!userId) return
+
+  changingLeader.value = true
+  try {
+    const updatedTeam = isAdminView.value
+      ? await teamsApi.adminChangeTeamLeader(teamData.value.id, userId)
+      : await teamsApi.changeTeamLeader(teamData.value.id, userId)
+
+    teamData.value = updatedTeam
+    const membersData = await teamsApi.getTeamMembers(teamData.value.id)
+    teamMembers.value = membersData.members
+    teamMentor.value = membersData.members.find(member => member.role === 'MENTOR')
+    showChangeCaptain.value = false
+    emit('update:teamInfo', updatedTeam)
+    ElMessage({
+      message: 'Капитан команды успешно изменён',
+      type: 'success'
+    })
+  } catch (error) {
+    console.error('Error changing team leader:', error)
+    ElMessage({
+      message: error.message || 'Ошибка при смене капитана команды',
+      type: 'error'
+    })
+  } finally {
+    changingLeader.value = false
+  }
 }
 
 const removeMember = async () => {
